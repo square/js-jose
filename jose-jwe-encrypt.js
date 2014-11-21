@@ -5,7 +5,7 @@
  * @return Uint8Array with random bytes
  */
 JoseJWE.prototype.createIV = function() {
-	var iv = new Uint8Array(new Array(this.content_encryption.iv_length));	
+	var iv = new Uint8Array(new Array(this.content_encryption.iv_bytes));
 	return crypto.getRandomValues(iv);
 };
 
@@ -80,7 +80,7 @@ JoseJWE.prototype.encryptPlaintext = function(cek_promise, plain_text) {
 
 	// Create the IV
 	var iv = this.createIV();
-	if (iv.length != this.content_encryption.iv_length) {
+	if (iv.length != this.content_encryption.iv_bytes) {
 		return Promise.reject("encryptPlaintext: invalid IV length");
 	}
 
@@ -90,21 +90,18 @@ JoseJWE.prototype.encryptPlaintext = function(cek_promise, plain_text) {
 
 	var config = this.content_encryption;
 	if (config.auth.aead) {
-		var tag_length = config.auth.tag_length;
-		if (tag_length % 8 != 0) {
-			return Promise.reject("encryptPlaintext: invalid tag_length");
-		}
+		var tag_bytes = config.auth.tag_bytes;
 
 		var enc = {
 			name: config.id.name,
 			iv: iv,
 			additionalData: aad,
-			tagLength: tag_length
+			tagLength: tag_bytes * 8
 		};
 
 		return cek_promise.then(function(cek) {
 			return crypto.subtle.encrypt(enc, cek, plain_text).then(function(cipher_text) {
-				var offset = cipher_text.byteLength - tag_length/8;
+				var offset = cipher_text.byteLength - tag_bytes;
 				return {
 					header: jwe_protected_header,
 					iv: iv,
@@ -114,26 +111,22 @@ JoseJWE.prototype.encryptPlaintext = function(cek_promise, plain_text) {
 			});
 		});
 	} else {
-		if (config.auth.truncated_length % 8 != 0) {
-			return Promise.reject("encryptPlaintext: invalid truncated HMAC length");
-		}
-
 		// We need to split the CEK key into a MAC and ENC keys
 		var cek_bytes_promise = cek_promise.then(function(cek) {
 			return crypto.subtle.exportKey("raw", cek);
 		});
 		var mac_key_promise = cek_bytes_promise.then(function(cek_bytes) {
-			if (cek_bytes.byteLength * 8 != config.id.length + config.auth.key_size) {
+			if (cek_bytes.byteLength * 8 != config.id.length + config.auth.key_bytes * 8) {
 				return Promise.reject("encryptPlaintext: incorrect cek length");
 			}
-			var bytes = cek_bytes.slice(0, config.auth.key_size/8);
+			var bytes = cek_bytes.slice(0, config.auth.key_bytes);
 			return crypto.subtle.importKey("raw", bytes, config.auth.id, false, ["sign"]);			
 		});
 		var enc_key_promise = cek_bytes_promise.then(function(cek_bytes) {
-			if (cek_bytes.byteLength * 8 != config.id.length + config.auth.key_size) {
+			if (cek_bytes.byteLength * 8 != config.id.length + config.auth.key_bytes * 8) {
 				return Promise.reject("encryptPlaintext: incorrect cek length");
 			}
-			var bytes = cek_bytes.slice(config.auth.key_size/8);
+			var bytes = cek_bytes.slice(config.auth.key_bytes);
 			return crypto.subtle.importKey("raw", bytes, config.id, false, ["encrypt"]);
 		});
 
@@ -166,7 +159,7 @@ JoseJWE.prototype.encryptPlaintext = function(cek_promise, plain_text) {
 				header: jwe_protected_header,
 				iv: iv,
 				cipher: cipher_text,
-				tag: mac.slice(0, config.auth.truncated_length/8)
+				tag: mac.slice(0, config.auth.truncated_bytes)
 			}
 		});
 	}

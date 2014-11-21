@@ -51,6 +51,9 @@ JoseJWE.prototype.setContentEncryptionAlgorithm = function(alg) {
 /**
  * Converts the Jose web algorithms into data which is
  * useful for the Web Crypto API.
+ *
+ * length = in bits
+ * bytes = in bytes
  */
 JoseJWE.getCryptoConfig = function(alg) {
 	switch (alg) {
@@ -81,40 +84,40 @@ JoseJWE.getCryptoConfig = function(alg) {
 			return {
 				jwe_name: "A128CBC-HS256",
 				id: {name: "AES-CBC", length: 128},
-				iv_length: 16,
+				iv_bytes: 16,
 				auth: {
-					key_size: 128,
+					key_bytes: 16,
 					id: {name: "HMAC", hash: {name: "SHA-256"}},
-					truncated_length: 128
+					truncated_bytes: 16
 				}
 			}
         case "A256CBC-HS512":
             return {
                 id: {name: "AES-CBC", length: 256},
-                iv_length: 16,
+                iv_bytes: 16,
                 auth: {
-                    key_size: 256,
+                    key_bytes: 32,
                     id: {name: "HMAC", hash: {name: "SHA-512"}},
-                    truncated_length: 256
+                    truncated_bytes: 32
                 }
             };
         case "A128GCM":
             return {
                 id: {name: "AES-GCM", length: 128},
-                iv_length: 12,
+                iv_bytes: 12,
                 auth: {
                     aead: true,
-                    tag_length: 128
+                    tag_bytes: 16
                 }
             };
 		case "A256GCM":
 			return {
 				jwe_name: "A256GCM",
 				id: {name: "AES-GCM", length: 256},
-				iv_length: 12,
+				iv_bytes: 12,
 				auth: {
 					aead: true,
-					tag_length: 128
+					tag_bytes: 16
 				}
 			};
 		default:
