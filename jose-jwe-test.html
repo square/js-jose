@@ -1,0 +1,111 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Jose JWE Test</title>
+ 
+  <link rel="stylesheet" href="qunit-1.15.0.css">
+  <script src="qunit-1.15.0.js"></script>
+  <script src="qunit-promises.js"></script>
+  <script src="jose-jwe.js"></script>
+  <script src="jose-jwe-encrypt.js"></script>
+  <script src="jose-jwe-utils.js"></script>
+
+  <script>
+  test("encryption using RSAES OAEP and AES GCM (keys & IV from appendix-A.1)", function(assert) {
+    var jwe = new JoseJWE();
+    jwe.createIV = function() {
+      return new Uint8Array([227, 197, 117, 252, 2, 219, 233, 68, 180, 225, 77, 219]);
+    }
+    jwe.createCEK = function(purpose) {
+      var cek = new Uint8Array([177, 161, 244, 128, 84, 143, 225, 115, 63, 180, 3, 255, 107, 154, 212, 246, 138, 7, 110, 91, 112, 46, 34, 105, 47, 130, 203, 46, 122, 234, 64, 252]);
+      return crypto.subtle.importKey("raw", cek, {name: "AES-GCM"}, true, purpose);
+    }
+    var rsa = JoseJWE.Utils.importRSAfromJWK(
+      {
+        "kty": "RSA",
+        "n": "oahUIoWw0K0usKNuOR6H4wkf4oBUXHTxRvgb48E-BVvxkeDNjbC4he8rUW"+
+             "cJoZmds2h7M70imEVhRU5djINXtqllXI4DFqcI1DgjT9LewND8MW2Krf3S"+
+             "psk_ZkoFnilakGygTwpZ3uesH-PFABNIUYpOiN15dsQRkgr0vEhxN92i2a"+
+             "sbOenSZeyaxziK72UwxrrKoExv6kc5twXTq4h-QChLOln0_mtUZwfsRaMS"+
+             "tPs6mS6XrgxnxbWhojf663tuEQueGC-FCMfra36C9knDFGzKsNa7LZK2dj"+
+             "YgyD3JR_MB_4NUJW_TqOQtwHYbxevoJArm-L5StowjzGy-_bq6Gw",
+        "e": "AQAB"
+      },
+      ["encrypt"]);        
+    var cipher_text = jwe.encrypt(
+      rsa,
+      "The true sign of intelligence is not knowledge but imagination."
+    ).then(function(result){return result.split('.')});
+
+    assert.willEqual(cipher_text.then(function(result){return result.length}),
+      5, "got right number of components");
+
+    assert.willEqual(cipher_text.then(function(result){return result[0]}),
+      "eyJhbGciOiJSU0EtT0FFUCIsImVuYyI6IkEyNTZHQ00ifQ",
+      "got expected header");
+
+    assert.willEqual(cipher_text.then(function(result){return result[2]}),
+      "48V1_ALb6US04U3b",
+      "got expected IV");
+
+    assert.willEqual(cipher_text.then(function(result){return result[3]}),
+      "5eym8TW_c8SuK0ltJ3rpYIzOeDQz7TALvtu6UG9oMo4vpzs9tX_EFShS8iB7j6jiSdiwkIr3ajwQzaBtQD_A",
+      "got expected cipher text");
+
+    assert.willEqual(cipher_text.then(function(result){return result[4]}),
+      "XFBoMYUZodetZdvTiFvSkQ",
+      "got expected tag");
+  });
+
+  // We can't test appendix-A.2 because Chrome currently doesn't support RSAES-PKCS1-V1_5.
+
+  test("encryption using AES Key Wrap and AES_128_CBC_HMAC_SHA_256 (keys & IV from appendix-A.3)", function(assert) {
+    var jwe = new JoseJWE();
+    jwe.setKeyEncryptionAlgorithm("A128KW");
+    jwe.setContentEncryptionAlgorithm("A128CBC-HS256");
+
+    jwe.createIV = function() {
+      return new Uint8Array([3, 22, 60, 12, 43, 67, 104, 105, 108, 108, 105, 99, 111, 116, 104, 101]);
+    }
+    jwe.createCEK = function(purpose) {
+      var cek = new Uint8Array([4, 211, 31, 197, 84, 157, 252, 254, 11, 100, 157, 250, 63, 170, 106, 206, 107, 124, 212, 45, 111, 107, 9, 219, 200, 177, 0, 240, 143, 156, 44, 207]);
+      return crypto.subtle.importKey("raw", cek, {name: "AES-GCM"}, true, purpose);
+    }
+    var shared_key = {"kty":"oct", "k":"GawgguFyGrWKav7AX4VKUg"};
+    shared_key = crypto.subtle.importKey("jwk", shared_key, {name: "AES-KW"}, true, ["wrapKey"]);
+
+    var cipher_text = jwe.encrypt(
+      shared_key,
+      "Live long and prosper."
+    ).then(function(result){return result.split('.')});
+
+    assert.willEqual(cipher_text.then(function(result){return result.length}),
+      5, "got right number of components");
+
+    assert.willEqual(cipher_text.then(function(result){return result[0]}),
+      "eyJhbGciOiJBMTI4S1ciLCJlbmMiOiJBMTI4Q0JDLUhTMjU2In0",
+      "got expected header");
+
+    assert.willEqual(cipher_text.then(function(result){return result[1]}),
+      "6KB707dM9YTIgHtLvtgWQ8mKwboJW3of9locizkDTHzBC2IlrT1oOQ",
+      "got expected encrypted key");
+
+    assert.willEqual(cipher_text.then(function(result){return result[2]}),
+      "AxY8DCtDaGlsbGljb3RoZQ",
+      "got expected IV");
+
+    assert.willEqual(cipher_text.then(function(result){return result[3]}),
+      "KDlTtXchhZTGufMYmOYGS4HffxPSUrfmqCHXaI9wOGY",
+      "got expected cipher text");
+
+    assert.willEqual(cipher_text.then(function(result){return result[4]}),
+      "U0m_YmjN04DJvceFICbCVQ",
+      "got expected tag");
+  });
+  </script>
+</head>
+<body> 
+<div id="qunit"></div>
+</body>
+</html>
