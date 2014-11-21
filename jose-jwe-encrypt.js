@@ -15,8 +15,27 @@ JoseJWE.prototype.createIV = function() {
  *
  * @return Promise<CryptoKey>
  */
-JoseJWE.prototype.createCEK = function(purpose) {
-	return crypto.subtle.generateKey(this.content_encryption.id, true, purpose);
+JoseJWE.prototype.createCEK = function() {
+	var len = this.content_encryption.specific_cek_bytes;
+	if (len) {
+		// In some cases, e.g. A128CBC-HS256, the CEK gets split into two
+		// keys. The Web Crypto API does not allow us to generate an arbitrary
+		// number of bytes and then create a CryptoKey without any associated
+		// algorithm. We therefore piggy back on AES-CBS and HMAC which allows
+		// us to create CEKs of size 16, 32, 64 and 128 bytes.
+		if (len == 16) {
+			return crypto.subtle.generateKey({name: "AES-CBC", length: 128}, true, ["encrypt"]);
+		} else if (len == 32) {
+			return crypto.subtle.generateKey({name: "AES-CBC", length: 256}, true, ["encrypt"]);
+		} else if (len == 64) {
+			return crypto.subtle.generateKey({name: "HMAC", hash: {name: "SHA-256"}}, true, ["sign"]);
+		} else if (len == 128) {
+			return crypto.subtle.generateKey({name: "HMAC", hash: {name: "SHA-384"}}, true, ["sign"]);
+		} else {
+			JoseJWE.assert(false, "createCEK: invalid specific_cek_bytes");
+		}
+	}
+	return crypto.subtle.generateKey(this.content_encryption.id, true, ["encrypt"]);
 };
 
 /**
@@ -28,7 +47,7 @@ JoseJWE.prototype.createCEK = function(purpose) {
  */
 JoseJWE.prototype.encrypt = function(key_promise, plain_text) {
 	// Create a CEK key
-	var cek_promise = this.createCEK(["encrypt"]);
+	var cek_promise = this.createCEK();
 
 	// Key & Cek allows us to create the encrypted_cek
 	var encrypted_cek = this.encryptCek(key_promise, cek_promise);

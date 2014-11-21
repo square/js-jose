@@ -63,21 +63,21 @@ JoseJWE.getCryptoConfig = function(alg) {
 				jwe_name: "RSA-OAEP",
 				id: {name: "RSA-OAEP", hash: {name: "SHA-1"}}
 			};
-       case "RSA-OAEP-256":
-           return {
-               jwe_name: "RSA-OAEP-256",
-               id: {name: "RSA-OAEP", hash: {name: "SHA-256"}}
-           };   			
+    case "RSA-OAEP-256":
+     return {
+        jwe_name: "RSA-OAEP-256",
+        id: {name: "RSA-OAEP", hash: {name: "SHA-256"}}
+      };   			
 		case "A128KW":
 			return {
 				jwe_name: "A128KW",
 				id: {name: "AES-KW", length: 128}
 			};
-       case "A256KW":
-           return {
-               jwe_name: "A256KW",
-               id: {name: "AES-KW", length: 256}
-			};
+    case "A256KW":
+      return {
+        jwe_name: "A256KW",
+        id: {name: "AES-KW", length: 256}
+    };
 
 		// Content encryption
 		case "A128CBC-HS256":
@@ -85,31 +85,33 @@ JoseJWE.getCryptoConfig = function(alg) {
 				jwe_name: "A128CBC-HS256",
 				id: {name: "AES-CBC", length: 128},
 				iv_bytes: 16,
+				specific_cek_bytes: 32,
 				auth: {
 					key_bytes: 16,
 					id: {name: "HMAC", hash: {name: "SHA-256"}},
 					truncated_bytes: 16
 				}
-			}
-        case "A256CBC-HS512":
-            return {
-                id: {name: "AES-CBC", length: 256},
-                iv_bytes: 16,
-                auth: {
-                    key_bytes: 32,
-                    id: {name: "HMAC", hash: {name: "SHA-512"}},
-                    truncated_bytes: 32
-                }
-            };
-        case "A128GCM":
-            return {
-                id: {name: "AES-GCM", length: 128},
-                iv_bytes: 12,
-                auth: {
-                    aead: true,
-                    tag_bytes: 16
-                }
-            };
+			};
+    case "A256CBC-HS512":
+      return {
+  	    id: {name: "AES-CBC", length: 256},
+				iv_bytes: 16,
+				specific_cek_bytes: 64,
+        auth: {
+          key_bytes: 32,
+          id: {name: "HMAC", hash: {name: "SHA-512"}},
+          truncated_bytes: 32
+        }
+      };
+    case "A128GCM":
+      return {
+        id: {name: "AES-GCM", length: 128},
+        iv_bytes: 12,
+        auth: {
+          aead: true,
+          tag_bytes: 16
+        }
+      };
 		case "A256GCM":
 			return {
 				jwe_name: "A256GCM",

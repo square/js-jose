@@ -17,9 +17,9 @@
     jwe.createIV = function() {
       return new Uint8Array([227, 197, 117, 252, 2, 219, 233, 68, 180, 225, 77, 219]);
     }
-    jwe.createCEK = function(purpose) {
+    jwe.createCEK = function() {
       var cek = new Uint8Array([177, 161, 244, 128, 84, 143, 225, 115, 63, 180, 3, 255, 107, 154, 212, 246, 138, 7, 110, 91, 112, 46, 34, 105, 47, 130, 203, 46, 122, 234, 64, 252]);
-      return crypto.subtle.importKey("raw", cek, {name: "AES-GCM"}, true, purpose);
+      return crypto.subtle.importKey("raw", cek, {name: "AES-GCM"}, true, ["encrypt"]);
     }
     var rsa = JoseJWE.Utils.importRSAfromJWK(
       {
@@ -68,9 +68,9 @@
     jwe.createIV = function() {
       return new Uint8Array([3, 22, 60, 12, 43, 67, 104, 105, 108, 108, 105, 99, 111, 116, 104, 101]);
     }
-    jwe.createCEK = function(purpose) {
+    jwe.createCEK = function() {
       var cek = new Uint8Array([4, 211, 31, 197, 84, 157, 252, 254, 11, 100, 157, 250, 63, 170, 106, 206, 107, 124, 212, 45, 111, 107, 9, 219, 200, 177, 0, 240, 143, 156, 44, 207]);
-      return crypto.subtle.importKey("raw", cek, {name: "AES-GCM"}, true, purpose);
+      return crypto.subtle.importKey("raw", cek, {name: "AES-GCM"}, true, ["encrypt"]);
     }
     var shared_key = {"kty":"oct", "k":"GawgguFyGrWKav7AX4VKUg"};
     shared_key = crypto.subtle.importKey("jwk", shared_key, {name: "AES-KW"}, true, ["wrapKey"]);
