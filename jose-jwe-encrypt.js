@@ -80,6 +80,9 @@ JoseJWE.prototype.encryptPlaintext = function(cek_promise, plain_text) {
 
 	// Create the IV
 	var iv = this.createIV();
+	if (iv.length != this.content_encryption.iv_length) {
+		return Promise.reject("encryptPlaintext: invalid IV length");
+	}
 
 	// Create the AAD
 	var aad = JoseJWE.Utils.arrayFromString(jwe_protected_header);

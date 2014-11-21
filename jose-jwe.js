@@ -70,7 +70,7 @@ JoseJWE.getCryptoConfig = function(alg) {
 			return {
 				jwe_name: "A128CBC-HS256",
 				id: {name: "AES-CBC", length: 128},
-				iv_length: 12,
+				iv_length: 16,
 				auth: {
  					jwe_name: "HMAC-SHA-256-128",
 					key_size: 128,
