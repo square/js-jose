@@ -40,12 +40,31 @@ Example usage
     });
 
 
+Encrypton algorithms used by this library
+-----------------------------------------
+
+Key Encryption:
+
+* RSA-OAEP (default)
+* RSA-OAEP-256
+* A128KW (not recommended for use)
+* A256KW (not recommended for use)
+
+Content Encryption:
+
+* A128CBC-HS256
+* A256CBC-HS512
+* A128GCM
+* A256GCM (default)
+
+
 Some background info
 --------------------
 
 The Web Crypto API is still pretty new and isn't very well documented. The
 following resources are useful:
 
+* [www.w3.org](http://www.w3.org/TR/WebCryptoAPI/)
 * [msdn.microsoft.com](http://msdn.microsoft.com/en-us/library/ie/dn302338(v=vs.85).aspx)
 * [docs.google.com](https://docs.google.com/document/d/184AgXzLAoUjQjrtNdbimceyXVYzrn3tGpf3xQGCN10g)
 
