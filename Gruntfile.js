@@ -12,7 +12,8 @@ module.exports = function(grunt) {
         src: [
           'lib/jose-jwe-core.js',
           'lib/jose-jwe-utils.js',
-          'lib/jose-jwe-encrypt.js'
+          'lib/jose-jwe-encrypt.js',
+          'lib/jose-jwe-decrypt.js'
         ],
         dest: 'dist/jose-jwe.js'
       }

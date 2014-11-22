@@ -3,9 +3,7 @@
 <p>plain text: <span id="plaintext">hello world</span></p>
 <p>cipher text: <pre style="word-wrap: break-word" id="ciphertext"></pre></p>
 <p>error: <span id="error" style="color: red"></span></p>
-<script src="jose-jwe.js"></script>
-<script src="jose-jwe-encrypt.js"></script>
-<script src="jose-jwe-utils.js"></script>
+<script src="../dist/jose-jwe.js"></script>
 
 <script>
 var joseJWE = new JoseJWE();
@@ -13,11 +11,20 @@ joseJWE.setKeyEncryptionAlgorithm("A128KW");
 joseJWE.setContentEncryptionAlgorithm("A128CBC-HS256");
 
 var shared_key = {"kty":"oct", "k":"GawgguFyGrWKav7AX4VKUg"};
-shared_key = crypto.subtle.importKey("jwk", shared_key, {name: "AES-KW"}, true, ["wrapKey"]);
+shared_key = crypto.subtle.importKey("jwk", shared_key, {name: "AES-KW"}, true, ["wrapKey", "unwrapKey"]);
 
 joseJWE.encrypt(shared_key, plaintext.textContent).then(function(result) {
 	ciphertext.textContent = result;
-}).catch(function(err){
+
+  joseJWE.decrypt(shared_key, result)
+    .then(function(decrypted_plain_text) {
+      if (decrypted_plain_text != plaintext.textContent) {
+        error.textContent = "decryption failed!";
+      }
+    }).catch(function(err) {
+      error.textContent = err;
+    });
+}).catch(function(err) {
 	error.textContent = err;
 });
 </script>
