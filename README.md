@@ -8,19 +8,30 @@ JavaScript library to encrypt data in JSON Web Encryption (JWE) format.
 Note: this library currently only implements a subset of the JWE spec. For
 example, the code only performs encryption.
 
+Extra headers aren't yet implemented. Some headers can be trivially supported
+('jku', jwk', kid', 'x5u', 'x5c', 'x5t', 'x5t#S256', 'typ', 'cty', 'crit') by
+exposing a setHeaders() function. The zip header might be more challenging.
+Interpreting the headers at decryption time can be hard, which is why I punted
+on them for now.
+
+The library uses compact representation. There is therefore no support for
+multiple recipients. It should be easy to add that if needed.
+
 The library uses the Web Crypto API, which is available in recent browsers
 (http://caniuse.com/#feat=cryptographyexists). As of Nov 2014, it seems ~50%
 of users have some form of Web Crypto support.
 
-This code has been tested in Chrome 38 and with our Golang code for decryption.
+This code has been tested in Chrome 38 and is compatible with the Golang
+implementation.
 
 JSON web encryption is currently a set of draft. This code is based on the
 following versions of the drafts:
 
-* https://tools.ietf.org/html/draft-ietf-jose-json-web-encryption-36
-* https://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-36
-* https://tools.ietf.org/html/draft-ietf-jose-json-web-key-36
-* https://tools.ietf.org/html/draft-ietf-jose-json-web-signature-36
+* https://tools.ietf.org/html/draft-ietf-jose-json-web-encryption-37
+* https://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-37
+* https://tools.ietf.org/html/draft-ietf-jose-json-web-key-37
+* https://tools.ietf.org/html/draft-ietf-jose-json-web-signature-37
+
 
 Example usage
 -------------
@@ -38,8 +49,8 @@ Example usage
     });
 
 
-Encrypton algorithms used by this library
------------------------------------------
+Encrypton algorithms exposed by this library
+--------------------------------------------
 
 Key Encryption:
 
@@ -56,12 +67,26 @@ Content Encryption:
 * A256GCM (default)
 
 
+Algorithms not exposed (and why)
+--------------------------------
+
+* dir (could be added if deemed useful, would require little work)
+* PBES2-HS256+A128KW (would require implementing PBES2)
+* PBES2-HS512+A256KW (would require implementing PBES2)
+* RSAES-PKCS1-v_5 was removed in Chrome (https://code.google.com/p/chromium/issues/detail?id=372920)
+* PBES2-HS384+A192KW (AES with 192-bit keys isn't supported in Chrome)
+* A192KW (AES with 192-bit keys isn't supported in Chrome)
+* ECDH-ES (Chrome and IE currently don't support it)
+* ECDH-ES+A128KW (Chrome and IE currently don't support it)
+* ECDH-ES+A192KW (Chrome and IE currently don't support it)
+* ECDH-ES+A256KW (Chrome and IE currently don't support it)
+
+
 Building
 --------
 
 * `npm install`
 * `grunt`
-
 
 
 Some background info
