@@ -33,17 +33,17 @@
  * Initializes a JoseJWE object.
  */
 function JoseJWE() {
-	this.setKeyEncryptionAlgorithm("RSA-OAEP");
-	this.setContentEncryptionAlgorithm("A256GCM");
+  this.setKeyEncryptionAlgorithm("RSA-OAEP");
+  this.setContentEncryptionAlgorithm("A256GCM");
 }
 
 /**
  * Feel free to override this function.
  */
 JoseJWE.assert = function(expr, msg) {
-	if (!expr) {
-		throw new Error(msg);
-	}
+  if (!expr) {
+    throw new Error(msg);
+  }
 };
 
 /**
@@ -51,7 +51,7 @@ JoseJWE.assert = function(expr, msg) {
  * @param alg  string
  */
 JoseJWE.prototype.setKeyEncryptionAlgorithm = function(alg) {
-	this.key_encryption = JoseJWE.getCryptoConfig(alg);
+  this.key_encryption = JoseJWE.getCryptoConfig(alg);
 };
 
 /**
@@ -59,7 +59,7 @@ JoseJWE.prototype.setKeyEncryptionAlgorithm = function(alg) {
  * @param alg  string
  */
 JoseJWE.prototype.setContentEncryptionAlgorithm = function(alg) {
-	this.content_encryption = JoseJWE.getCryptoConfig(alg);
+  this.content_encryption = JoseJWE.getCryptoConfig(alg);
 };
 
 // Private functions
@@ -72,47 +72,47 @@ JoseJWE.prototype.setContentEncryptionAlgorithm = function(alg) {
  * bytes = in bytes
  */
 JoseJWE.getCryptoConfig = function(alg) {
-	switch (alg) {
-		// Key encryption
-		case "RSA-OAEP":
-			return {
-				jwe_name: "RSA-OAEP",
-				id: {name: "RSA-OAEP", hash: {name: "SHA-1"}}
-			};
+  switch (alg) {
+    // Key encryption
+    case "RSA-OAEP":
+      return {
+        jwe_name: "RSA-OAEP",
+        id: {name: "RSA-OAEP", hash: {name: "SHA-1"}}
+      };
     case "RSA-OAEP-256":
      return {
         jwe_name: "RSA-OAEP-256",
         id: {name: "RSA-OAEP", hash: {name: "SHA-256"}}
-      };   			
-		case "A128KW":
-			return {
-				jwe_name: "A128KW",
-				id: {name: "AES-KW", length: 128}
-			};
+      };
+    case "A128KW":
+      return {
+        jwe_name: "A128KW",
+        id: {name: "AES-KW", length: 128}
+      };
     case "A256KW":
       return {
         jwe_name: "A256KW",
         id: {name: "AES-KW", length: 256}
     };
 
-		// Content encryption
-		case "A128CBC-HS256":
-			return {
-				jwe_name: "A128CBC-HS256",
-				id: {name: "AES-CBC", length: 128},
-				iv_bytes: 16,
-				specific_cek_bytes: 32,
-				auth: {
-					key_bytes: 16,
-					id: {name: "HMAC", hash: {name: "SHA-256"}},
-					truncated_bytes: 16
-				}
-			};
+    // Content encryption
+    case "A128CBC-HS256":
+      return {
+        jwe_name: "A128CBC-HS256",
+        id: {name: "AES-CBC", length: 128},
+        iv_bytes: 16,
+        specific_cek_bytes: 32,
+        auth: {
+          key_bytes: 16,
+          id: {name: "HMAC", hash: {name: "SHA-256"}},
+          truncated_bytes: 16
+        }
+      };
     case "A256CBC-HS512":
       return {
-  	    id: {name: "AES-CBC", length: 256},
-				iv_bytes: 16,
-				specific_cek_bytes: 64,
+        id: {name: "AES-CBC", length: 256},
+        iv_bytes: 16,
+        specific_cek_bytes: 64,
         auth: {
           key_bytes: 32,
           id: {name: "HMAC", hash: {name: "SHA-512"}},
@@ -128,18 +128,18 @@ JoseJWE.getCryptoConfig = function(alg) {
           tag_bytes: 16
         }
       };
-		case "A256GCM":
-			return {
-				jwe_name: "A256GCM",
-				id: {name: "AES-GCM", length: 256},
-				iv_bytes: 12,
-				auth: {
-					aead: true,
-					tag_bytes: 16
-				}
-			};
-		default:
-			JoseJWE.assert(false, "unsupported algorithm: " + alg);
-	}
+    case "A256GCM":
+      return {
+        jwe_name: "A256GCM",
+        id: {name: "AES-GCM", length: 256},
+        iv_bytes: 12,
+        auth: {
+          aead: true,
+          tag_bytes: 16
+        }
+      };
+    default:
+      JoseJWE.assert(false, "unsupported algorithm: " + alg);
+  }
 };
 
