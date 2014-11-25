@@ -1,0 +1,15 @@
+{
+  "name": "jose-jwe",
+  "version": "0.0.1",
+  "devDependencies": {
+    "grunt": "~0.4.1",
+    "grunt-contrib-concat": "^0.5.0",
+    "grunt-contrib-jshint": "^0.10.0",
+    "grunt-contrib-uglify": "^0.6.0",
+    "grunt-karma": "^0.9.0",
+    "karma": "^0.12.28",
+    "karma-chrome-launcher": "^0.1.5",
+    "karma-qunit": "^0.1.4",
+    "qunitjs": "^1.15.0"
+  }
+}

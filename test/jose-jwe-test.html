@@ -3,13 +3,9 @@
 <head>
   <meta charset="utf-8">
   <title>Jose JWE Test</title>
- 
-  <link rel="stylesheet" href="qunit-1.15.0.css">
-  <script src="qunit-1.15.0.js"></script>
+
   <script src="qunit-promises.js"></script>
-  <script src="jose-jwe.js"></script>
-  <script src="jose-jwe-encrypt.js"></script>
-  <script src="jose-jwe-utils.js"></script>
+  <script src="../dist/jose-jwe.js"></script>
 
   <script>
   test("encryption using RSAES OAEP and AES GCM (keys & IV from appendix-A.1)", function(assert) {
@@ -32,7 +28,7 @@
              "YgyD3JR_MB_4NUJW_TqOQtwHYbxevoJArm-L5StowjzGy-_bq6Gw",
         "e": "AQAB"
       },
-      ["encrypt"]);        
+      ["encrypt"]);
     var cipher_text = jwe.encrypt(
       rsa,
       "The true sign of intelligence is not knowledge but imagination."
@@ -105,7 +101,7 @@
   });
   </script>
 </head>
-<body> 
+<body>
 <div id="qunit"></div>
 </body>
 </html>
