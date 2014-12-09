@@ -592,15 +592,14 @@ JoseJWE.prototype.encryptPlainText = function(cek_promise, plain_text) {
       return crypto.subtle.encrypt(enc, enc_key, plain_text);
     });
 
-    // MAC the aad, iv and ciphertext
-    var mac_promise = Promise.all([mac_key_promise, cipher_text_promise]).then(function(all) {
-      var mac_key = all[0];
-      var cipher_text = all[1];
-      var al = new Uint8Array(JoseJWE.Utils.arrayFromInt32(aad.length * 8));
-      var al_full = new Uint8Array(8);
-      al_full.set(al, 4);
-      var buf = JoseJWE.Utils.arrayBufferConcat(aad, iv, cipher_text, al_full);
-      return crypto.subtle.sign(config.auth.id, mac_key, buf);
+    // compute MAC
+    var mac_promise = cipher_text_promise.then(function(cipher_text) {
+      return JoseJWE.MacThenEncrypt.truncatedMac(
+        config,
+        mac_key_promise,
+        aad,
+        iv,
+        cipher_text);
     });
 
     return Promise.all([cipher_text_promise, mac_promise]).then(function(all) {
@@ -610,7 +609,7 @@ JoseJWE.prototype.encryptPlainText = function(cek_promise, plain_text) {
         header: jwe_protected_header,
         iv: iv,
         cipher: cipher_text,
-        tag: mac.slice(0, config.auth.truncated_bytes)
+        tag: mac
       };
     });
   }
@@ -706,25 +705,21 @@ JoseJWE.prototype.decryptCiphertext = function(cek_promise, aad, iv, cipher_text
     var enc_key_promise = keys[1];
 
     // Validate the MAC
-    var mac_promise = mac_key_promise.then(function(mac_key) {
-      var al = new Uint8Array(JoseJWE.Utils.arrayFromInt32(aad.length * 8));
-      var al_full = new Uint8Array(8);
-      al_full.set(al, 4);
-      var buf = JoseJWE.Utils.arrayBufferConcat(aad, iv, cipher_text, al_full);
-
-      // The MAC is truncated, we therefore can't use crypto.subtle.verify
-      return crypto.subtle.sign(config.auth.id, mac_key, buf).then(function(mac) {
-        mac = mac.slice(0, config.auth.truncated_bytes);
-        if (JoseJWE.Utils.compare(new Uint8Array(mac), tag)) {
-          return Promise.resolve();
-        } else {
-          return Promise.reject("decryptCiphertext: MAC failed.");
-        }
-      });
-    });
+    var mac_promise = JoseJWE.MacThenEncrypt.truncatedMac(
+      config,
+      mac_key_promise,
+      aad,
+      iv,
+      cipher_text);
 
     return Promise.all([enc_key_promise, mac_promise]).then(function(all) {
       var enc_key = all[0];
+      var mac = all[1];
+
+      if (!JoseJWE.Utils.compare(new Uint8Array(mac), tag)) {
+        return Promise.reject("decryptCiphertext: MAC failed.");
+      }
+
       var dec = {
         name: config.id.name,
         iv: iv,
@@ -779,8 +774,8 @@ JoseJWE.MacThenEncrypt = {};
  * a way to validate truncated MACs. The MAC key is therefore always imported to
  * sign data.
  *
+ * @param hash                config (used for key lengths & algorithms)
  * @param Promise<CryptoKey>  CEK key to split
- * @param hash                config (used to key lengths & algorithms)
  * @return [Promise<mac key>, Promise<enc key>]
  */
 JoseJWE.MacThenEncrypt.splitKey = function(config, cek_promise, purpose) {
@@ -803,4 +798,26 @@ JoseJWE.MacThenEncrypt.splitKey = function(config, cek_promise, purpose) {
     return crypto.subtle.importKey("raw", bytes, config.id, false, purpose);
   });
   return [mac_key_promise, enc_key_promise];
+};
+
+/**
+ * Computes a truncated MAC.
+ *
+ * @param hash                config
+ * @param Promise<CryptoKey>  mac key
+ * @param Uint8Array          aad
+ * @param Uint8Array          iv
+ * @param Uint8Array          cipher_text
+ * @return Promise<buffer>    truncated MAC
+ */
+JoseJWE.MacThenEncrypt.truncatedMac = function(config, mac_key_promise, aad, iv, cipher_text) {
+  return mac_key_promise.then(function(mac_key) {
+    var al = new Uint8Array(JoseJWE.Utils.arrayFromInt32(aad.length * 8));
+    var al_full = new Uint8Array(8);
+    al_full.set(al, 4);
+    var buf = JoseJWE.Utils.arrayBufferConcat(aad, iv, cipher_text, al_full);
+    return crypto.subtle.sign(config.auth.id, mac_key, buf).then(function(bytes) {
+      return bytes.slice(0, config.auth.truncated_bytes);
+    });
+  });
 };
