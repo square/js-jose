@@ -13,7 +13,8 @@ module.exports = function(grunt) {
           'lib/jose-jwe-core.js',
           'lib/jose-jwe-utils.js',
           'lib/jose-jwe-encrypt.js',
-          'lib/jose-jwe-decrypt.js'
+          'lib/jose-jwe-decrypt.js',
+          'lib/jose-jwe-mac-then-enc.js',
         ],
         dest: 'dist/jose-jwe.js'
       }

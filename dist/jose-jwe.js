@@ -579,24 +579,9 @@ JoseJWE.prototype.encryptPlainText = function(cek_promise, plain_text) {
       });
     });
   } else {
-    // We need to split the CEK key into a MAC and ENC keys
-    var cek_bytes_promise = cek_promise.then(function(cek) {
-      return crypto.subtle.exportKey("raw", cek);
-    });
-    var mac_key_promise = cek_bytes_promise.then(function(cek_bytes) {
-      if (cek_bytes.byteLength * 8 != config.id.length + config.auth.key_bytes * 8) {
-        return Promise.reject("encryptPlainText: incorrect cek length");
-      }
-      var bytes = cek_bytes.slice(0, config.auth.key_bytes);
-      return crypto.subtle.importKey("raw", bytes, config.auth.id, false, ["sign"]);
-    });
-    var enc_key_promise = cek_bytes_promise.then(function(cek_bytes) {
-      if (cek_bytes.byteLength * 8 != config.id.length + config.auth.key_bytes * 8) {
-        return Promise.reject("encryptPlainText: incorrect cek length");
-      }
-      var bytes = cek_bytes.slice(config.auth.key_bytes);
-      return crypto.subtle.importKey("raw", bytes, config.id, false, ["encrypt"]);
-    });
+    var keys = JoseJWE.MacThenEncrypt.splitKey(config, cek_promise, ["encrypt"]);
+    var mac_key_promise = keys[0];
+    var enc_key_promise = keys[1];
 
     // Encrypt the plain text
     var cipher_text_promise = enc_key_promise.then(function(enc_key) {
@@ -716,25 +701,9 @@ JoseJWE.prototype.decryptCiphertext = function(cek_promise, aad, iv, cipher_text
       return crypto.subtle.decrypt(dec, cek, buf);
     });
   } else {
-    // We need to split the CEK key into a MAC and ENC keys
-    // TODO: figure out what to do if the key length is invalid?
-    var cek_bytes_promise = cek_promise.then(function(cek) {
-      return crypto.subtle.exportKey("raw", cek);
-    });
-    var mac_key_promise = cek_bytes_promise.then(function(cek_bytes) {
-      if (cek_bytes.byteLength * 8 != config.id.length + config.auth.key_bytes * 8) {
-        return Promise.reject("decryptCiphertext: incorrect cek length");
-      }
-      var bytes = cek_bytes.slice(0, config.auth.key_bytes);
-      return crypto.subtle.importKey("raw", bytes, config.auth.id, false, ["sign"]);
-    });
-    var enc_key_promise = cek_bytes_promise.then(function(cek_bytes) {
-      if (cek_bytes.byteLength * 8 != config.id.length + config.auth.key_bytes * 8) {
-        return Promise.reject("decryptCiphertext: incorrect cek length");
-      }
-      var bytes = cek_bytes.slice(config.auth.key_bytes);
-      return crypto.subtle.importKey("raw", bytes, config.id, false, ["decrypt"]);
-    });
+    var keys = JoseJWE.MacThenEncrypt.splitKey(config, cek_promise, ["decrypt"]);
+    var mac_key_promise = keys[0];
+    var enc_key_promise = keys[1];
 
     // Validate the MAC
     var mac_promise = mac_key_promise.then(function(mac_key) {
@@ -768,12 +737,10 @@ JoseJWE.prototype.decryptCiphertext = function(cek_promise, aad, iv, cipher_text
 /**
  * Decrypts the encrypted CEK. If decryption fails, we create a random CEK.
  *
- * When decrypting an RSA-PKCS1v1.5 payload, we must take precautions to
- * prevent chosen-ciphertext attacks as described in RFC 3218, "Preventing
- * the Million Message Attack on Cryptographic Message Syntax".
- *
- * I'm not sure if this is applicable to OAEP, but it doesn't harm to replace
- * the error case with random bytes.
+ * In some modes (e.g. RSA-PKCS1v1.5), you myst take precautions to prevent
+ * chosen-ciphertext attacks as described in RFC 3218, "Preventing
+ * the Million Message Attack on Cryptographic Message Syntax". We currently
+ * only support RSA-OAEP, so we don't generate a key if unwrapping fails.
  *
  * return Promise<CryptoKey>
  */
@@ -783,8 +750,57 @@ JoseJWE.prototype.decryptCek = function(key_promise, encrypted_cek) {
   var key_encryption = this.key_encryption.id;
 
   return key_promise.then(function(key) {
-    return crypto.subtle.unwrapKey("raw", encrypted_cek, key, key_encryption, hack.id, extractable, hack.dec_op).catch(function(_){
-      return crypto.subtle.generateKey(hack.id, false, hack.dec_op);
-    });
+    return crypto.subtle.unwrapKey("raw", encrypted_cek, key, key_encryption, hack.id, extractable, hack.dec_op);
   });
+};
+
+/*-
+ * Copyright 2014 Square Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+JoseJWE.MacThenEncrypt = {};
+
+/**
+ * Splits a CEK into two pieces: a MAC key and an ENC key.
+ *
+ * This code is structured around the fact that the crypto API does not provide
+ * a way to validate truncated MACs. The MAC key is therefore always imported to
+ * sign data.
+ *
+ * @param Promise<CryptoKey>  CEK key to split
+ * @param hash                config (used to key lengths & algorithms)
+ * @return [Promise<mac key>, Promise<enc key>]
+ */
+JoseJWE.MacThenEncrypt.splitKey = function(config, cek_promise, purpose) {
+  // We need to split the CEK key into a MAC and ENC keys
+  var cek_bytes_promise = cek_promise.then(function(cek) {
+    return crypto.subtle.exportKey("raw", cek);
+  });
+  var mac_key_promise = cek_bytes_promise.then(function(cek_bytes) {
+    if (cek_bytes.byteLength * 8 != config.id.length + config.auth.key_bytes * 8) {
+      return Promise.reject("encryptPlainText: incorrect cek length");
+    }
+    var bytes = cek_bytes.slice(0, config.auth.key_bytes);
+    return crypto.subtle.importKey("raw", bytes, config.auth.id, false, ["sign"]);
+  });
+  var enc_key_promise = cek_bytes_promise.then(function(cek_bytes) {
+    if (cek_bytes.byteLength * 8 != config.id.length + config.auth.key_bytes * 8) {
+      return Promise.reject("encryptPlainText: incorrect cek length");
+    }
+    var bytes = cek_bytes.slice(config.auth.key_bytes);
+    return crypto.subtle.importKey("raw", bytes, config.id, false, purpose);
+  });
+  return [mac_key_promise, enc_key_promise];
 };
