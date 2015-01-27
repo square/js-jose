@@ -9,6 +9,7 @@
     "grunt-karma": "^0.9.0",
     "karma": "^0.12.28",
     "karma-chrome-launcher": "^0.1.5",
+    "karma-coverage": "^0.2.7",
     "karma-qunit": "^0.1.4",
     "qunitjs": "^1.15.0"
   }

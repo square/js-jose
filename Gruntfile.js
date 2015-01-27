@@ -32,7 +32,25 @@ module.exports = function(grunt) {
     },
 
     karma: {
-      continuous: {
+      with_coverage: {
+        options: {
+          preprocessors: {
+            'dist/jose-jwe.js': ['coverage']
+          },
+          reporters: ['coverage'],
+          frameworks: ['qunit'],
+          files: [
+            {pattern: 'dist/jose-jwe.js', watching: false, included: false},
+            {pattern: 'test/qunit-promises.js', watching: false, included: false},
+            'test/jose-jwe-test.html'
+          ],
+          autoWatch: true,
+          browsers: ['Chrome'],
+          singleRun: true,
+          plugins:[ 'karma-coverage', 'karma-qunit', 'karma-chrome-launcher']
+        }
+      },
+      without_coverage: {
         options: {
           frameworks: ['qunit'],
           files: [
@@ -53,5 +71,6 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-karma');
 
-  grunt.registerTask('default', ['jshint', 'concat', 'uglify', 'karma']);
+  grunt.registerTask('default', ['jshint', 'concat', 'uglify', 'karma:without_coverage']);
+  grunt.registerTask('with_coverage', ['jshint', 'concat', 'uglify', 'karma:with_coverage']);
 };
