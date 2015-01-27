@@ -11,3 +11,4 @@ TODO List
 * Make it easier to build a subset of the library. Some people might only want
   to do encryption or encryption with a specific algorithm.
 * Rethink error handling. Do we really need JoseJWE.assert?
+* Add support for importing public keys as PEM files and validating signatures.
