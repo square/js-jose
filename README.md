@@ -26,10 +26,10 @@ implementation.
 JSON web encryption is currently a set of drafts. This code is based on the
 following files:
 
-* https://tools.ietf.org/html/draft-ietf-jose-json-web-encryption-37
-* https://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-37
-* https://tools.ietf.org/html/draft-ietf-jose-json-web-key-37
-* https://tools.ietf.org/html/draft-ietf-jose-json-web-signature-37
+* https://tools.ietf.org/html/draft-ietf-jose-json-web-encryption-40
+* https://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-40
+* https://tools.ietf.org/html/draft-ietf-jose-json-web-key-41
+* https://tools.ietf.org/html/draft-ietf-jose-json-web-signature-41
 
 **Disclaimer**: This library contains encryption software that is subject to the
 U.S. Export Administration Regulations. You may not export, re-export, transfer
