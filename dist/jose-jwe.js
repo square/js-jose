@@ -1,3 +1,4 @@
+(function(){
 /*-
  * Copyright 2014 Square Inc.
  *
@@ -23,10 +24,10 @@
 /**
  * Initializes a JoseJWE object.
  */
-function JoseJWE() {
+JoseJWE = function() {
   this.setKeyEncryptionAlgorithm("RSA-OAEP");
   this.setContentEncryptionAlgorithm("A256GCM");
-}
+};
 
 /**
  * Feel free to override this function.
@@ -42,7 +43,7 @@ JoseJWE.assert = function(expr, msg) {
  * @param alg  string
  */
 JoseJWE.prototype.setKeyEncryptionAlgorithm = function(alg) {
-  this.key_encryption = JoseJWE.getCryptoConfig(alg);
+  this.key_encryption = getCryptoConfig(alg);
 };
 
 /**
@@ -50,7 +51,7 @@ JoseJWE.prototype.setKeyEncryptionAlgorithm = function(alg) {
  * @param alg  string
  */
 JoseJWE.prototype.setContentEncryptionAlgorithm = function(alg) {
-  this.content_encryption = JoseJWE.getCryptoConfig(alg);
+  this.content_encryption = getCryptoConfig(alg);
 };
 
 // Private functions
@@ -62,7 +63,7 @@ JoseJWE.prototype.setContentEncryptionAlgorithm = function(alg) {
  * length = in bits
  * bytes = in bytes
  */
-JoseJWE.getCryptoConfig = function(alg) {
+var getCryptoConfig = function(alg) {
   switch (alg) {
     // Key encryption
     case "RSA-OAEP":
@@ -152,31 +153,7 @@ JoseJWE.getCryptoConfig = function(alg) {
  */
 
 JoseJWE.Utils = {};
-
-JoseJWE.Utils.isString = function(str) {
-  return ((typeof(str) == "string") || (str instanceof String));
-};
-
-/**
- * Takes an arrayish (an array, ArrayBuffer or Uint8Array)
- * and returns an array or a Uint8Array.
- *
- * @param arr  arrayish
- * @return array or Uint8Array
- */
-JoseJWE.Utils.arrayish = function(arr) {
-  if (arr instanceof Array) {
-    return arr;
-  }
-  if (arr instanceof Uint8Array) {
-    return arr;
-  }
-  if (arr instanceof ArrayBuffer) {
-    return new Uint8Array(arr);
-  }
-  JoseJWE.assert(false, "arrayish: invalid input");
-};
-
+var Utils = {};
 
 /**
  * Converts the output from `openssl x509 -text` or `openssl rsa -text` into a
@@ -188,8 +165,8 @@ JoseJWE.Utils.arrayish = function(arr) {
  * @return Promise<CryptoKey>
  */
 JoseJWE.Utils.importRsaPublicKey = function(rsa_key) {
-  var jwk = JoseJWE.Utils.convertRsaKey(rsa_key, ["n", "e"]);
-  var config = JoseJWE.getCryptoConfig("RSA-OAEP");
+  var jwk = Utils.convertRsaKey(rsa_key, ["n", "e"]);
+  var config = getCryptoConfig("RSA-OAEP");
   return crypto.subtle.importKey("jwk", jwk, config.id, false, ["wrapKey"]);
 };
 
@@ -203,9 +180,35 @@ JoseJWE.Utils.importRsaPublicKey = function(rsa_key) {
  * @return Promise<CryptoKey>
  */
 JoseJWE.Utils.importRsaPrivateKey = function(rsa_key) {
-  var jwk = JoseJWE.Utils.convertRsaKey(rsa_key, ["n", "e", "d", "p", "q", "dp", "dq", "qi"]);
-  var config = JoseJWE.getCryptoConfig("RSA-OAEP");
+  var jwk = Utils.convertRsaKey(rsa_key, ["n", "e", "d", "p", "q", "dp", "dq", "qi"]);
+  var config = getCryptoConfig("RSA-OAEP");
   return crypto.subtle.importKey("jwk", jwk, config.id, false, ["unwrapKey"]);
+};
+
+// Private functions
+
+Utils.isString = function(str) {
+  return ((typeof(str) == "string") || (str instanceof String));
+};
+
+/**
+ * Takes an arrayish (an array, ArrayBuffer or Uint8Array)
+ * and returns an array or a Uint8Array.
+ *
+ * @param arr  arrayish
+ * @return array or Uint8Array
+ */
+Utils.arrayish = function(arr) {
+  if (arr instanceof Array) {
+    return arr;
+  }
+  if (arr instanceof Uint8Array) {
+    return arr;
+  }
+  if (arr instanceof ArrayBuffer) {
+    return new Uint8Array(arr);
+  }
+  JoseJWE.assert(false, "arrayish: invalid input");
 };
 
 /**
@@ -217,7 +220,7 @@ JoseJWE.Utils.importRsaPrivateKey = function(rsa_key) {
  * @param parameters  array<string>
  * @return json
  */
-JoseJWE.Utils.convertRsaKey = function(rsa_key, parameters) {
+Utils.convertRsaKey = function(rsa_key, parameters) {
   var r = {};
 
   // Check that we have all the parameters
@@ -248,11 +251,11 @@ JoseJWE.Utils.convertRsaKey = function(rsa_key, parameters) {
     var v = rsa_key[p];
     if (p == "e") {
       if (typeof(v) == "number") {
-        v = JoseJWE.Utils.Base64Url.encodeArray(JoseJWE.Utils.stripLeadingZeros(JoseJWE.Utils.arrayFromInt32(v)));
+        v = Utils.Base64Url.encodeArray(Utils.stripLeadingZeros(JoseJWE.Utils.arrayFromInt32(v)));
       }
     } else if (/^([0-9a-fA-F]{2}:)+[0-9a-fA-F]{2}$/.test(v)) {
       var arr = v.split(":").map(intFromHex);
-      v = JoseJWE.Utils.Base64Url.encodeArray(JoseJWE.Utils.stripLeadingZeros(arr));
+      v = Utils.Base64Url.encodeArray(Utils.stripLeadingZeros(arr));
     } else if (typeof(v) != "string") {
       JoseJWE.assert(false, "convertRsaKey: expecting rsa_key['" + p + "'] to be a string");
     }
@@ -268,8 +271,8 @@ JoseJWE.Utils.convertRsaKey = function(rsa_key, parameters) {
  * @param str  string
  * @return Uint8Array
  */
-JoseJWE.Utils.arrayFromString = function(str) {
-  JoseJWE.assert(JoseJWE.Utils.isString(str), "arrayFromString: invalid input");
+Utils.arrayFromString = function(str) {
+  JoseJWE.assert(Utils.isString(str), "arrayFromString: invalid input");
   var arr = str.split('').map(function(c){return c.charCodeAt(0);});
   return new Uint8Array(arr);
 };
@@ -280,7 +283,7 @@ JoseJWE.Utils.arrayFromString = function(str) {
  * @param arr  ArrayBuffer
  * @return string
  */
-JoseJWE.Utils.stringFromArray = function(arr) {
+Utils.stringFromArray = function(arr) {
   JoseJWE.assert(arr instanceof ArrayBuffer, "stringFromArray: invalid input");
   arr = new Uint8Array(arr);
   r = '';
@@ -296,7 +299,7 @@ JoseJWE.Utils.stringFromArray = function(arr) {
  * @param arr  arrayish
  * @return array
  */
-JoseJWE.Utils.stripLeadingZeros = function(arr) {
+Utils.stripLeadingZeros = function(arr) {
   if (arr instanceof ArrayBuffer) {
     arr = new Uint8Array(arr);
   }
@@ -318,7 +321,7 @@ JoseJWE.Utils.stripLeadingZeros = function(arr) {
  * @param i  number
  * @return ArrayBuffer
  */
-JoseJWE.Utils.arrayFromInt32 = function(i) {
+Utils.arrayFromInt32 = function(i) {
   JoseJWE.assert(typeof(i) == "number", "arrayFromInt32: invalid input");
   JoseJWE.assert(i == i|0, "arrayFromInt32: out of range");
 
@@ -336,12 +339,12 @@ JoseJWE.Utils.arrayFromInt32 = function(i) {
  * @param two or more arrayishes
  * @return Uint8Array
  */
-JoseJWE.Utils.arrayBufferConcat = function(/* ... */) {
+Utils.arrayBufferConcat = function(/* ... */) {
   // Compute total size
   var args = [];
   var total = 0;
   for (var i=0; i<arguments.length; i++) {
-    args.push(JoseJWE.Utils.arrayish(arguments[i]));
+    args.push(Utils.arrayish(arguments[i]));
     total += args[i].length;
   }
   var r = new Uint8Array(total);
@@ -360,7 +363,7 @@ JoseJWE.Utils.arrayBufferConcat = function(/* ... */) {
  *
  * TODO: use double hashing!
  */
-JoseJWE.Utils.compare = function(arr1, arr2) {
+Utils.compare = function(arr1, arr2) {
   JoseJWE.assert(arr1 instanceof Uint8Array, "compare: invalid input");
   JoseJWE.assert(arr2 instanceof Uint8Array, "compare: invalid input");
 
@@ -383,7 +386,7 @@ JoseJWE.Utils.compare = function(arr1, arr2) {
  * back on AES-CBS and HMAC which allows the creation of CEKs of size 16, 32, 64
  * and 128 bytes.
  */
-JoseJWE.Utils.getCekWorkaround = function(alg) {
+Utils.getCekWorkaround = function(alg) {
   var len = alg.specific_cek_bytes;
   if (len) {
     if (len == 16) {
@@ -401,7 +404,7 @@ JoseJWE.Utils.getCekWorkaround = function(alg) {
   return {id: alg.id, enc_op: ["encrypt"], dec_op: ["decrypt"]};
 };
 
-JoseJWE.Utils.Base64Url = {};
+Utils.Base64Url = {};
 
 /**
  * Base64Url encodes a string (no trailing '=')
@@ -409,8 +412,8 @@ JoseJWE.Utils.Base64Url = {};
  * @param str  string
  * @return string
  */
-JoseJWE.Utils.Base64Url.encode = function(str) {
-  JoseJWE.assert(JoseJWE.Utils.isString(str), "Base64Url.encode: invalid input");
+Utils.Base64Url.encode = function(str) {
+  JoseJWE.assert(Utils.isString(str), "Base64Url.encode: invalid input");
   return btoa(str)
     .replace(/\+/g, "-")
     .replace(/\//g, "_")
@@ -423,13 +426,13 @@ JoseJWE.Utils.Base64Url.encode = function(str) {
  * @param buf  array or ArrayBuffer
  * @return string
  */
-JoseJWE.Utils.Base64Url.encodeArray = function(arr) {
-  arr = JoseJWE.Utils.arrayish(arr);
+Utils.Base64Url.encodeArray = function(arr) {
+  arr = Utils.arrayish(arr);
   var r = "";
   for (i=0; i<arr.length; i++) {
     r+=String.fromCharCode(arr[i]);
   }
-  return JoseJWE.Utils.Base64Url.encode(r);
+  return Utils.Base64Url.encode(r);
 };
 
 /**
@@ -438,15 +441,15 @@ JoseJWE.Utils.Base64Url.encodeArray = function(arr) {
  * @param str  string
  * @return string
  */
-JoseJWE.Utils.Base64Url.decode = function(str) {
-  JoseJWE.assert(JoseJWE.Utils.isString(str), "Base64Url.decode: invalid input");
+Utils.Base64Url.decode = function(str) {
+  JoseJWE.assert(Utils.isString(str), "Base64Url.decode: invalid input");
   // atob is nice and ignores missing '='
   return atob(str.replace(/-/g, "+").replace(/_/g, "/"));
 };
 
-JoseJWE.Utils.Base64Url.decodeArray = function(str) {
-  JoseJWE.assert(JoseJWE.Utils.isString(str), "Base64Url.decodeArray: invalid input");
-  return JoseJWE.Utils.arrayFromString(JoseJWE.Utils.Base64Url.decode(str));
+Utils.Base64Url.decodeArray = function(str) {
+  JoseJWE.assert(Utils.isString(str), "Base64Url.decodeArray: invalid input");
+  return Utils.arrayFromString(Utils.Base64Url.decode(str));
 };
 
 /*-
@@ -483,7 +486,7 @@ JoseJWE.prototype.createIV = function() {
  * @return Promise<CryptoKey>
  */
 JoseJWE.prototype.createCEK = function() {
-  var hack = JoseJWE.Utils.getCekWorkaround(this.content_encryption);
+  var hack = Utils.getCekWorkaround(this.content_encryption);
   return crypto.subtle.generateKey(hack.id, true, hack.enc_op);
 };
 
@@ -509,10 +512,10 @@ JoseJWE.prototype.encrypt = function(key_promise, plain_text) {
     var encrypted_cek = all[0];
     var data = all[1];
     return data.header + "." +
-      JoseJWE.Utils.Base64Url.encodeArray(encrypted_cek) + "." +
-      JoseJWE.Utils.Base64Url.encodeArray(data.iv) + "." +
-      JoseJWE.Utils.Base64Url.encodeArray(data.cipher) + "." +
-      JoseJWE.Utils.Base64Url.encodeArray(data.tag);
+      Utils.Base64Url.encodeArray(encrypted_cek) + "." +
+      Utils.Base64Url.encodeArray(data.iv) + "." +
+      Utils.Base64Url.encodeArray(data.cipher) + "." +
+      Utils.Base64Url.encodeArray(data.tag);
   });
 };
 
@@ -541,7 +544,7 @@ JoseJWE.prototype.encryptCek = function(key_promise, cek_promise) {
  */
 JoseJWE.prototype.encryptPlainText = function(cek_promise, plain_text) {
   // Create header
-  var jwe_protected_header = JoseJWE.Utils.Base64Url.encode(JSON.stringify({
+  var jwe_protected_header = Utils.Base64Url.encode(JSON.stringify({
     "alg": this.key_encryption.jwe_name,
     "enc": this.content_encryption.jwe_name
   }));
@@ -553,8 +556,8 @@ JoseJWE.prototype.encryptPlainText = function(cek_promise, plain_text) {
   }
 
   // Create the AAD
-  var aad = JoseJWE.Utils.arrayFromString(jwe_protected_header);
-  plain_text = JoseJWE.Utils.arrayFromString(plain_text);
+  var aad = Utils.arrayFromString(jwe_protected_header);
+  plain_text = Utils.arrayFromString(plain_text);
 
   var config = this.content_encryption;
   if (config.auth.aead) {
@@ -579,7 +582,7 @@ JoseJWE.prototype.encryptPlainText = function(cek_promise, plain_text) {
       });
     });
   } else {
-    var keys = JoseJWE.MacThenEncrypt.splitKey(config, cek_promise, ["encrypt"]);
+    var keys = MacThenEncrypt.splitKey(config, cek_promise, ["encrypt"]);
     var mac_key_promise = keys[0];
     var enc_key_promise = keys[1];
 
@@ -594,7 +597,7 @@ JoseJWE.prototype.encryptPlainText = function(cek_promise, plain_text) {
 
     // compute MAC
     var mac_promise = cipher_text_promise.then(function(cipher_text) {
-      return JoseJWE.MacThenEncrypt.truncatedMac(
+      return MacThenEncrypt.truncatedMac(
         config,
         mac_key_promise,
         aad,
@@ -646,7 +649,7 @@ JoseJWE.prototype.decrypt = function(key_promise, cipher_text) {
   }
 
   // part 1: header
-  header = JSON.parse(JoseJWE.Utils.Base64Url.decode(parts[0]));
+  header = JSON.parse(Utils.Base64Url.decode(parts[0]));
   if (!header.alg) {
     return Promise.reject("decrypt: missing alg");
   }
@@ -663,17 +666,17 @@ JoseJWE.prototype.decrypt = function(key_promise, cipher_text) {
   }
 
   // part 2: decrypt the CEK
-  var cek_promise = this.decryptCek(key_promise, JoseJWE.Utils.Base64Url.decodeArray(parts[1]));
+  var cek_promise = this.decryptCek(key_promise, Utils.Base64Url.decodeArray(parts[1]));
 
   // part 3: decrypt the cipher text
   var plain_text_promise = this.decryptCiphertext(
     cek_promise,
-    JoseJWE.Utils.arrayFromString(parts[0]),
-    JoseJWE.Utils.Base64Url.decodeArray(parts[2]),
-    JoseJWE.Utils.Base64Url.decodeArray(parts[3]),
-    JoseJWE.Utils.Base64Url.decodeArray(parts[4]));
+    Utils.arrayFromString(parts[0]),
+    Utils.Base64Url.decodeArray(parts[2]),
+    Utils.Base64Url.decodeArray(parts[3]),
+    Utils.Base64Url.decodeArray(parts[4]));
 
-  return plain_text_promise.then(JoseJWE.Utils.stringFromArray);
+  return plain_text_promise.then(Utils.stringFromArray);
 };
 
 /**
@@ -696,16 +699,16 @@ JoseJWE.prototype.decryptCiphertext = function(cek_promise, aad, iv, cipher_text
     };
 
     return cek_promise.then(function(cek) {
-      var buf = JoseJWE.Utils.arrayBufferConcat(cipher_text, tag);
+      var buf = Utils.arrayBufferConcat(cipher_text, tag);
       return crypto.subtle.decrypt(dec, cek, buf);
     });
   } else {
-    var keys = JoseJWE.MacThenEncrypt.splitKey(config, cek_promise, ["decrypt"]);
+    var keys = MacThenEncrypt.splitKey(config, cek_promise, ["decrypt"]);
     var mac_key_promise = keys[0];
     var enc_key_promise = keys[1];
 
     // Validate the MAC
-    var mac_promise = JoseJWE.MacThenEncrypt.truncatedMac(
+    var mac_promise = MacThenEncrypt.truncatedMac(
       config,
       mac_key_promise,
       aad,
@@ -716,7 +719,7 @@ JoseJWE.prototype.decryptCiphertext = function(cek_promise, aad, iv, cipher_text
       var enc_key = all[0];
       var mac = all[1];
 
-      if (!JoseJWE.Utils.compare(new Uint8Array(mac), tag)) {
+      if (!Utils.compare(new Uint8Array(mac), tag)) {
         return Promise.reject("decryptCiphertext: MAC failed.");
       }
 
@@ -740,7 +743,7 @@ JoseJWE.prototype.decryptCiphertext = function(cek_promise, aad, iv, cipher_text
  * return Promise<CryptoKey>
  */
 JoseJWE.prototype.decryptCek = function(key_promise, encrypted_cek) {
-  var hack = JoseJWE.Utils.getCekWorkaround(this.content_encryption);
+  var hack = Utils.getCekWorkaround(this.content_encryption);
   var extractable = (this.content_encryption.specific_cek_bytes > 0);
   var key_encryption = this.key_encryption.id;
 
@@ -765,7 +768,7 @@ JoseJWE.prototype.decryptCek = function(key_promise, encrypted_cek) {
  * limitations under the License.
  */
 
-JoseJWE.MacThenEncrypt = {};
+var MacThenEncrypt = {};
 
 /**
  * Splits a CEK into two pieces: a MAC key and an ENC key.
@@ -778,7 +781,7 @@ JoseJWE.MacThenEncrypt = {};
  * @param Promise<CryptoKey>  CEK key to split
  * @return [Promise<mac key>, Promise<enc key>]
  */
-JoseJWE.MacThenEncrypt.splitKey = function(config, cek_promise, purpose) {
+MacThenEncrypt.splitKey = function(config, cek_promise, purpose) {
   // We need to split the CEK key into a MAC and ENC keys
   var cek_bytes_promise = cek_promise.then(function(cek) {
     return crypto.subtle.exportKey("raw", cek);
@@ -810,14 +813,15 @@ JoseJWE.MacThenEncrypt.splitKey = function(config, cek_promise, purpose) {
  * @param Uint8Array          cipher_text
  * @return Promise<buffer>    truncated MAC
  */
-JoseJWE.MacThenEncrypt.truncatedMac = function(config, mac_key_promise, aad, iv, cipher_text) {
+MacThenEncrypt.truncatedMac = function(config, mac_key_promise, aad, iv, cipher_text) {
   return mac_key_promise.then(function(mac_key) {
-    var al = new Uint8Array(JoseJWE.Utils.arrayFromInt32(aad.length * 8));
+    var al = new Uint8Array(Utils.arrayFromInt32(aad.length * 8));
     var al_full = new Uint8Array(8);
     al_full.set(al, 4);
-    var buf = JoseJWE.Utils.arrayBufferConcat(aad, iv, cipher_text, al_full);
+    var buf = Utils.arrayBufferConcat(aad, iv, cipher_text, al_full);
     return crypto.subtle.sign(config.auth.id, mac_key, buf).then(function(bytes) {
       return bytes.slice(0, config.auth.truncated_bytes);
     });
   });
 };
+}());
