@@ -76,10 +76,19 @@
       "got expected tag");
 
     var private_rsa_key = JoseJWE.Utils.importRsaPrivateKey(rsa_key);
-    decrypted_plain_text_promise = cipher_text_promise.then(function(cipher_text){
-      return jwe.decrypt(private_rsa_key, cipher_text)
+    var decrypted_plain_text_promise = cipher_text_promise.then(function(cipher_text){
+      return jwe.decrypt(private_rsa_key, cipher_text);
     });
     assert.willEqual(decrypted_plain_text_promise, plain_text, "got expected decrypted plain text");
+
+    // Modify string and check for invalid tag
+    var mac_failure = cipher_text_promise.then(function(cipher_text) {
+      var cipher_text = cipher_text.split('.');
+      cipher_text.pop();
+      cipher_text.push("WFBoMYUZodetZdvTiFvSkQ");
+      return jwe.decrypt(private_rsa_key, cipher_text.join('.'));
+    });
+    assert.wontEqual(mac_failure, "OperationError: ", "invalid tag did not cause failure");
   });
 
   // We can't test appendix-A.2 because Chrome currently doesn't support RSAES-PKCS1-V1_5.
@@ -125,10 +134,19 @@
       "U0m_YmjN04DJvceFICbCVQ",
       "got expected tag");
 
-    decrypted_plain_text_promise = cipher_text_promise.then(function(cipher_text){
+    var decrypted_plain_text_promise = cipher_text_promise.then(function(cipher_text){
       return jwe.decrypt(shared_key, cipher_text)
     });
     assert.willEqual(decrypted_plain_text_promise, plain_text, "got expected decrypted plain text");
+
+    // Modify string and check for invalid tag
+    var mac_failure = cipher_text_promise.then(function(cipher_text) {
+      var cipher_text = cipher_text.split('.');
+      cipher_text.pop();
+      cipher_text.push("WEm_YmjN04DJvceFICbCVQ");
+      return jwe.decrypt(shared_key, cipher_text.join('.'));
+    });
+    assert.wontEqual(mac_failure, "decryptCiphertext: MAC failed.", "invalid tag did not cause failure");
   });
   </script>
 </head>
