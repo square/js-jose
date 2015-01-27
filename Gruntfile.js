@@ -9,6 +9,10 @@ module.exports = function(grunt) {
 
     concat: {
       dist: {
+        options: {
+          banner: "(function(){\n",
+          footer: "}());\n"
+        },
         src: [
           'lib/jose-jwe-core.js',
           'lib/jose-jwe-utils.js',
