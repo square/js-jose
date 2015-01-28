@@ -591,7 +591,7 @@ JoseJWE.prototype.encryptPlainText = function(cek_promise, plain_text) {
       });
     });
   } else {
-    var keys = MacThenEncrypt.splitKey(config, cek_promise, ["encrypt"]);
+    var keys = EncryptThenMac.splitKey(config, cek_promise, ["encrypt"]);
     var mac_key_promise = keys[0];
     var enc_key_promise = keys[1];
 
@@ -606,7 +606,7 @@ JoseJWE.prototype.encryptPlainText = function(cek_promise, plain_text) {
 
     // compute MAC
     var mac_promise = cipher_text_promise.then(function(cipher_text) {
-      return MacThenEncrypt.truncatedMac(
+      return EncryptThenMac.truncatedMac(
         config,
         mac_key_promise,
         aad,
@@ -712,12 +712,12 @@ JoseJWE.prototype.decryptCiphertext = function(cek_promise, aad, iv, cipher_text
       return crypto.subtle.decrypt(dec, cek, buf);
     });
   } else {
-    var keys = MacThenEncrypt.splitKey(config, cek_promise, ["decrypt"]);
+    var keys = EncryptThenMac.splitKey(config, cek_promise, ["decrypt"]);
     var mac_key_promise = keys[0];
     var enc_key_promise = keys[1];
 
     // Validate the MAC
-    var mac_promise = MacThenEncrypt.truncatedMac(
+    var mac_promise = EncryptThenMac.truncatedMac(
       config,
       mac_key_promise,
       aad,
@@ -777,7 +777,7 @@ JoseJWE.prototype.decryptCek = function(key_promise, encrypted_cek) {
  * limitations under the License.
  */
 
-var MacThenEncrypt = {};
+var EncryptThenMac = {};
 
 /**
  * Splits a CEK into two pieces: a MAC key and an ENC key.
@@ -790,7 +790,7 @@ var MacThenEncrypt = {};
  * @param Promise<CryptoKey>  CEK key to split
  * @return [Promise<mac key>, Promise<enc key>]
  */
-MacThenEncrypt.splitKey = function(config, cek_promise, purpose) {
+EncryptThenMac.splitKey = function(config, cek_promise, purpose) {
   // We need to split the CEK key into a MAC and ENC keys
   var cek_bytes_promise = cek_promise.then(function(cek) {
     return crypto.subtle.exportKey("raw", cek);
@@ -822,7 +822,7 @@ MacThenEncrypt.splitKey = function(config, cek_promise, purpose) {
  * @param Uint8Array          cipher_text
  * @return Promise<buffer>    truncated MAC
  */
-MacThenEncrypt.truncatedMac = function(config, mac_key_promise, aad, iv, cipher_text) {
+EncryptThenMac.truncatedMac = function(config, mac_key_promise, aad, iv, cipher_text) {
   return mac_key_promise.then(function(mac_key) {
     var al = new Uint8Array(Utils.arrayFromInt32(aad.length * 8));
     var al_full = new Uint8Array(8);
