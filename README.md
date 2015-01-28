@@ -73,10 +73,10 @@ Content Encryption:
 * A256CBC-HS512
 
 
-Algorithms not exposed (and reason)
------------------------------------
+Algorithms not exposed (and reason why)
+---------------------------------------
 
-* dir (could be added if deemed useful, would require little work)
+* DIR (could be added if deemed useful, would require little work)
 * PBES2-HS256+A128KW (would require implementing PBES2)
 * PBES2-HS512+A256KW (would require implementing PBES2)
 * RSAES-PKCS1-v_5 was removed in Chrome (https://code.google.com/p/chromium/issues/detail?id=372920)
@@ -92,22 +92,25 @@ Algorithms not exposed (and reason)
 Building
 --------
 
-* `npm install`
-* `grunt`
+    npm install
+    grunt
 
 
 Some background info
 --------------------
 
-The Web Crypto API is still pretty new and isn't very well documented. The
-following resources are useful:
+The Web Crypto API is still pretty new and isn't always very well documented.
+The following resources are useful:
 
 * [www.w3.org](http://www.w3.org/TR/WebCryptoAPI/)
 * [msdn.microsoft.com](http://msdn.microsoft.com/en-us/library/ie/dn302338(v=vs.85).aspx)
-* [docs.google.com](https://docs.google.com/document/d/184AgXzLAoUjQjrtNdbimceyXVYzrn3tGpf3xQGCN10g)
+* [docs.google.com](https://sites.google.com/a/chromium.org/dev/blink/webcrypto)
+* [developer.mozilla.org](https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto)
 
-Note: Internet Explorer's Web Crypto API differs from Chrome's. This library
-probably needs a thin abstraction layer.
+Note: Internet Explorer's Web Crypto API differs from Chrome's (as it was
+implemented against an earlier version of the ietf draft). We will either
+need to implement a thin abstraction layer or [wait for Microsoft to update
+things](https://status.modern.ie/webcryptoapi?term=crypto).
 
 Some other interesting resources:
 
@@ -118,3 +121,5 @@ Some other interesting resources:
 * asn1, pem, x509 and more: http://kjur.github.io/jsrsasign/ and
   https://github.com/michaelrhanson/jwt-js/tree/master/lib/kurushima-jsrsa
 * Stanford Javascript Crypto library: https://github.com/bitwiseshiftleft/sjcl
+* https://github.com/GlobalSign/ASN1.js
+
