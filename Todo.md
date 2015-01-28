@@ -12,3 +12,4 @@ TODO List
   to do encryption or encryption with a specific algorithm.
 * Rethink error handling. Do we really need JoseJWE.assert?
 * Add support for importing public keys as PEM files and validating signatures.
+* Improve handling of malformed JSON input (see https://tools.ietf.org/html/draft-ietf-jose-json-web-signature-41#section-10.12)
