@@ -20,8 +20,8 @@ The library uses the Web Crypto API, which is available in recent browsers
 (http://caniuse.com/#feat=cryptographyexists). As of Nov 2014, it seems ~50%
 of users have some form of Web Crypto support.
 
-This code has been tested in Chrome 38 and is compatible with the Golang
-implementation.
+This code has been tested in Chrome 38 and is compatible with the [Golang
+implementation](https://github.com/square/go-jose).
 
 JSON web encryption is currently a set of drafts. This code is based on the
 following files:
