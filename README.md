@@ -24,7 +24,7 @@ This code has been tested in Chrome 38 and is compatible with the [Golang
 implementation](https://github.com/square/go-jose).
 
 JSON web encryption is currently a set of drafts. This code is based on the
-following files:
+following drafts:
 
 * https://tools.ietf.org/html/draft-ietf-jose-json-web-encryption-40
 * https://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-40
@@ -112,7 +112,8 @@ implemented against an earlier version of the ietf draft). We will either
 need to implement a thin abstraction layer or [wait for Microsoft to update
 things](https://status.modern.ie/webcryptoapi?term=crypto).
 
-Some other interesting resources:
+Random other interesting resources
+----------------------------------
 
 * Web Crypto API polyfill (_no longer under active development_): http://polycrypt.net/
 * Netflix' Web Crypto API polyfill: https://github.com/Netflix/NfWebCrypto
@@ -122,4 +123,4 @@ Some other interesting resources:
   https://github.com/michaelrhanson/jwt-js/tree/master/lib/kurushima-jsrsa
 * Stanford Javascript Crypto library: https://github.com/bitwiseshiftleft/sjcl
 * https://github.com/GlobalSign/ASN1.js
-
+* https://gist.github.com/jo/8619441
