@@ -13,10 +13,12 @@ cryptographer.setContentEncryptionAlgorithm("A128CBC-HS256");
 var shared_key = {"kty":"oct", "k":"GawgguFyGrWKav7AX4VKUg"};
 shared_key = crypto.subtle.importKey("jwk", shared_key, {name: "AES-KW"}, true, ["wrapKey", "unwrapKey"]);
 
-JoseJWE.encrypt(cryptographer, shared_key, plaintext.textContent).then(function(result) {
+var encrypter = new JoseJWE.Encrypter(cryptographer, shared_key);
+encrypter.encrypt(plaintext.textContent).then(function(result) {
 	ciphertext.textContent = result;
 
-  JoseJWE.decrypt(cryptographer, shared_key, result)
+  var decrypter = new JoseJWE.Decrypter(cryptographer, shared_key);
+  decrypter.decrypt(result)
     .then(function(decrypted_plain_text) {
       if (decrypted_plain_text != plaintext.textContent) {
         error.textContent = "decryption failed!";
