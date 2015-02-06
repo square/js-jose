@@ -178,6 +178,25 @@
     });
     assert.willEqual(decrypted_plain_text_promise, plain_text, "got expected decrypted plain text");
   });
+
+  test("RSA-OAEP-256 with A256CBC-HS512", function(assert) {
+    var jwe = new JoseJWE();
+    jwe.setKeyEncryptionAlgorithm("RSA-OAEP-256");
+    jwe.setContentEncryptionAlgorithm("A256CBC-HS512");
+    var key_promise = crypto.subtle.generateKey({
+      name: "RSA-OAEP",
+      hash: {name: "SHA-256"},
+      modulusLength: 2048,
+      publicExponent: new Uint8Array([0x01, 0x00, 0x01])}, false, ["wrapKey", "unwrapKey"]);
+    var plain_text = "Always remember that you are absolutely unique. Just like everyone else. --Margaret Mead";
+
+    var decrypted_plain_text_promise = key_promise.then(function(key) {
+      return jwe.encrypt(Promise.resolve(key.publicKey), plain_text).then(function(cipher_text) {
+        return jwe.decrypt(Promise.resolve(key.privateKey), cipher_text);
+      });
+    });
+    assert.willEqual(decrypted_plain_text_promise, plain_text, "got expected decrypted plain text");
+  });
   </script>
 </head>
 <body>
