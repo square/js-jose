@@ -197,6 +197,24 @@
     });
     assert.willEqual(decrypted_plain_text_promise, plain_text, "got expected decrypted plain text");
   });
+
+  test("A256KW with A128GCM", function(assert) {
+    var jwe = new JoseJWE();
+    jwe.setKeyEncryptionAlgorithm("A256KW");
+    jwe.setContentEncryptionAlgorithm("A128GCM");
+
+    var shared_key = {"kty":"oct", "k":"GawgguFyGrWKav7AX4VKUg"};
+    shared_key = crypto.subtle.importKey("jwk", shared_key, jwe.key_encryption.id, true, ["wrapKey", "unwrapKey"]);
+
+    var plain_text = "All generalizations are false, including this one.  --Mark Twain";
+
+    var cipher_text_promise = jwe.encrypt(shared_key, plain_text);
+
+    var decrypted_plain_text_promise = cipher_text_promise.then(function(cipher_text){
+      return jwe.decrypt(shared_key, cipher_text)
+    });
+    assert.willEqual(decrypted_plain_text_promise, plain_text, "got expected decrypted plain text");
+  });
   </script>
 </head>
 <body>

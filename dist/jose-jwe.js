@@ -114,6 +114,7 @@ var getCryptoConfig = function(alg) {
       };
     case "A128GCM":
       return {
+        jwe_name: "A128GCM",
         id: {name: "AES-GCM", length: 128},
         iv_bytes: 12,
         auth: {
