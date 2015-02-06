@@ -91,7 +91,7 @@
     assert.wontEqual(mac_failure, "OperationError: ", "invalid tag did not cause failure");
   });
 
-  // We can't test appendix-A.2 because Chrome currently doesn't support RSAES-PKCS1-V1_5.
+  // We can't test appendix-A.2 because Chrome dropped support for RSAES-PKCS1-V1_5.
 
   test("encryption using AES Key Wrap and AES_128_CBC_HMAC_SHA_256 (keys & IV from appendix-A.3)", function(assert) {
     var jwe = new JoseJWE();
