@@ -148,6 +148,36 @@
     });
     assert.wontEqual(mac_failure, "decryptCiphertext: MAC failed.", "invalid tag did not cause failure");
   });
+
+  test("key import", function(assert) {
+    var jwe = new JoseJWE();
+    jwe.setContentEncryptionAlgorithm("A128CBC-HS256");
+
+    // Key was generated with: `openssl genrsa 1024 | openssl rsa -text`
+    var rsa_key = {
+      "e": 65537,
+      "n": "00:bf:53:bf:5b:19:bc:80:5c:88:15:d8:a5:f7:70:cf:c7:0c:aa:f5:b4:07:b8:d1:7b:3a:34:fc:b3:d8:25:46:86:58:5a:d5:69:49:8d:83:23:cd:e2:87:cd:4a:6d:39:a6:8a:dd:dd:c2:e4:d0:ce:7b:a3:d8:28:f8:f0:af:eb:87:2f:f5:c5:bc:5b:c2:08:ec:67:8a:96:57:bb:b6:6b:b5:a2:7d:ab:ff:67:13:09:1b:32:ba:89:c2:27:fd:1b:00:8b:1b:a0:44:3f:a5:4c:39:75:cd:dd:be:75:e6:c7:a5:4f:27:e3:e8:91:0b:1f:38:b7:f5:f7:03:88:f5:1e:b5",
+      "d": "0d:f4:61:c4:97:3f:f4:6c:cb:50:2c:99:0e:4f:20:18:78:88:0f:9b:ad:e4:81:02:e7:df:ed:7e:80:89:57:77:7d:02:43:06:86:e2:d7:69:c9:1e:78:a1:34:88:7a:e7:f6:c0:ef:e7:c3:20:a7:ae:c4:e8:83:34:84:f9:8f:c8:10:22:b5:19:ad:07:de:18:5d:d2:ff:27:c2:a7:42:1b:9a:6b:64:43:75:6e:e7:6d:5e:3a:77:fd:2a:65:18:a5:e9:46:79:ea:50:60:a9:27:21:7b:da:71:9b:00:0d:07:63:0f:e4:a7:f7:d7:3c:32:19:b2:73:a5:2b:24:8d:01",
+      "p": "00:de:16:f5:44:0a:bf:b5:4c:00:ce:1b:fe:e9:33:6b:47:66:0e:f9:a8:b1:44:ee:54:3f:1c:51:0d:36:fb:40:3a:53:61:46:3b:63:ee:6b:95:54:1d:b2:49:30:47:92:fd:b7:69:87:a5:f0:91:ab:16:ed:1d:0a:c3:ee:27:3c:71",
+      "q": "00:dc:8a:57:d7:1a:ba:2d:e9:07:39:bf:64:ef:b2:f2:91:20:6c:32:4b:0d:15:2e:78:ab:a5:99:c5:4f:25:40:cc:8a:9c:d4:f5:3d:ab:a7:e1:e6:d4:97:90:66:bc:fb:45:af:c6:84:1d:1c:56:f6:18:7a:b2:81:27:e3:fa:38:85",
+      "dp": "00:9b:4b:2e:61:4f:aa:d1:98:bd:8f:61:a0:13:6c:b2:fd:0f:ee:34:c0:b2:83:e2:aa:e2:1e:68:c6:76:c5:a5:19:a3:a8:07:36:0c:20:70:f5:d0:05:9b:de:f5:75:76:e1:16:59:22:52:f4:2e:c7:95:96:63:92:5d:82:af:c8:e1",
+      "dq": "74:1d:fb:05:ec:b2:9e:3d:95:6a:58:55:82:c7:4b:64:12:18:25:9a:d2:76:96:93:3e:7c:e0:ab:bc:72:36:dd:fb:15:7c:22:eb:a7:97:ab:1f:68:4b:ac:e2:0b:1a:99:a4:64:f7:66:84:67:5d:07:a2:82:9d:f2:2c:dc:b0:29",
+      "qi": "0c:c8:32:20:2e:df:d7:85:0f:e6:50:ec:ba:1b:6f:60:dd:18:79:3f:d4:ac:d8:6c:bf:05:d7:68:11:3f:2e:1b:26:d5:63:9d:c7:02:0f:e0:c2:70:49:c9:d1:7b:68:66:da:17:36:f5:f2:6b:4e:06:bd:db:29:04:c6:34:7a:e0",
+    };
+
+    var public_rsa_key = JoseJWE.Utils.importRsaPublicKey(rsa_key);
+    var plain_text = "Look deep into nature, and then you will understand everything better."
+    var cipher_text_promise = jwe.encrypt(
+      public_rsa_key,
+      plain_text
+    );
+
+    var private_rsa_key = JoseJWE.Utils.importRsaPrivateKey(rsa_key);
+    var decrypted_plain_text_promise = cipher_text_promise.then(function(cipher_text){
+      return jwe.decrypt(private_rsa_key, cipher_text);
+    });
+    assert.willEqual(decrypted_plain_text_promise, plain_text, "got expected decrypted plain text");
+  });
   </script>
 </head>
 <body>
