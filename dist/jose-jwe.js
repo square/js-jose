@@ -102,6 +102,7 @@ var getCryptoConfig = function(alg) {
       };
     case "A256CBC-HS512":
       return {
+        jwe_name: "A256CBC-HS512",
         id: {name: "AES-CBC", length: 256},
         iv_bytes: 16,
         specific_cek_bytes: 64,
@@ -113,6 +114,7 @@ var getCryptoConfig = function(alg) {
       };
     case "A128GCM":
       return {
+        jwe_name: "A128GCM",
         id: {name: "AES-GCM", length: 128},
         iv_bytes: 12,
         auth: {
