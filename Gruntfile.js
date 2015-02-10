@@ -15,10 +15,10 @@ module.exports = function(grunt) {
         },
         src: [
           'lib/jose-jwe-core.js',
+          'lib/jose-jwe-webcryptographer.js',
           'lib/jose-jwe-utils.js',
           'lib/jose-jwe-encrypt.js',
           'lib/jose-jwe-decrypt.js',
-          'lib/jose-jwe-enc-then-mac.js',
         ],
         dest: 'dist/jose-jwe.js'
       }

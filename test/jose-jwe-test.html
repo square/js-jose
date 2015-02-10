@@ -9,11 +9,11 @@
 
   <script>
   test("encryption using RSAES OAEP and AES GCM (keys & IV from appendix-A.1)", function(assert) {
-    var jwe = new JoseJWE();
-    jwe.createIV = function() {
+    var cryptographer = new JoseJWE.WebCryptographer();
+    cryptographer.createIV = function() {
       return new Uint8Array([227, 197, 117, 252, 2, 219, 233, 68, 180, 225, 77, 219]);
     }
-    jwe.createCEK = function() {
+    cryptographer.createCek = function() {
       var cek = new Uint8Array([177, 161, 244, 128, 84, 143, 225, 115, 63, 180, 3, 255, 107, 154, 212, 246, 138, 7, 110, 91, 112, 46, 34, 105, 47, 130, 203, 46, 122, 234, 64, 252]);
       return crypto.subtle.importKey("raw", cek, {name: "AES-GCM"}, true, ["encrypt"]);
     }
@@ -51,10 +51,7 @@
       };
     var public_rsa_key = JoseJWE.Utils.importRsaPublicKey(rsa_key);
     var plain_text = "The true sign of intelligence is not knowledge but imagination.";
-    var cipher_text_promise = jwe.encrypt(
-      public_rsa_key,
-      plain_text
-    );
+    var cipher_text_promise = JoseJWE.encrypt(cryptographer, public_rsa_key, plain_text);
 
     assert.willEqual(cipher_text_promise.then(function(result){return result.split('.').length}),
       5, "got right number of components");
@@ -77,16 +74,16 @@
 
     var private_rsa_key = JoseJWE.Utils.importRsaPrivateKey(rsa_key);
     var decrypted_plain_text_promise = cipher_text_promise.then(function(cipher_text){
-      return jwe.decrypt(private_rsa_key, cipher_text);
+      return JoseJWE.decrypt(cryptographer, private_rsa_key, cipher_text);
     });
-    assert.willEqual(decrypted_plain_text_promise, plain_text, "got expected decrypted plain text");
+    assert.willEqual(decrypted_plain_text_promise, plain_text, "Error: got expected decrypted plain text");
 
     // Modify string and check for invalid tag
     var mac_failure = cipher_text_promise.then(function(cipher_text) {
       var cipher_text = cipher_text.split('.');
       cipher_text.pop();
       cipher_text.push("WFBoMYUZodetZdvTiFvSkQ");
-      return jwe.decrypt(private_rsa_key, cipher_text.join('.'));
+      return JoseJWE.decrypt(cryptographer, private_rsa_key, cipher_text.join('.'));
     });
     assert.wontEqual(mac_failure, "OperationError: ", "invalid tag did not cause failure");
   });
@@ -94,14 +91,14 @@
   // We can't test appendix-A.2 because Chrome dropped support for RSAES-PKCS1-V1_5.
 
   test("encryption using AES Key Wrap and AES_128_CBC_HMAC_SHA_256 (keys & IV from appendix-A.3)", function(assert) {
-    var jwe = new JoseJWE();
-    jwe.setKeyEncryptionAlgorithm("A128KW");
-    jwe.setContentEncryptionAlgorithm("A128CBC-HS256");
+    var cryptographer = new JoseJWE.WebCryptographer();
+    cryptographer.setKeyEncryptionAlgorithm("A128KW");
+    cryptographer.setContentEncryptionAlgorithm("A128CBC-HS256");
 
-    jwe.createIV = function() {
+    cryptographer.createIV = function() {
       return new Uint8Array([3, 22, 60, 12, 43, 67, 104, 105, 108, 108, 105, 99, 111, 116, 104, 101]);
     }
-    jwe.createCEK = function() {
+    cryptographer.createCek = function() {
       var cek = new Uint8Array([4, 211, 31, 197, 84, 157, 252, 254, 11, 100, 157, 250, 63, 170, 106, 206, 107, 124, 212, 45, 111, 107, 9, 219, 200, 177, 0, 240, 143, 156, 44, 207]);
       return crypto.subtle.importKey("raw", cek, {name: "AES-GCM"}, true, ["encrypt"]);
     }
@@ -109,7 +106,7 @@
     shared_key = crypto.subtle.importKey("jwk", shared_key, {name: "AES-KW"}, true, ["wrapKey", "unwrapKey"]);
 
     var plain_text = "Live long and prosper.";
-    var cipher_text_promise = jwe.encrypt(shared_key, plain_text);
+    var cipher_text_promise = JoseJWE.encrypt(cryptographer, shared_key, plain_text);
 
     assert.willEqual(cipher_text_promise.then(function(result){return result.split('.').length}),
       5, "got right number of components");
@@ -135,7 +132,7 @@
       "got expected tag");
 
     var decrypted_plain_text_promise = cipher_text_promise.then(function(cipher_text){
-      return jwe.decrypt(shared_key, cipher_text)
+      return JoseJWE.decrypt(cryptographer, shared_key, cipher_text);
     });
     assert.willEqual(decrypted_plain_text_promise, plain_text, "got expected decrypted plain text");
 
@@ -144,14 +141,14 @@
       var cipher_text = cipher_text.split('.');
       cipher_text.pop();
       cipher_text.push("WEm_YmjN04DJvceFICbCVQ");
-      return jwe.decrypt(shared_key, cipher_text.join('.'));
+      return JoseJWE.decrypt(cryptographer, shared_key, cipher_text.join('.'));
     });
-    assert.wontEqual(mac_failure, "decryptCiphertext: MAC failed.", "invalid tag did not cause failure");
+    assert.wontEqual(mac_failure, "Error: decryptCiphertext: MAC failed.", "invalid tag did not cause failure");
   });
 
   test("key import", function(assert) {
-    var jwe = new JoseJWE();
-    jwe.setContentEncryptionAlgorithm("A128CBC-HS256");
+    var cryptographer = new JoseJWE.WebCryptographer();
+    cryptographer.setContentEncryptionAlgorithm("A128CBC-HS256");
 
     // Key was generated with: `openssl genrsa 1024 | openssl rsa -text`
     var rsa_key = {
@@ -167,22 +164,19 @@
 
     var public_rsa_key = JoseJWE.Utils.importRsaPublicKey(rsa_key);
     var plain_text = "Look deep into nature, and then you will understand everything better."
-    var cipher_text_promise = jwe.encrypt(
-      public_rsa_key,
-      plain_text
-    );
+    var cipher_text_promise = JoseJWE.encrypt(cryptographer, public_rsa_key, plain_text);
 
     var private_rsa_key = JoseJWE.Utils.importRsaPrivateKey(rsa_key);
     var decrypted_plain_text_promise = cipher_text_promise.then(function(cipher_text){
-      return jwe.decrypt(private_rsa_key, cipher_text);
+      return JoseJWE.decrypt(cryptographer, private_rsa_key, cipher_text);
     });
     assert.willEqual(decrypted_plain_text_promise, plain_text, "got expected decrypted plain text");
   });
 
   test("RSA-OAEP-256 with A256CBC-HS512", function(assert) {
-    var jwe = new JoseJWE();
-    jwe.setKeyEncryptionAlgorithm("RSA-OAEP-256");
-    jwe.setContentEncryptionAlgorithm("A256CBC-HS512");
+    var cryptographer = new JoseJWE.WebCryptographer();
+    cryptographer.setKeyEncryptionAlgorithm("RSA-OAEP-256");
+    cryptographer.setContentEncryptionAlgorithm("A256CBC-HS512");
     var key_promise = crypto.subtle.generateKey({
       name: "RSA-OAEP",
       hash: {name: "SHA-256"},
@@ -191,34 +185,34 @@
     var plain_text = "Always remember that you are absolutely unique. Just like everyone else. --Margaret Mead";
 
     var decrypted_plain_text_promise = key_promise.then(function(key) {
-      return jwe.encrypt(Promise.resolve(key.publicKey), plain_text).then(function(cipher_text) {
-        return jwe.decrypt(Promise.resolve(key.privateKey), cipher_text);
+      return JoseJWE.encrypt(cryptographer, Promise.resolve(key.publicKey), plain_text).then(function(cipher_text) {
+        return JoseJWE.decrypt(cryptographer, Promise.resolve(key.privateKey), cipher_text);
       });
     });
     assert.willEqual(decrypted_plain_text_promise, plain_text, "got expected decrypted plain text");
   });
 
   test("A256KW with A128GCM", function(assert) {
-    var jwe = new JoseJWE();
-    jwe.setKeyEncryptionAlgorithm("A256KW");
-    jwe.setContentEncryptionAlgorithm("A128GCM");
+    var cryptographer = new JoseJWE.WebCryptographer();
+    cryptographer.setKeyEncryptionAlgorithm("A256KW");
+    cryptographer.setContentEncryptionAlgorithm("A128GCM");
 
     var shared_key = {"kty":"oct", "k":"GawgguFyGrWKav7AX4VKUg"};
-    shared_key = crypto.subtle.importKey("jwk", shared_key, jwe.key_encryption.id, true, ["wrapKey", "unwrapKey"]);
+    shared_key = crypto.subtle.importKey("jwk", shared_key, cryptographer.key_encryption.id, true, ["wrapKey", "unwrapKey"]);
 
     var plain_text = "All generalizations are false, including this one.  --Mark Twain";
 
-    var cipher_text_promise = jwe.encrypt(shared_key, plain_text);
+    var cipher_text_promise = JoseJWE.encrypt(cryptographer, shared_key, plain_text);
 
     var decrypted_plain_text_promise = cipher_text_promise.then(function(cipher_text){
-      return jwe.decrypt(shared_key, cipher_text)
+      return JoseJWE.decrypt(cryptographer, shared_key, cipher_text)
     });
     assert.willEqual(decrypted_plain_text_promise, plain_text, "got expected decrypted plain text");
   });
 
   test("setting invalid algorithm", function(assert) {
-    var jwe = new JoseJWE();
-    assert.throws(function(){jwe.setKeyEncryptionAlgorithm("blah")}, "got exception when setting invalid algorithm");
+    var cryptographer = new JoseJWE.WebCryptographer();
+    assert.throws(function(){cryptographer.setKeyEncryptionAlgorithm("blah")}, "got exception when setting invalid algorithm");
   });
 
   test("importing public key", function(assert) {
@@ -242,53 +236,53 @@
   });
 
   test("various decryption failures", function(assert) {
-    var jwe = new JoseJWE();
-    jwe.setKeyEncryptionAlgorithm("A128KW");
+    var cryptographer = new JoseJWE.WebCryptographer();
+    cryptographer.setKeyEncryptionAlgorithm("A128KW");
 
     var shared_key = {"kty":"oct", "k":"GawgguFyGrWKav7AX4VKUg"};
     shared_key = crypto.subtle.importKey("jwk", shared_key, {name: "AES-KW"}, true, ["wrapKey", "unwrapKey"]);
 
     var plain_text = "A yawn is a silent scream for coffee. --unknown";
-    var cipher_text_promise = jwe.encrypt(shared_key, plain_text);
+    var cipher_text_promise = JoseJWE.encrypt(cryptographer, shared_key, plain_text);
 
     var decrypt_truncated_input_promise = cipher_text_promise.then(function(cipher_text){
       cipher_text = cipher_text.split('.').slice(1).join('.');
-      return jwe.decrypt(shared_key, cipher_text)
+      return JoseJWE.decrypt(cryptographer, shared_key, cipher_text)
     });
-    assert.wontEqual(decrypt_truncated_input_promise, "decrypt: invalid input", "truncated input did not cause failure");
+    assert.wontEqual(decrypt_truncated_input_promise, "Error: decrypt: invalid input", "truncated input did not cause failure");
 
     var decrypt_missing_alg_promise = cipher_text_promise.then(function(cipher_text){
       cipher_text = cipher_text.split('.');
       cipher_text[0] = 'eyJlbmMiOiJBMjU2R0NNIn0=';
-      return jwe.decrypt(shared_key, cipher_text.join('.'));
+      return JoseJWE.decrypt(cryptographer, shared_key, cipher_text.join('.'));
     });
-    assert.wontEqual(decrypt_missing_alg_promise, "decrypt: missing alg", "missing alg in header did not cause failure");
+    assert.wontEqual(decrypt_missing_alg_promise, "Error: decrypt: missing alg", "missing alg in header did not cause failure");
 
     var decrypt_missing_enc_promise = cipher_text_promise.then(function(cipher_text){
       cipher_text = cipher_text.split('.');
       cipher_text[0] = 'eyJhbGciOiJBMTI4S1cifQ==';
-      return jwe.decrypt(shared_key, cipher_text.join('.'));
+      return JoseJWE.decrypt(cryptographer, shared_key, cipher_text.join('.'));
     });
-    assert.wontEqual(decrypt_missing_enc_promise, "decrypt: missing enc", "missing enc in header did not cause failure");
+    assert.wontEqual(decrypt_missing_enc_promise, "Error: decrypt: missing enc", "missing enc in header did not cause failure");
 
     var decrypt_crit_header_promise = cipher_text_promise.then(function(cipher_text){
       cipher_text = cipher_text.split('.');
       cipher_text[0] = 'eyJlbmMiOiJBMjU2R0NNIiwiYWxnIjoiQTEyOEtXIiwiY3JpdCI6ImJsYWgifQ==';
-      return jwe.decrypt(shared_key, cipher_text.join('.'));
+      return JoseJWE.decrypt(cryptographer, shared_key, cipher_text.join('.'));
     });
-    assert.wontEqual(decrypt_crit_header_promise, "decrypt: crit is not supported", "crit in header did not cause failure");
+    assert.wontEqual(decrypt_crit_header_promise, "Error: decrypt: crit is not supported", "crit in header did not cause failure");
 
     var decrypt_invalid_iv_promise = cipher_text_promise.then(function(cipher_text){
       cipher_text = cipher_text.split('.');
       cipher_text[2] = 'w4kHDJEum_fHW-U';
-      return jwe.decrypt(shared_key, cipher_text.join('.'));
+      return JoseJWE.decrypt(cryptographer, shared_key, cipher_text.join('.'));
     });
-    assert.wontEqual(decrypt_invalid_iv_promise, "decryptCiphertext: invalid IV", "invalid IV did not cause failure");
+    assert.wontEqual(decrypt_invalid_iv_promise, "Error: decryptCiphertext: invalid IV", "invalid IV did not cause failure");
 
-    var jwe2 = new JoseJWE();
-    jwe2.setKeyEncryptionAlgorithm("A128KW");
-    jwe2.createIV = function() { return new Uint8Array(new Array(11)); };
-    assert.wontEqual(jwe2.encrypt(shared_key, plain_text), "encryptPlainText: invalid IV length", "fails to encrypt when we don't have the right IV length");
+    var cryptographer2 = new JoseJWE.WebCryptographer();
+    cryptographer2.setKeyEncryptionAlgorithm("A128KW");
+    cryptographer2.createIV = function() { return new Uint8Array(new Array(11)); };
+    assert.wontEqual(JoseJWE.encrypt(cryptographer2, shared_key, plain_text), "Error: invalid IV length", "fails to encrypt when we don't have the right IV length");
   });
   </script>
 </head>

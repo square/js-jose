@@ -6,17 +6,17 @@
 <script src="../dist/jose-jwe.js"></script>
 
 <script>
-var joseJWE = new JoseJWE();
-joseJWE.setKeyEncryptionAlgorithm("A128KW");
-joseJWE.setContentEncryptionAlgorithm("A128CBC-HS256");
+var cryptographer = new JoseJWE.WebCryptographer();
+cryptographer.setKeyEncryptionAlgorithm("A128KW");
+cryptographer.setContentEncryptionAlgorithm("A128CBC-HS256");
 
 var shared_key = {"kty":"oct", "k":"GawgguFyGrWKav7AX4VKUg"};
 shared_key = crypto.subtle.importKey("jwk", shared_key, {name: "AES-KW"}, true, ["wrapKey", "unwrapKey"]);
 
-joseJWE.encrypt(shared_key, plaintext.textContent).then(function(result) {
+JoseJWE.encrypt(cryptographer, shared_key, plaintext.textContent).then(function(result) {
 	ciphertext.textContent = result;
 
-  joseJWE.decrypt(shared_key, result)
+  JoseJWE.decrypt(cryptographer, shared_key, result)
     .then(function(decrypted_plain_text) {
       if (decrypted_plain_text != plaintext.textContent) {
         error.textContent = "decryption failed!";

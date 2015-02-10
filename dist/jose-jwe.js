@@ -24,10 +24,7 @@
 /**
  * Initializes a JoseJWE object.
  */
-JoseJWE = function() {
-  this.setKeyEncryptionAlgorithm("RSA-OAEP");
-  this.setContentEncryptionAlgorithm("A256GCM");
-};
+JoseJWE = {};
 
 /**
  * Feel free to override this function.
@@ -38,23 +35,323 @@ JoseJWE.assert = function(expr, msg) {
   }
 };
 
+/*-
+ * Copyright 2014 Square Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * The WebCryptographer uses http://www.w3.org/TR/WebCryptoAPI/ to perform
+ * various crypto operations. In theory, this should help build the library with
+ * different underlying crypto APIs. I'm however unclear if we'll run into code
+ * duplication or callback vs Promise based API issues.
+ */
+JoseJWE.WebCryptographer = function() {
+  this.setKeyEncryptionAlgorithm("RSA-OAEP");
+  this.setContentEncryptionAlgorithm("A256GCM");
+};
+
 /**
  * Overrides the default key encryption algorithm
  * @param alg  string
  */
-JoseJWE.prototype.setKeyEncryptionAlgorithm = function(alg) {
+JoseJWE.WebCryptographer.prototype.setKeyEncryptionAlgorithm = function(alg) {
   this.key_encryption = getCryptoConfig(alg);
+};
+
+JoseJWE.WebCryptographer.prototype.getKeyEncryptionAlgorithm = function() {
+  return this.key_encryption.jwe_name;
 };
 
 /**
  * Overrides the default content encryption algorithm
  * @param alg  string
  */
-JoseJWE.prototype.setContentEncryptionAlgorithm = function(alg) {
+JoseJWE.WebCryptographer.prototype.setContentEncryptionAlgorithm = function(alg) {
   this.content_encryption = getCryptoConfig(alg);
 };
 
-// Private functions
+JoseJWE.WebCryptographer.prototype.getContentEncryptionAlgorithm = function() {
+  return this.content_encryption.jwe_name;
+};
+
+/**
+ * Generates an IV.
+ * This function mainly exists so that it can be mocked for testing purpose.
+ *
+ * @return Uint8Array with random bytes
+ */
+JoseJWE.WebCryptographer.prototype.createIV = function() {
+  var iv = new Uint8Array(new Array(this.content_encryption.iv_bytes));
+  var r = crypto.getRandomValues(iv);
+  return r;
+};
+
+/**
+ * Creates a random content encryption key.
+ * This function mainly exists so that it can be mocked for testing purpose.
+ *
+ * @return Promise<CryptoKey>
+ */
+JoseJWE.WebCryptographer.prototype.createCek = function() {
+  var hack = getCekWorkaround(this.content_encryption);
+  return crypto.subtle.generateKey(hack.id, true, hack.enc_op);
+};
+
+JoseJWE.WebCryptographer.prototype.wrapCek = function(cek, key) {
+  return crypto.subtle.wrapKey("raw", cek, key, this.key_encryption.id);
+};
+
+JoseJWE.WebCryptographer.prototype.unwrapCek = function(cek, key) {
+  var hack = getCekWorkaround(this.content_encryption);
+  var extractable = (this.content_encryption.specific_cek_bytes > 0);
+  var key_encryption = this.key_encryption.id;
+
+  return crypto.subtle.unwrapKey("raw", cek, key, key_encryption, hack.id, extractable, hack.dec_op);
+};
+
+/**
+ * Returns algorithm and operation needed to create a CEK.
+ *
+ * In some cases, e.g. A128CBC-HS256, the CEK gets split into two keys. The Web
+ * Crypto API does not allow us to generate an arbitrary number of bytes and
+ * then create a CryptoKey without any associated algorithm. We therefore piggy
+ * back on AES-CBS and HMAC which allows the creation of CEKs of size 16, 32, 64
+ * and 128 bytes.
+ */
+var getCekWorkaround = function(alg) {
+  var len = alg.specific_cek_bytes;
+  if (len) {
+    if (len == 16) {
+      return {id: {name: "AES-CBC", length: 128}, enc_op: ["encrypt"], dec_op: ["decrypt"]};
+    } else if (len == 32) {
+      return {id: {name: "AES-CBC", length: 256}, enc_op: ["encrypt"], dec_op: ["decrypt"]};
+    } else if (len == 64) {
+      return {id: {name: "HMAC", hash: {name: "SHA-256"}}, enc_op: ["sign"], dec_op: ["verify"]};
+    } else if (len == 128) {
+      return {id: {name: "HMAC", hash: {name: "SHA-384"}}, enc_op: ["sign"], dec_op: ["verify"]};
+    } else {
+      JoseJWE.assert(false, "getCekWorkaround: invalid len");
+    }
+  }
+  return {id: alg.id, enc_op: ["encrypt"], dec_op: ["decrypt"]};
+};
+
+/**
+ * Encrypts plain_text with cek.
+ *
+ * @param iv          Uint8Array
+ * @param aad         Uint8Array
+ * @param cek_promise Promise<CryptoKey>
+ * @param plain_text  Uint8Array
+ * @return Promise<json>
+ */
+JoseJWE.WebCryptographer.prototype.encrypt = function(iv, aad, cek_promise, plain_text) {
+  var config = this.content_encryption;
+  if (iv.length != config.iv_bytes) {
+    return Promise.reject(Error("invalid IV length"));
+  }
+  if (config.auth.aead) {
+    var tag_bytes = config.auth.tag_bytes;
+
+    var enc = {
+      name: config.id.name,
+      iv: iv,
+      additionalData: aad,
+      tagLength: tag_bytes * 8
+    };
+
+    return cek_promise.then(function(cek) {
+      return crypto.subtle.encrypt(enc, cek, plain_text).then(function(cipher_text) {
+        var offset = cipher_text.byteLength - tag_bytes;
+        return {
+          cipher: cipher_text.slice(0, offset),
+          tag: cipher_text.slice(offset)
+        };
+      });
+    });
+  } else {
+    var keys = splitKey(config, cek_promise, ["encrypt"]);
+    var mac_key_promise = keys[0];
+    var enc_key_promise = keys[1];
+
+    // Encrypt the plain text
+    var cipher_text_promise = enc_key_promise.then(function(enc_key) {
+      var enc = {
+        name: config.id.name,
+        iv: iv,
+      };
+      return crypto.subtle.encrypt(enc, enc_key, plain_text);
+    });
+
+    // compute MAC
+    var mac_promise = cipher_text_promise.then(function(cipher_text) {
+      return truncatedMac(
+        config,
+        mac_key_promise,
+        aad,
+        iv,
+        cipher_text);
+    });
+
+    return Promise.all([cipher_text_promise, mac_promise]).then(function(all) {
+      var cipher_text = all[0];
+      var mac = all[1];
+      return {
+        cipher: cipher_text,
+        tag: mac
+      };
+    });
+  }
+};
+
+ /**
+  * Decrypts cipher_text with cek. Validates the tag.
+  *
+  * @param key_promise    Promise<CryptoKey>
+  * @return Promise<string>
+  */
+JoseJWE.WebCryptographer.prototype.decrypt = function(cek_promise, aad, iv, cipher_text, tag) {
+  /**
+   * Compares two Uint8Arrays in constant time.
+   *
+   * @return Promise<void>
+   */
+  var compare = function(config, mac_key_promise, arr1, arr2) {
+    JoseJWE.assert(arr1 instanceof Uint8Array, "compare: invalid input");
+    JoseJWE.assert(arr2 instanceof Uint8Array, "compare: invalid input");
+
+    return mac_key_promise.then(function(mac_key) {
+      var hash1 = crypto.subtle.sign(config.auth.id, mac_key, arr1);
+      var hash2 = crypto.subtle.sign(config.auth.id, mac_key, arr2);
+      return Promise.all([hash1, hash2]).then(function(all) {
+        var hash1 = new Uint8Array(all[0]);
+        var hash2 = new Uint8Array(all[1]);
+        if (hash1.length != hash2.length) {
+          throw new Error("compare failed");
+        }
+        for (var i=0; i<hash1.length; i++) {
+          if (hash1[i] != hash2[i]) {
+            throw new Error("compare failed");
+          }
+        }
+        return Promise.accept(null);
+      });
+    });
+  };
+
+  if (iv.length != this.content_encryption.iv_bytes) {
+    return Promise.reject(Error("decryptCiphertext: invalid IV"));
+  }
+
+  var config = this.content_encryption;
+  if (config.auth.aead) {
+    var dec = {
+      name: config.id.name,
+      iv: iv,
+      additionalData: aad,
+      tagLength: config.auth.tag_bytes * 8
+    };
+
+    return cek_promise.then(function(cek) {
+      var buf = Utils.arrayBufferConcat(cipher_text, tag);
+      return crypto.subtle.decrypt(dec, cek, buf);
+    });
+  } else {
+    var keys = splitKey(config, cek_promise, ["decrypt"]);
+    var mac_key_promise = keys[0];
+    var enc_key_promise = keys[1];
+
+    // Validate the MAC
+    var mac_promise = truncatedMac(
+      config,
+      mac_key_promise,
+      aad,
+      iv,
+      cipher_text);
+
+    return Promise.all([enc_key_promise, mac_promise]).then(function(all) {
+      var enc_key = all[0];
+      var mac = all[1];
+
+      return compare(config, mac_key_promise, new Uint8Array(mac), tag).then(function() {
+        var dec = {
+          name: config.id.name,
+          iv: iv,
+        };
+        return crypto.subtle.decrypt(dec, enc_key, cipher_text);
+      }).catch(function (err) {
+        return Promise.reject(Error("decryptCiphertext: MAC failed."));
+      });
+    });
+  }
+};
+
+/**
+ * Splits a CEK into two pieces: a MAC key and an ENC key.
+ *
+ * This code is structured around the fact that the crypto API does not provide
+ * a way to validate truncated MACs. The MAC key is therefore always imported to
+ * sign data.
+ *
+ * @param hash                config (used for key lengths & algorithms)
+ * @param Promise<CryptoKey>  CEK key to split
+ * @return [Promise<mac key>, Promise<enc key>]
+ */
+var splitKey = function(config, cek_promise, purpose) {
+  // We need to split the CEK key into a MAC and ENC keys
+  var cek_bytes_promise = cek_promise.then(function(cek) {
+    return crypto.subtle.exportKey("raw", cek);
+  });
+  var mac_key_promise = cek_bytes_promise.then(function(cek_bytes) {
+    if (cek_bytes.byteLength * 8 != config.id.length + config.auth.key_bytes * 8) {
+      return Promise.reject(Error("encryptPlainText: incorrect cek length"));
+    }
+    var bytes = cek_bytes.slice(0, config.auth.key_bytes);
+    return crypto.subtle.importKey("raw", bytes, config.auth.id, false, ["sign"]);
+  });
+  var enc_key_promise = cek_bytes_promise.then(function(cek_bytes) {
+    if (cek_bytes.byteLength * 8 != config.id.length + config.auth.key_bytes * 8) {
+      return Promise.reject(Error("encryptPlainText: incorrect cek length"));
+    }
+    var bytes = cek_bytes.slice(config.auth.key_bytes);
+    return crypto.subtle.importKey("raw", bytes, config.id, false, purpose);
+  });
+  return [mac_key_promise, enc_key_promise];
+};
+
+/**
+ * Computes a truncated MAC.
+ *
+ * @param hash                config
+ * @param Promise<CryptoKey>  mac key
+ * @param Uint8Array          aad
+ * @param Uint8Array          iv
+ * @param Uint8Array          cipher_text
+ * @return Promise<buffer>    truncated MAC
+ */
+var truncatedMac = function(config, mac_key_promise, aad, iv, cipher_text) {
+  return mac_key_promise.then(function(mac_key) {
+    var al = new Uint8Array(Utils.arrayFromInt32(aad.length * 8));
+    var al_full = new Uint8Array(8);
+    al_full.set(al, 4);
+    var buf = Utils.arrayBufferConcat(aad, iv, cipher_text, al_full);
+    return crypto.subtle.sign(config.auth.id, mac_key, buf).then(function(bytes) {
+      return bytes.slice(0, config.auth.truncated_bytes);
+    });
+  });
+};
 
 /**
  * Converts the Jose web algorithms into data which is
@@ -85,7 +382,7 @@ var getCryptoConfig = function(alg) {
       return {
         jwe_name: "A256KW",
         id: {name: "AES-KW", length: 256}
-    };
+      };
 
     // Content encryption
     case "A128CBC-HS256":
@@ -133,10 +430,9 @@ var getCryptoConfig = function(alg) {
         }
       };
     default:
-      JoseJWE.assert(false, "unsupported algorithm: " + alg);
+      throw Error("unsupported algorithm: " + alg);
   }
 };
-
 
 /*-
  * Copyright 2014 Square Inc.
@@ -162,6 +458,8 @@ var Utils = {};
  * CryptoKey which can then be used with RSA-OAEP. Also accepts (and validates)
  * JWK keys.
  *
+ * TODO: this code probably belongs in the webcryptographer.
+ *
  * @param rsa_key  public RSA key in json format. Parameters can be base64
  *                 encoded, strings or number (for 'e').
  * @return Promise<CryptoKey>
@@ -176,6 +474,8 @@ JoseJWE.Utils.importRsaPublicKey = function(rsa_key) {
  * Converts the output from `openssl x509 -text` or `openssl rsa -text` into a
  * CryptoKey which can then be used with RSA-OAEP. Also accepts (and validates)
  * JWK keys.
+ *
+ * TODO: this code probably belongs in the webcryptographer.
  *
  * @param rsa_key  private RSA key in json format. Parameters can be base64
  *                 encoded, strings or number (for 'e').
@@ -360,61 +660,6 @@ Utils.arrayBufferConcat = function(/* ... */) {
   return r;
 };
 
-/**
- * Compares two Uint8Arrays in constant time.
- *
- * @return Promise<void>
- */
-Utils.compare = function(config, mac_key_promise, arr1, arr2) {
-  JoseJWE.assert(arr1 instanceof Uint8Array, "compare: invalid input");
-  JoseJWE.assert(arr2 instanceof Uint8Array, "compare: invalid input");
-
-  return mac_key_promise.then(function(mac_key) {
-    var hash1 = crypto.subtle.sign(config.auth.id, mac_key, arr1);
-    var hash2 = crypto.subtle.sign(config.auth.id, mac_key, arr2);
-    return Promise.all([hash1, hash2]).then(function(all) {
-      var hash1 = new Uint8Array(all[0]);
-      var hash2 = new Uint8Array(all[1]);
-      if (hash1.length != hash2.length) {
-        throw new Error("compare failed");
-      }
-      for (var i=0; i<hash1.length; i++) {
-        if (hash1[i] != hash2[i]) {
-          throw new Error("compare failed");
-        }
-      }
-      return Promise.accept(null);
-    });
-  });
-};
-
-/**
- * Returns algorithm and operation needed to create a CEK.
- *
- * In some cases, e.g. A128CBC-HS256, the CEK gets split into two keys. The Web
- * Crypto API does not allow us to generate an arbitrary number of bytes and
- * then create a CryptoKey without any associated algorithm. We therefore piggy
- * back on AES-CBS and HMAC which allows the creation of CEKs of size 16, 32, 64
- * and 128 bytes.
- */
-Utils.getCekWorkaround = function(alg) {
-  var len = alg.specific_cek_bytes;
-  if (len) {
-    if (len == 16) {
-      return {id: {name: "AES-CBC", length: 128}, enc_op: ["encrypt"], dec_op: ["decrypt"]};
-    } else if (len == 32) {
-      return {id: {name: "AES-CBC", length: 256}, enc_op: ["encrypt"], dec_op: ["decrypt"]};
-    } else if (len == 64) {
-      return {id: {name: "HMAC", hash: {name: "SHA-256"}}, enc_op: ["sign"], dec_op: ["verify"]};
-    } else if (len == 128) {
-      return {id: {name: "HMAC", hash: {name: "SHA-384"}}, enc_op: ["sign"], dec_op: ["verify"]};
-    } else {
-      JoseJWE.assert(false, "getCekWorkaround: invalid len");
-    }
-  }
-  return {id: alg.id, enc_op: ["encrypt"], dec_op: ["decrypt"]};
-};
-
 Utils.Base64Url = {};
 
 /**
@@ -480,43 +725,64 @@ Utils.Base64Url.decodeArray = function(str) {
  */
 
 /**
- * Generates an IV.
- * This function mainly exists so that it can be mocked for testing purpose.
- *
- * @return Uint8Array with random bytes
- */
-JoseJWE.prototype.createIV = function() {
-  var iv = new Uint8Array(new Array(this.content_encryption.iv_bytes));
-  return crypto.getRandomValues(iv);
-};
-
-/**
- * Creates a random content encryption key.
- * This function mainly exists so that it can be mocked for testing purpose.
- *
- * @return Promise<CryptoKey>
- */
-JoseJWE.prototype.createCEK = function() {
-  var hack = Utils.getCekWorkaround(this.content_encryption);
-  return crypto.subtle.generateKey(hack.id, true, hack.enc_op);
-};
-
-/**
  * Performs encryption
  *
  * @param key_promise  Promise<CryptoKey>, either RSA or shared key
  * @param plain_text   string to encrypt
  * @return Promise<string>
  */
-JoseJWE.prototype.encrypt = function(key_promise, plain_text) {
+JoseJWE.encrypt = function(cryptographer, key_promise, plain_text) {
+  /**
+   * Encrypts the CEK
+   *
+   * @param key_promise  Promise<CryptoKey>
+   * @param cek_promise  Promise<CryptoKey>
+   * @return Promise<ArrayBuffer>
+   */
+  var encryptCek = function(key_promise, cek_promise) {
+    return Promise.all([key_promise, cek_promise]).then(function(all) {
+      var key = all[0];
+      var cek = all[1];
+      return cryptographer.wrapCek(cek, key);
+    });
+  };
+
+  /**
+   * Encrypts plain_text with CEK.
+   *
+   * @param cek_promise  Promise<CryptoKey>
+   * @param plain_text   string
+   * @return Promise<json>
+   */
+  var encryptPlainText = function(cek_promise, plain_text) {
+    // Create header
+    var jwe_protected_header = Utils.Base64Url.encode(JSON.stringify({
+      "alg": cryptographer.getKeyEncryptionAlgorithm(),
+      "enc": cryptographer.getContentEncryptionAlgorithm()
+    }));
+
+    // Create the IV
+    var iv = cryptographer.createIV();
+
+    // Create the AAD
+    var aad = Utils.arrayFromString(jwe_protected_header);
+    plain_text = Utils.arrayFromString(plain_text);
+
+    return cryptographer.encrypt(iv, aad, cek_promise, plain_text).then(function(r) {
+      r.header = jwe_protected_header;
+      r.iv = iv;
+      return r;
+    });
+  };
+
   // Create a CEK key
-  var cek_promise = this.createCEK();
+  var cek_promise = cryptographer.createCek();
 
   // Key & Cek allows us to create the encrypted_cek
-  var encrypted_cek = this.encryptCek(key_promise, cek_promise);
+  var encrypted_cek = encryptCek(key_promise, cek_promise);
 
   // Cek allows us to encrypy the plain text
-  var enc_promise = this.encryptPlainText(cek_promise, plain_text);
+  var enc_promise = encryptPlainText(cek_promise, plain_text);
 
   // Once we have all the promises, we can base64 encode all the pieces.
   return Promise.all([encrypted_cek, enc_promise]).then(function(all) {
@@ -528,105 +794,6 @@ JoseJWE.prototype.encrypt = function(key_promise, plain_text) {
       Utils.Base64Url.encodeArray(data.cipher) + "." +
       Utils.Base64Url.encodeArray(data.tag);
   });
-};
-
-/**
- * Encrypts the CEK
- *
- * @param key_promise  Promise<CryptoKey>
- * @param cek_promise  Promise<CryptoKey>
- * @return Promise<ArrayBuffer>
- */
-JoseJWE.prototype.encryptCek = function(key_promise, cek_promise) {
-  var config = this.key_encryption;
-  return Promise.all([key_promise, cek_promise]).then(function(all) {
-    var key = all[0];
-    var cek = all[1];
-    return crypto.subtle.wrapKey("raw", cek, key, config.id);
-  });
-};
-
-/**
- * Encrypts plain_text with CEK.
- *
- * @param cek_promise  Promise<CryptoKey>
- * @param plain_text   string
- * @return Promise<json>
- */
-JoseJWE.prototype.encryptPlainText = function(cek_promise, plain_text) {
-  // Create header
-  var jwe_protected_header = Utils.Base64Url.encode(JSON.stringify({
-    "alg": this.key_encryption.jwe_name,
-    "enc": this.content_encryption.jwe_name
-  }));
-
-  // Create the IV
-  var iv = this.createIV();
-  if (iv.length != this.content_encryption.iv_bytes) {
-    return Promise.reject("encryptPlainText: invalid IV length");
-  }
-
-  // Create the AAD
-  var aad = Utils.arrayFromString(jwe_protected_header);
-  plain_text = Utils.arrayFromString(plain_text);
-
-  var config = this.content_encryption;
-  if (config.auth.aead) {
-    var tag_bytes = config.auth.tag_bytes;
-
-    var enc = {
-      name: config.id.name,
-      iv: iv,
-      additionalData: aad,
-      tagLength: tag_bytes * 8
-    };
-
-    return cek_promise.then(function(cek) {
-      return crypto.subtle.encrypt(enc, cek, plain_text).then(function(cipher_text) {
-        var offset = cipher_text.byteLength - tag_bytes;
-        return {
-          header: jwe_protected_header,
-          iv: iv,
-          cipher: cipher_text.slice(0, offset),
-          tag: cipher_text.slice(offset)
-        };
-      });
-    });
-  } else {
-    var keys = EncryptThenMac.splitKey(config, cek_promise, ["encrypt"]);
-    var mac_key_promise = keys[0];
-    var enc_key_promise = keys[1];
-
-    // Encrypt the plain text
-    var cipher_text_promise = enc_key_promise.then(function(enc_key) {
-      var enc = {
-        name: config.id.name,
-        iv: iv,
-      };
-      return crypto.subtle.encrypt(enc, enc_key, plain_text);
-    });
-
-    // compute MAC
-    var mac_promise = cipher_text_promise.then(function(cipher_text) {
-      return EncryptThenMac.truncatedMac(
-        config,
-        mac_key_promise,
-        aad,
-        iv,
-        cipher_text);
-    });
-
-    return Promise.all([cipher_text_promise, mac_promise]).then(function(all) {
-      var cipher_text = all[0];
-      var mac = all[1];
-      return {
-        header: jwe_protected_header,
-        iv: iv,
-        cipher: cipher_text,
-        tag: mac
-      };
-    });
-  }
 };
 
 /*-
@@ -652,35 +819,51 @@ JoseJWE.prototype.encryptPlainText = function(cek_promise, plain_text) {
  * @param plain_text   string to decrypt
  * @return Promise<string>
  */
-JoseJWE.prototype.decrypt = function(key_promise, cipher_text) {
+JoseJWE.decrypt = function(cryptographer, key_promise, cipher_text) {
+  /**
+   * Decrypts the encrypted CEK. If decryption fails, we create a random CEK.
+   *
+   * In some modes (e.g. RSA-PKCS1v1.5), you myst take precautions to prevent
+   * chosen-ciphertext attacks as described in RFC 3218, "Preventing
+   * the Million Message Attack on Cryptographic Message Syntax". We currently
+   * only support RSA-OAEP, so we don't generate a key if unwrapping fails.
+   *
+   * return Promise<CryptoKey>
+   */
+  var decryptCek = function(key_promise, encrypted_cek) {
+    return key_promise.then(function(key) {
+      return cryptographer.unwrapCek(encrypted_cek, key);
+    });
+  };
+
   // Split cipher_text in 5 parts
   var parts = cipher_text.split(".");
   if (parts.length != 5) {
-    return Promise.reject("decrypt: invalid input");
+    return Promise.reject(Error("decrypt: invalid input"));
   }
 
   // part 1: header
   header = JSON.parse(Utils.Base64Url.decode(parts[0]));
   if (!header.alg) {
-    return Promise.reject("decrypt: missing alg");
+    return Promise.reject(Error("decrypt: missing alg"));
   }
-  this.setKeyEncryptionAlgorithm(header.alg);
+  cryptographer.setKeyEncryptionAlgorithm(header.alg);
 
   if (!header.enc) {
-    return Promise.reject("decrypt: missing enc");
+    return Promise.reject(Error("decrypt: missing enc"));
   }
-  this.setContentEncryptionAlgorithm(header.enc);
+  cryptographer.setContentEncryptionAlgorithm(header.enc);
 
   if (header.crit) {
     // We don't support the crit header
-    return Promise.reject("decrypt: crit is not supported");
+    return Promise.reject(Error("decrypt: crit is not supported"));
   }
 
   // part 2: decrypt the CEK
-  var cek_promise = this.decryptCek(key_promise, Utils.Base64Url.decodeArray(parts[1]));
+  var cek_promise = decryptCek(key_promise, Utils.Base64Url.decodeArray(parts[1]));
 
   // part 3: decrypt the cipher text
-  var plain_text_promise = this.decryptCiphertext(
+  var plain_text_promise = cryptographer.decrypt(
     cek_promise,
     Utils.arrayFromString(parts[0]),
     Utils.Base64Url.decodeArray(parts[2]),
@@ -688,151 +871,5 @@ JoseJWE.prototype.decrypt = function(key_promise, cipher_text) {
     Utils.Base64Url.decodeArray(parts[4]));
 
   return plain_text_promise.then(Utils.stringFromArray);
-};
-
-/**
- * @param key_promise    Promise<CryptoKey>
- * @param encrypted_cek  string
- * @return Promise<string>
- */
-JoseJWE.prototype.decryptCiphertext = function(cek_promise, aad, iv, cipher_text, tag) {
-  if (iv.length != this.content_encryption.iv_bytes) {
-    return Promise.reject("decryptCiphertext: invalid IV");
-  }
-
-  var config = this.content_encryption;
-  if (config.auth.aead) {
-    var dec = {
-      name: config.id.name,
-      iv: iv,
-      additionalData: aad,
-      tagLength: config.auth.tag_bytes * 8
-    };
-
-    return cek_promise.then(function(cek) {
-      var buf = Utils.arrayBufferConcat(cipher_text, tag);
-      return crypto.subtle.decrypt(dec, cek, buf);
-    });
-  } else {
-    var keys = EncryptThenMac.splitKey(config, cek_promise, ["decrypt"]);
-    var mac_key_promise = keys[0];
-    var enc_key_promise = keys[1];
-
-    // Validate the MAC
-    var mac_promise = EncryptThenMac.truncatedMac(
-      config,
-      mac_key_promise,
-      aad,
-      iv,
-      cipher_text);
-
-    return Promise.all([enc_key_promise, mac_promise]).then(function(all) {
-      var enc_key = all[0];
-      var mac = all[1];
-
-      return Utils.compare(config, mac_key_promise, new Uint8Array(mac), tag).then(function() {
-        var dec = {
-          name: config.id.name,
-          iv: iv,
-        };
-        return crypto.subtle.decrypt(dec, enc_key, cipher_text);
-      }).catch(function (err) {
-        return Promise.reject("decryptCiphertext: MAC failed.");
-      });
-    });
-  }
-};
-
-/**
- * Decrypts the encrypted CEK. If decryption fails, we create a random CEK.
- *
- * In some modes (e.g. RSA-PKCS1v1.5), you myst take precautions to prevent
- * chosen-ciphertext attacks as described in RFC 3218, "Preventing
- * the Million Message Attack on Cryptographic Message Syntax". We currently
- * only support RSA-OAEP, so we don't generate a key if unwrapping fails.
- *
- * return Promise<CryptoKey>
- */
-JoseJWE.prototype.decryptCek = function(key_promise, encrypted_cek) {
-  var hack = Utils.getCekWorkaround(this.content_encryption);
-  var extractable = (this.content_encryption.specific_cek_bytes > 0);
-  var key_encryption = this.key_encryption.id;
-
-  return key_promise.then(function(key) {
-    return crypto.subtle.unwrapKey("raw", encrypted_cek, key, key_encryption, hack.id, extractable, hack.dec_op);
-  });
-};
-
-/*-
- * Copyright 2014 Square Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-var EncryptThenMac = {};
-
-/**
- * Splits a CEK into two pieces: a MAC key and an ENC key.
- *
- * This code is structured around the fact that the crypto API does not provide
- * a way to validate truncated MACs. The MAC key is therefore always imported to
- * sign data.
- *
- * @param hash                config (used for key lengths & algorithms)
- * @param Promise<CryptoKey>  CEK key to split
- * @return [Promise<mac key>, Promise<enc key>]
- */
-EncryptThenMac.splitKey = function(config, cek_promise, purpose) {
-  // We need to split the CEK key into a MAC and ENC keys
-  var cek_bytes_promise = cek_promise.then(function(cek) {
-    return crypto.subtle.exportKey("raw", cek);
-  });
-  var mac_key_promise = cek_bytes_promise.then(function(cek_bytes) {
-    if (cek_bytes.byteLength * 8 != config.id.length + config.auth.key_bytes * 8) {
-      return Promise.reject("encryptPlainText: incorrect cek length");
-    }
-    var bytes = cek_bytes.slice(0, config.auth.key_bytes);
-    return crypto.subtle.importKey("raw", bytes, config.auth.id, false, ["sign"]);
-  });
-  var enc_key_promise = cek_bytes_promise.then(function(cek_bytes) {
-    if (cek_bytes.byteLength * 8 != config.id.length + config.auth.key_bytes * 8) {
-      return Promise.reject("encryptPlainText: incorrect cek length");
-    }
-    var bytes = cek_bytes.slice(config.auth.key_bytes);
-    return crypto.subtle.importKey("raw", bytes, config.id, false, purpose);
-  });
-  return [mac_key_promise, enc_key_promise];
-};
-
-/**
- * Computes a truncated MAC.
- *
- * @param hash                config
- * @param Promise<CryptoKey>  mac key
- * @param Uint8Array          aad
- * @param Uint8Array          iv
- * @param Uint8Array          cipher_text
- * @return Promise<buffer>    truncated MAC
- */
-EncryptThenMac.truncatedMac = function(config, mac_key_promise, aad, iv, cipher_text) {
-  return mac_key_promise.then(function(mac_key) {
-    var al = new Uint8Array(Utils.arrayFromInt32(aad.length * 8));
-    var al_full = new Uint8Array(8);
-    al_full.set(al, 4);
-    var buf = Utils.arrayBufferConcat(aad, iv, cipher_text, al_full);
-    return crypto.subtle.sign(config.auth.id, mac_key, buf).then(function(bytes) {
-      return bytes.slice(0, config.auth.truncated_bytes);
-    });
-  });
 };
 }());
