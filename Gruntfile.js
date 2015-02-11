@@ -1,6 +1,6 @@
 module.exports = function(grunt) {
 
-  grunt.initConfig({
+  var config = {
     pkg: grunt.file.readJSON('package.json'),
 
     jshint: {
@@ -46,6 +46,12 @@ module.exports = function(grunt) {
           ],
           autoWatch: true,
           browsers: ['Chrome'],
+          customLaunchers: {
+            Chrome_travis_ci: {
+              base: 'Chrome',
+              flags: ['--no-sandbox']
+            }
+          },
           singleRun: true,
           plugins:[ 'karma-coverage', 'karma-qunit', 'karma-chrome-launcher']
         }
@@ -60,11 +66,24 @@ module.exports = function(grunt) {
           ],
           autoWatch: true,
           browsers: ['Chrome'],
+          customLaunchers: {
+            Chrome_travis_ci: {
+              base: 'Chrome',
+              flags: ['--no-sandbox']
+            }
+          },
           singleRun: true
         }
       }
     }
-  });
+  };
+
+  if(process.env.TRAVIS){
+    config.karma.with_coverage.browsers = ['Chrome_travis_ci'];
+    config.karma.without_coverage.browsers = ['Chrome_travis_ci'];
+  }
+
+  grunt.initConfig(config);
 
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-jshint');
