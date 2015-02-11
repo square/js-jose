@@ -725,28 +725,41 @@ Utils.Base64Url.decodeArray = function(str) {
  */
 
 /**
- * Performs encryption
+ * Handles encryption.
  *
- * @param key_promise  Promise<CryptoKey>, either RSA or shared key
- * @param plain_text   string to encrypt
- * @return Promise<string>
+ * @param cryptographer  an instance of WebCryptographer (or equivalent).
+ * @param key_promise    Promise<CryptoKey>, either RSA or shared key
  */
-JoseJWE.encrypt = function(cryptographer, key_promise, plain_text) {
-  /**
-   * Encrypts the CEK
-   *
-   * @param key_promise  Promise<CryptoKey>
-   * @param cek_promise  Promise<CryptoKey>
-   * @return Promise<ArrayBuffer>
-   */
-  var encryptCek = function(key_promise, cek_promise) {
-    return Promise.all([key_promise, cek_promise]).then(function(all) {
-      var key = all[0];
-      var cek = all[1];
-      return cryptographer.wrapCek(cek, key);
-    });
-  };
+JoseJWE.Encrypter = function(cryptographer, key_promise) {
+  this.cryptographer = cryptographer;
+  this.key_promise = key_promise;
+  this.userHeaders = {};
+};
 
+/**
+ * Adds a key/value pair which will be included in the header.
+ *
+ * The data lives in plaintext (an attacker can read the header) but is tamper
+ * proof (an attacker cannot modify the header).
+ *
+ * Note: some headers have semantic implications. E.g. if you set the "zip"
+ * header, you are responsible for properly compressing plain_text before
+ * calling encrypt().
+ *
+ * @param k  String
+ * @param v  String
+ */
+JoseJWE.Encrypter.prototype.addHeader = function(k, v) {
+  this.userHeaders[k] = v;
+};
+
+/**
+ * Performs encryption.
+ *
+ * @param plain_text  String
+ * @return Promise<String>
+ */
+JoseJWE.Encrypter.prototype.encrypt = function(plain_text) {
   /**
    * Encrypts plain_text with CEK.
    *
@@ -756,19 +769,22 @@ JoseJWE.encrypt = function(cryptographer, key_promise, plain_text) {
    */
   var encryptPlainText = function(cek_promise, plain_text) {
     // Create header
-    var jwe_protected_header = Utils.Base64Url.encode(JSON.stringify({
-      "alg": cryptographer.getKeyEncryptionAlgorithm(),
-      "enc": cryptographer.getContentEncryptionAlgorithm()
-    }));
+    var headers = {};
+    for (var i in this.userHeaders) {
+      headers[i] = this.userHeaders[i];
+    }
+    headers.alg = this.cryptographer.getKeyEncryptionAlgorithm();
+    headers.enc = this.cryptographer.getContentEncryptionAlgorithm();
+    var jwe_protected_header = Utils.Base64Url.encode(JSON.stringify(headers));
 
     // Create the IV
-    var iv = cryptographer.createIV();
+    var iv = this.cryptographer.createIV();
 
     // Create the AAD
     var aad = Utils.arrayFromString(jwe_protected_header);
     plain_text = Utils.arrayFromString(plain_text);
 
-    return cryptographer.encrypt(iv, aad, cek_promise, plain_text).then(function(r) {
+    return this.cryptographer.encrypt(iv, aad, cek_promise, plain_text).then(function(r) {
       r.header = jwe_protected_header;
       r.iv = iv;
       return r;
@@ -776,13 +792,17 @@ JoseJWE.encrypt = function(cryptographer, key_promise, plain_text) {
   };
 
   // Create a CEK key
-  var cek_promise = cryptographer.createCek();
+  var cek_promise = this.cryptographer.createCek();
 
   // Key & Cek allows us to create the encrypted_cek
-  var encrypted_cek = encryptCek(key_promise, cek_promise);
+  var encrypted_cek = Promise.all([this.key_promise, cek_promise]).then(function(all) {
+      var key = all[0];
+      var cek = all[1];
+      return this.cryptographer.wrapCek(cek, key);
+    }.bind(this));
 
   // Cek allows us to encrypy the plain text
-  var enc_promise = encryptPlainText(cek_promise, plain_text);
+  var enc_promise = encryptPlainText.bind(this, cek_promise, plain_text)();
 
   // Once we have all the promises, we can base64 encode all the pieces.
   return Promise.all([encrypted_cek, enc_promise]).then(function(all) {
@@ -813,29 +833,29 @@ JoseJWE.encrypt = function(cryptographer, key_promise, plain_text) {
  */
 
 /**
- * Performs decryption
+ * Handles decryption.
  *
- * @param key_promise  Promise<CryptoKey>, either RSA private key or shared key
- * @param plain_text   string to decrypt
- * @return Promise<string>
+ * @param cryptographer  an instance of WebCryptographer (or equivalent). Keep
+ *                       in mind that decryption mutates the cryptographer.
+ * @param key_promise    Promise<CryptoKey>, either RSA or shared key
  */
-JoseJWE.decrypt = function(cryptographer, key_promise, cipher_text) {
-  /**
-   * Decrypts the encrypted CEK. If decryption fails, we create a random CEK.
-   *
-   * In some modes (e.g. RSA-PKCS1v1.5), you myst take precautions to prevent
-   * chosen-ciphertext attacks as described in RFC 3218, "Preventing
-   * the Million Message Attack on Cryptographic Message Syntax". We currently
-   * only support RSA-OAEP, so we don't generate a key if unwrapping fails.
-   *
-   * return Promise<CryptoKey>
-   */
-  var decryptCek = function(key_promise, encrypted_cek) {
-    return key_promise.then(function(key) {
-      return cryptographer.unwrapCek(encrypted_cek, key);
-    });
-  };
+JoseJWE.Decrypter = function(cryptographer, key_promise) {
+  this.cryptographer = cryptographer;
+  this.key_promise = key_promise;
+  this.headers = {};
+};
 
+JoseJWE.Decrypter.prototype.getHeaders = function() {
+  return this.headers;
+};
+
+/**
+ * Performs decryption.
+ *
+ * @param cipher_text  String
+ * @return Promise<String>
+ */
+JoseJWE.Decrypter.prototype.decrypt = function(cipher_text) {
   // Split cipher_text in 5 parts
   var parts = cipher_text.split(".");
   if (parts.length != 5) {
@@ -843,27 +863,33 @@ JoseJWE.decrypt = function(cryptographer, key_promise, cipher_text) {
   }
 
   // part 1: header
-  header = JSON.parse(Utils.Base64Url.decode(parts[0]));
-  if (!header.alg) {
+  this.headers = JSON.parse(Utils.Base64Url.decode(parts[0]));
+  if (!this.headers.alg) {
     return Promise.reject(Error("decrypt: missing alg"));
   }
-  cryptographer.setKeyEncryptionAlgorithm(header.alg);
-
-  if (!header.enc) {
+  if (!this.headers.enc) {
     return Promise.reject(Error("decrypt: missing enc"));
   }
-  cryptographer.setContentEncryptionAlgorithm(header.enc);
+  this.cryptographer.setKeyEncryptionAlgorithm(this.headers.alg);
+  this.cryptographer.setContentEncryptionAlgorithm(this.headers.enc);
 
-  if (header.crit) {
+  if (this.headers.crit) {
     // We don't support the crit header
     return Promise.reject(Error("decrypt: crit is not supported"));
   }
 
   // part 2: decrypt the CEK
-  var cek_promise = decryptCek(key_promise, Utils.Base64Url.decodeArray(parts[1]));
+  // In some modes (e.g. RSA-PKCS1v1.5), you must take precautions to prevent
+  // chosen-ciphertext attacks as described in RFC 3218, "Preventing
+  // the Million Message Attack on Cryptographic Message Syntax". We currently
+  // only support RSA-OAEP, so we don't generate a key if unwrapping fails.
+  var encrypted_cek = Utils.Base64Url.decodeArray(parts[1]);
+  var cek_promise = this.key_promise.then(function(key) {
+    return this.cryptographer.unwrapCek(encrypted_cek, key);
+  }.bind(this));
 
   // part 3: decrypt the cipher text
-  var plain_text_promise = cryptographer.decrypt(
+  var plain_text_promise = this.cryptographer.decrypt(
     cek_promise,
     Utils.arrayFromString(parts[0]),
     Utils.Base64Url.decodeArray(parts[2]),

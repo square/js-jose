@@ -37,10 +37,13 @@ var cryptographer = new JoseJWE.WebCryptographer();
 var public_rsa_key = JoseJWE.Utils.importRsaPublicKey(rsa_key);
 var private_rsa_key = JoseJWE.Utils.importRsaPrivateKey(rsa_key);
 
-JoseJWE.encrypt(cryptographer, public_rsa_key, plaintext.textContent).then(function(result) {
+var encrypter = new JoseJWE.Encrypter(cryptographer, public_rsa_key);
+
+encrypter.encrypt(plaintext.textContent).then(function(result) {
 	ciphertext.textContent = result;
 
-  JoseJWE.decrypt(cryptographer, private_rsa_key, result)
+  var decrypter = new JoseJWE.Decrypter(cryptographer, private_rsa_key);
+  decrypter.decrypt(result)
     .then(function(decrypted_plain_text) {
       if (decrypted_plain_text != plaintext.textContent) {
         error.textContent = "decryption failed!";

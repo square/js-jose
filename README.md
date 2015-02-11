@@ -7,14 +7,14 @@ JavaScript library to encrypt/decrypt data in JSON Web Encryption (JWE) format.
 This library is designed to work in the browser (tested in Chrome 38). It can
 do RSA-based public/private crypto as well as shared key.
 
-Extra headers aren't yet implemented. Some headers can be trivially supported
-('jku', jwk', kid', 'x5u', 'x5c', 'x5t', 'x5t#S256', 'typ', 'cty', 'crit') by
-exposing a setHeaders() function. The zip header might be more challenging.
-Interpreting the headers at decryption time can be hard, which is why I punted
-on them for now.
+JWE is an encapsulation format which makes it easy to share ciphertext between
+different platforms: data encrypted in a browser can be decrypted in Go, Java,
+etc.
 
 The library uses compact representation. There is therefore no support for
 multiple recipients. It should be easy to add that if needed.
+
+The library partially supports extra headers.
 
 The library uses the Web Crypto API, which is available in recent browsers
 (http://caniuse.com/#feat=cryptographyexists). As of Nov 2014, it seems ~50%
