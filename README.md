@@ -1,6 +1,8 @@
 Javascript library for Jose JWE
 ===============================
 
+[![build](https://img.shields.io/travis/square/js-jose.svg?style=flat)](https://travis-ci.org/square/js-jose)
+
 Overview
 --------
 JavaScript library to encrypt/decrypt data in JSON Web Encryption (JWE) format.
