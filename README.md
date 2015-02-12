@@ -1,7 +1,7 @@
 Javascript library for Jose JWE
 ===============================
 
-[![license](http://img.shields.io/badge/license-apache_2.0-red.svg?style=flat)](https://raw.githubusercontent.com/square/js-jose/master/LICENSE) [![build](https://img.shields.io/travis/square/js-jose.svg?style=flat)](https://travis-ci.org/square/js-jose)
+[![license](http://img.shields.io/badge/license-apache_2.0-red.svg?style=flat)](https://raw.githubusercontent.com/square/js-jose/master/LICENSE) [![build](https://img.shields.io/travis/square/js-jose.svg?style=flat)](https://travis-ci.org/square/js-jose) [![coverage](https://img.shields.io/coveralls/square/js-jose.svg?style=flat)](https://coveralls.io/r/square/js-jose)
 
 Overview
 --------

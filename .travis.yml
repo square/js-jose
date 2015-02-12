@@ -11,4 +11,6 @@ before_install:
 
 install: npm install
 
-script: grunt 
+script: grunt with_coverage
+
+after_success: grunt coveralls
