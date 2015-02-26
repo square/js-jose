@@ -313,6 +313,10 @@
     var encrypter2 = new JoseJWE.Encrypter(cryptographer2, shared_key);
     assert.wontEqual(encrypter2.encrypt(plain_text), "Error: invalid IV length", "fails to encrypt when we don't have the right IV length");
   });
+
+  test("caniuse", function(assert) {
+    assert.equal(JoseJWE.caniuse(), true);
+  });
   </script>
 </head>
 <body>
