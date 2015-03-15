@@ -19,7 +19,7 @@ multiple recipients. It should be easy to add that if needed.
 The library partially supports extra headers.
 
 The library uses the Web Crypto API, which is available in recent browsers
-(http://caniuse.com/#feat=cryptography). As of Nov 2014, it seems ~50%
+(http://caniuse.com/#feat=cryptography). As of March 2015, it seems ~68%
 of users have some form of Web Crypto support.
 
 This code has been tested in Chrome 38 and is compatible with the [Golang
