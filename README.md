@@ -62,6 +62,9 @@ Example signature
 
 Algorithms exposed by this library
 ----------------------------------
+Signatures:
+
+* RSA-256 (default)
 
 Key Encryption:
 
