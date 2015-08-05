@@ -1,20 +1,21 @@
-Javascript library for Jose JWE
-===============================
+Javascript library for Jose JWE and JWS
+=======================================
 
 [![license](http://img.shields.io/badge/license-apache_2.0-red.svg?style=flat)](https://raw.githubusercontent.com/square/js-jose/master/LICENSE) [![build](https://img.shields.io/travis/square/js-jose.svg?style=flat)](https://travis-ci.org/square/js-jose) [![coverage](https://img.shields.io/coveralls/square/js-jose.svg?style=flat)](https://coveralls.io/r/square/js-jose)
 
 Overview
 --------
-JavaScript library to encrypt/decrypt data in JSON Web Encryption (JWE) format.
-This library is designed to work in the browser (tested in Chrome 38). It can
-do RSA-based public/private crypto as well as shared key.
+JavaScript library to sign/verify and encrypt/decrypt data in JSON Web Signatures
+and Web Encryption (JWE) formats. This library is designed to work in the browser
+(tested in Chrome 38). It can do RSA-based public/private crypto as well 
+as shared key encryption.
 
-JWE is an encapsulation format which makes it easy to share ciphertext between
-different platforms: data encrypted in a browser can be decrypted in Go, Java,
-etc.
+Both JWE and JWS are encapsulation formats which makes it easy to share signatures 
+and ciphertext between different platforms: data signed or encrypted in a browser
+can be verified or decrypted in Go, Java, etc.
 
 The library uses compact representation. There is therefore no support for
-multiple recipients. It should be easy to add that if needed.
+multiple recipients in JWE messages. It should be easy to add that if needed.
 
 The library partially supports extra headers.
 
@@ -56,6 +57,8 @@ Example encryption
     	console.error(err);
     });
 
+Example signature
+-----------------
 
 Algorithms exposed by this library
 ----------------------------------
