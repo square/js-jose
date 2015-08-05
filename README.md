@@ -127,5 +127,6 @@ Random other interesting resources
 * asn1, pem, x509 and more: http://kjur.github.io/jsrsasign/ and
   https://github.com/michaelrhanson/jwt-js/tree/master/lib/kurushima-jsrsa
 * Stanford Javascript Crypto library: https://github.com/bitwiseshiftleft/sjcl
-* https://github.com/GlobalSign/ASN1.js
+* PKIjs - https://github.com/GlobalSign/PKI.js
+* ASN1js - https://github.com/GlobalSign/ASN1.js
 * https://gist.github.com/jo/8619441
