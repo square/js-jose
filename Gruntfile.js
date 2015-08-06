@@ -14,7 +14,7 @@ module.exports = function(grunt) {
           footer: "}());\n"
         },
         src: [
-          'lib/jose-jwe-core.js',
+          'lib/jose-core.js',
           'lib/jose-jwe-webcryptographer.js',
           'lib/jose-jwe-utils.js',
           'lib/jose-jwe-encrypt.js',
