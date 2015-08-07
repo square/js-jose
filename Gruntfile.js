@@ -10,8 +10,8 @@ module.exports = function(grunt) {
     concat: {
       dist: {
         options: {
-          banner: "(function(){\n",
-          footer: "}());\n"
+          banner: '(function(exports, crypto, undefined){\n"use strict";\n',
+          footer: "}(window, window.crypto));\n"
         },
         src: [
           'lib/jose-core.js',
