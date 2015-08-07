@@ -135,22 +135,24 @@ exports.JoseJWS = JoseJWS;
  * different underlying crypto APIs. I'm however unclear if we'll run into code
  * duplication or callback vs Promise based API issues.
  */
-Jose.WebCryptographer = function() {
+var WebCryptographer = function() {
   var that = this;
   that.setKeyEncryptionAlgorithm("RSA-OAEP");
   that.setContentEncryptionAlgorithm("A256GCM");
   that.setContentSignAlgorithm("RS256");
 };
 
+Jose.WebCryptographer = WebCryptographer;
+
 /**
  * Overrides the default key encryption algorithm
  * @param alg  string
  */
-Jose.WebCryptographer.prototype.setKeyEncryptionAlgorithm = function(alg) {
+WebCryptographer.prototype.setKeyEncryptionAlgorithm = function(alg) {
   this.key_encryption = getCryptoConfig(alg);
 };
 
-Jose.WebCryptographer.prototype.getKeyEncryptionAlgorithm = function() {
+WebCryptographer.prototype.getKeyEncryptionAlgorithm = function() {
   return this.key_encryption.jwe_name;
 };
 
@@ -158,11 +160,11 @@ Jose.WebCryptographer.prototype.getKeyEncryptionAlgorithm = function() {
  * Overrides the default content encryption algorithm
  * @param alg  string
  */
-Jose.WebCryptographer.prototype.setContentEncryptionAlgorithm = function(alg) {
+WebCryptographer.prototype.setContentEncryptionAlgorithm = function(alg) {
   this.content_encryption = getCryptoConfig(alg);
 };
 
-Jose.WebCryptographer.prototype.getContentEncryptionAlgorithm = function() {
+WebCryptographer.prototype.getContentEncryptionAlgorithm = function() {
   return this.content_encryption.jwe_name;
 };
 
@@ -170,11 +172,11 @@ Jose.WebCryptographer.prototype.getContentEncryptionAlgorithm = function() {
  * Overrides the default content sign algorithm
  * @param alg  string
  */
-Jose.WebCryptographer.prototype.setContentSignAlgorithm = function(alg) {
+WebCryptographer.prototype.setContentSignAlgorithm = function(alg) {
   this.content_sign = getSignConfig(alg);
 };
 
-Jose.WebCryptographer.prototype.getContentSignAlgorithm = function() {
+WebCryptographer.prototype.getContentSignAlgorithm = function() {
   return this.content_sign.jwa_name;
 };
 
@@ -184,7 +186,7 @@ Jose.WebCryptographer.prototype.getContentSignAlgorithm = function() {
  *
  * @return Uint8Array with random bytes
  */
-Jose.WebCryptographer.prototype.createIV = function() {
+WebCryptographer.prototype.createIV = function() {
   var iv = new Uint8Array(new Array(this.content_encryption.iv_bytes));
   return crypto.getRandomValues(iv);
 };
@@ -195,16 +197,16 @@ Jose.WebCryptographer.prototype.createIV = function() {
  *
  * @return Promise<CryptoKey>
  */
-Jose.WebCryptographer.prototype.createCek = function() {
+WebCryptographer.prototype.createCek = function() {
   var hack = getCekWorkaround(this.content_encryption);
   return crypto.subtle.generateKey(hack.id, true, hack.enc_op);
 };
 
-Jose.WebCryptographer.prototype.wrapCek = function(cek, key) {
+WebCryptographer.prototype.wrapCek = function(cek, key) {
   return crypto.subtle.wrapKey("raw", cek, key, this.key_encryption.id);
 };
 
-Jose.WebCryptographer.prototype.unwrapCek = function(cek, key) {
+WebCryptographer.prototype.unwrapCek = function(cek, key) {
   var that = this;
   var hack = getCekWorkaround(that.content_encryption);
   var extractable = (that.content_encryption.specific_cek_bytes > 0);
@@ -249,7 +251,7 @@ var getCekWorkaround = function(alg) {
  * @param plain_text  Uint8Array
  * @return Promise<json>
  */
-Jose.WebCryptographer.prototype.encrypt = function(iv, aad, cek_promise, plain_text) {
+WebCryptographer.prototype.encrypt = function(iv, aad, cek_promise, plain_text) {
   var config = this.content_encryption;
   if (iv.length != config.iv_bytes) {
     return Promise.reject(Error("invalid IV length"));
@@ -318,7 +320,7 @@ Jose.WebCryptographer.prototype.encrypt = function(iv, aad, cek_promise, plain_t
  * @param tag to be verified
  * @return Promise<string>
  */
-Jose.WebCryptographer.prototype.decrypt = function(cek_promise, aad, iv, cipher_text, tag) {
+WebCryptographer.prototype.decrypt = function(cek_promise, aad, iv, cipher_text, tag) {
   /**
    * Compares two Uint8Arrays in constant time.
    *
@@ -402,7 +404,7 @@ Jose.WebCryptographer.prototype.decrypt = function(cek_promise, aad, iv, cipher_
  * @param payload     String or json
  * @return Promise<ArrayBuffer>
  */
-Jose.WebCryptographer.prototype.sign = function(aad, payload, key_promise) {
+WebCryptographer.prototype.sign = function(aad, payload, key_promise) {
   var config = this.content_sign;
 
   if (aad.alg) {
@@ -426,7 +428,7 @@ Jose.WebCryptographer.prototype.sign = function(aad, payload, key_promise) {
  * @param key_promise Promise<CryptoKey>
  * @return Promise<json>
  */
-Jose.WebCryptographer.prototype.verify = function(aad, payload, signature, key_promise) {
+WebCryptographer.prototype.verify = function(aad, payload, signature, key_promise) {
   var config = this.content_sign;
 
   return key_promise.then(function(key) {
@@ -1021,10 +1023,11 @@ Utils.Base64Url.decodeArray = function(str) {
  * @param cryptographer  an instance of WebCryptographer (or equivalent).
  * @param key_promise    Promise<CryptoKey>, either RSA or shared key
  */
-JoseJWE.Encrypter = function(cryptographer, key_promise) {
-  this.cryptographer = cryptographer;
-  this.key_promise = key_promise;
-  this.userHeaders = {};
+JoseJWE.Encrypter = function (cryptographer, key_promise) {
+  var that = this;
+  that.cryptographer = cryptographer;
+  that.key_promise = key_promise;
+  that.userHeaders = {};
 };
 
 /**
@@ -1040,7 +1043,7 @@ JoseJWE.Encrypter = function(cryptographer, key_promise) {
  * @param k  String
  * @param v  String
  */
-JoseJWE.Encrypter.prototype.addHeader = function(k, v) {
+JoseJWE.Encrypter.prototype.addHeader = function (k, v) {
   this.userHeaders[k] = v;
 };
 
@@ -1050,7 +1053,8 @@ JoseJWE.Encrypter.prototype.addHeader = function(k, v) {
  * @param plain_text  String
  * @return Promise<String>
  */
-JoseJWE.Encrypter.prototype.encrypt = function(plain_text) {
+JoseJWE.Encrypter.prototype.encrypt = function (plain_text) {
+  var that = this;
   /**
    * Encrypts plain_text with CEK.
    *
@@ -1058,24 +1062,25 @@ JoseJWE.Encrypter.prototype.encrypt = function(plain_text) {
    * @param plain_text   string
    * @return Promise<json>
    */
-  var encryptPlainText = function(cek_promise, plain_text) {
+  var encryptPlainText = function (cek_promise, plain_text) {
+    var self = this;
     // Create header
     var headers = {};
-    for (var i in this.userHeaders) {
+    for(var i in this.userHeaders) {
       headers[i] = this.userHeaders[i];
     }
-    headers.alg = this.cryptographer.getKeyEncryptionAlgorithm();
-    headers.enc = this.cryptographer.getContentEncryptionAlgorithm();
+    headers.alg = self.cryptographer.getKeyEncryptionAlgorithm();
+    headers.enc = self.cryptographer.getContentEncryptionAlgorithm();
     var jwe_protected_header = Utils.Base64Url.encode(JSON.stringify(headers));
 
     // Create the IV
-    var iv = this.cryptographer.createIV();
+    var iv = self.cryptographer.createIV();
 
     // Create the AAD
     var aad = Utils.arrayFromString(jwe_protected_header);
     plain_text = Utils.arrayFromString(plain_text);
 
-    return this.cryptographer.encrypt(iv, aad, cek_promise, plain_text).then(function(r) {
+    return self.cryptographer.encrypt(iv, aad, cek_promise, plain_text).then(function (r) {
       r.header = jwe_protected_header;
       r.iv = iv;
       return r;
@@ -1083,20 +1088,20 @@ JoseJWE.Encrypter.prototype.encrypt = function(plain_text) {
   };
 
   // Create a CEK key
-  var cek_promise = this.cryptographer.createCek();
+  var cek_promise = that.cryptographer.createCek();
 
   // Key & Cek allows us to create the encrypted_cek
-  var encrypted_cek = Promise.all([this.key_promise, cek_promise]).then(function(all) {
-      var key = all[0];
-      var cek = all[1];
-      return this.cryptographer.wrapCek(cek, key);
-    }.bind(this));
+  var encrypted_cek = Promise.all([that.key_promise, cek_promise]).then(function (all) {
+    var key = all[0];
+    var cek = all[1];
+    return this.cryptographer.wrapCek(cek, key);
+  }.bind(this));
 
   // Cek allows us to encrypy the plain text
-  var enc_promise = encryptPlainText.bind(this, cek_promise, plain_text)();
+  var enc_promise = encryptPlainText.bind(that, cek_promise, plain_text)();
 
   // Once we have all the promises, we can base64 encode all the pieces.
-  return Promise.all([encrypted_cek, enc_promise]).then(function(all) {
+  return Promise.all([encrypted_cek, enc_promise]).then(function (all) {
     var encrypted_cek = all[0];
     var data = all[1];
     return data.header + "." +
@@ -1131,9 +1136,10 @@ JoseJWE.Encrypter.prototype.encrypt = function(plain_text) {
  * @param key_promise    Promise<CryptoKey>, either RSA or shared key
  */
 JoseJWE.Decrypter = function(cryptographer, key_promise) {
-  this.cryptographer = cryptographer;
-  this.key_promise = key_promise;
-  this.headers = {};
+  var that = this;
+  that.cryptographer = cryptographer;
+  that.key_promise = key_promise;
+  that.headers = {};
 };
 
 JoseJWE.Decrypter.prototype.getHeaders = function() {
@@ -1147,6 +1153,7 @@ JoseJWE.Decrypter.prototype.getHeaders = function() {
  * @return Promise<String>
  */
 JoseJWE.Decrypter.prototype.decrypt = function(cipher_text) {
+  var that = this;
   // Split cipher_text in 5 parts
   var parts = cipher_text.split(".");
   if (parts.length != 5) {
@@ -1154,17 +1161,17 @@ JoseJWE.Decrypter.prototype.decrypt = function(cipher_text) {
   }
 
   // part 1: header
-  this.headers = JSON.parse(Utils.Base64Url.decode(parts[0]));
-  if (!this.headers.alg) {
+  that.headers = JSON.parse(Utils.Base64Url.decode(parts[0]));
+  if (!that.headers.alg) {
     return Promise.reject(Error("decrypt: missing alg"));
   }
-  if (!this.headers.enc) {
+  if (!that.headers.enc) {
     return Promise.reject(Error("decrypt: missing enc"));
   }
-  this.cryptographer.setKeyEncryptionAlgorithm(this.headers.alg);
-  this.cryptographer.setContentEncryptionAlgorithm(this.headers.enc);
+  that.cryptographer.setKeyEncryptionAlgorithm(this.headers.alg);
+  that.cryptographer.setContentEncryptionAlgorithm(this.headers.enc);
 
-  if (this.headers.crit) {
+  if (that.headers.crit) {
     // We don't support the crit header
     return Promise.reject(Error("decrypt: crit is not supported"));
   }
@@ -1175,12 +1182,12 @@ JoseJWE.Decrypter.prototype.decrypt = function(cipher_text) {
   // the Million Message Attack on Cryptographic Message Syntax". We currently
   // only support RSA-OAEP, so we don't generate a key if unwrapping fails.
   var encrypted_cek = Utils.Base64Url.decodeArray(parts[1]);
-  var cek_promise = this.key_promise.then(function(key) {
+  var cek_promise = that.key_promise.then(function(key) {
     return this.cryptographer.unwrapCek(encrypted_cek, key);
-  }.bind(this));
+  }.bind(that));
 
   // part 3: decrypt the cipher text
-  var plain_text_promise = this.cryptographer.decrypt(
+  var plain_text_promise = that.cryptographer.decrypt(
     cek_promise,
     Utils.arrayFromString(parts[0]),
     Utils.Base64Url.decodeArray(parts[2]),
@@ -1410,4 +1417,9 @@ JoseJWS.Verifier.prototype.verify = function () {
   var that = this;
 
   return that.cryptographer.verify(that.aad, that.payload, that.signature, that.key_promise);
-};}(window, window.crypto, window.Promise, window.Error, window.Uint8Array));
+};
+// this file exists for backward compatibility only
+
+JoseJWE.Utils = Jose.Utils;
+JoseJWE.WebCryptographer = Jose.WebCryptographer;
+}(window, window.crypto, window.Promise, window.Error, window.Uint8Array));
