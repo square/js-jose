@@ -1,7 +1,7 @@
 {
   "name": "jose-jwe",
   "version": "0.0.3",
-  "description": "Library to encrypt and decrypt data in JSON Web Encryption (JWE) format.",
+  "description": "Library to encrypt and decrypt data in JSON Web Encryption (JWE) format and to sign data in JSON Web Signature (JWS).",
   "keywords": ["crypto"],
   "license": "Apache-2.0",
   "repository": {
