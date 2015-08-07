@@ -20,7 +20,8 @@ module.exports = function(grunt) {
           'lib/jose-jwe-encrypt.js',
           'lib/jose-jwe-decrypt.js',
           'lib/jose-jws-sign.js',
-          'lib/jose-jws-verify.js'
+          'lib/jose-jws-verify.js',
+          'lib/jose-backward-compatibility.js'
         ],
         dest: 'dist/jose-jwe.js'
       }
