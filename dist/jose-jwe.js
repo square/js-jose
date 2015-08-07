@@ -16,11 +16,7 @@
  * limitations under the License.
  */
 
-<<<<<<< HEAD
-Jose = {};
-=======
 var Jose = {};
->>>>>>> 49895cb3712e078a86f6af98f822ac380cc57856
 
 /**
  * Javascript Object Signing and Encryption library.
@@ -36,11 +32,7 @@ var JoseJWE = {};
 /**
  * Initializes a JoseJWS object.
  */
-<<<<<<< HEAD
-JoseJWS = {};
-=======
 var JoseJWS = {};
->>>>>>> 49895cb3712e078a86f6af98f822ac380cc57856
 
 /**
  * Checks if we have all the required APIs.
@@ -144,16 +136,10 @@ exports.JoseJWS = JoseJWS;
  * duplication or callback vs Promise based API issues.
  */
 Jose.WebCryptographer = function() {
-<<<<<<< HEAD
-  this.setKeyEncryptionAlgorithm("RSA-OAEP");
-  this.setContentEncryptionAlgorithm("A256GCM");
-  this.setContentSignAlgorithm("RS256");
-=======
   var that = this;
   that.setKeyEncryptionAlgorithm("RSA-OAEP");
   that.setContentEncryptionAlgorithm("A256GCM");
   that.setContentSignAlgorithm("RS256");
->>>>>>> 49895cb3712e078a86f6af98f822ac380cc57856
 };
 
 /**
@@ -219,16 +205,10 @@ Jose.WebCryptographer.prototype.wrapCek = function(cek, key) {
 };
 
 Jose.WebCryptographer.prototype.unwrapCek = function(cek, key) {
-<<<<<<< HEAD
-  var hack = getCekWorkaround(this.content_encryption);
-  var extractable = (this.content_encryption.specific_cek_bytes > 0);
-  var key_encryption = this.key_encryption.id;
-=======
   var that = this;
   var hack = getCekWorkaround(that.content_encryption);
   var extractable = (that.content_encryption.specific_cek_bytes > 0);
   var key_encryption = that.key_encryption.id;
->>>>>>> 49895cb3712e078a86f6af98f822ac380cc57856
 
   return crypto.subtle.unwrapKey("raw", cek, key, key_encryption, hack.id, extractable, hack.dec_op);
 };
@@ -407,11 +387,7 @@ Jose.WebCryptographer.prototype.decrypt = function(cek_promise, aad, iv, cipher_
           iv: iv
         };
         return crypto.subtle.decrypt(dec, enc_key, cipher_text);
-<<<<<<< HEAD
-      }).catch(function (err) {
-=======
       }).catch(function () {
->>>>>>> 49895cb3712e078a86f6af98f822ac380cc57856
         return Promise.reject(Error("decryptCiphertext: MAC failed."));
       });
     });
@@ -717,21 +693,13 @@ var Utils = {};
  * @param rsa_key  public RSA key in json format. Parameters can be base64
  *                 encoded, strings or number (for 'e').
  * @param alg      String, name of the algorithm
-<<<<<<< HEAD
- * @param usage    String having either "wrapKey" or "sign" as a value. Default: wrapKey
-=======
->>>>>>> 49895cb3712e078a86f6af98f822ac380cc57856
  * @return Promise<CryptoKey>
  */
 Jose.Utils.importRsaPublicKey = function(rsa_key, alg) {
   var jwk,
     config = null,
-<<<<<<< HEAD
-    rk;
-=======
     rk,
     usage;
->>>>>>> 49895cb3712e078a86f6af98f822ac380cc57856
 
   alg = alg || rsa_key.alg || "RSA-OAEP";
 
@@ -768,10 +736,6 @@ Jose.Utils.importRsaPublicKey = function(rsa_key, alg) {
  * @param rsa_key  private RSA key in json format. Parameters can be base64
  *                 encoded, strings or number (for 'e').
  * @param alg      String, name of the algorithm
-<<<<<<< HEAD
- * @param usage    string having either "unwrapKey" or "sign" as a value. Default: unwrapKey
-=======
->>>>>>> 49895cb3712e078a86f6af98f822ac380cc57856
  * @return Promise<CryptoKey>
  */
 Jose.Utils.importRsaPrivateKey = function(rsa_key, alg) {
@@ -900,13 +864,9 @@ Utils.convertRsaKey = function(rsa_key, parameters) {
  */
 Utils.arrayFromString = function(str) {
   Jose.assert(Utils.isString(str), "arrayFromString: invalid input");
-<<<<<<< HEAD
-  var arr = str.split('').map(function(c){return c.charCodeAt(0);});
-=======
   var arr = str.split('').map(function(c) {
     return c.charCodeAt(0);
   });
->>>>>>> 49895cb3712e078a86f6af98f822ac380cc57856
   return new Uint8Array(arr);
 };
 
@@ -956,11 +916,7 @@ Utils.stripLeadingZeros = function(arr) {
  */
 Utils.arrayFromInt32 = function(i) {
   Jose.assert(typeof(i) == "number", "arrayFromInt32: invalid input");
-<<<<<<< HEAD
-  Jose.assert(i == i|0, "arrayFromInt32: out of range");
-=======
   Jose.assert(i == i | 0, "arrayFromInt32: out of range");
->>>>>>> 49895cb3712e078a86f6af98f822ac380cc57856
 
   var buf = new Uint8Array(new Uint32Array([i]).buffer);
   var r = new Uint8Array(4);
@@ -1321,18 +1277,11 @@ JoseJWS.Signer.prototype.sign = function(payload, aad, header) {
  * @constructor
  */
 var JWS = function(protectedHeader, header, payload, signature) {
-<<<<<<< HEAD
-  this.header = header;
-  this.payload = Utils.Base64Url.encodeArray(payload);
-  this.signature = Utils.Base64Url.encodeArray(signature);
-  this.protected = Utils.Base64Url.encode(JSON.stringify(protectedHeader));
-=======
   var that = this;
   that.header = header;
   that.payload = Utils.Base64Url.encodeArray(payload);
   that.signature = Utils.Base64Url.encodeArray(signature);
   that.protected = Utils.Base64Url.encode(JSON.stringify(protectedHeader));
->>>>>>> 49895cb3712e078a86f6af98f822ac380cc57856
 };
 
 /**
@@ -1350,12 +1299,8 @@ JWS.prototype.JsonSerialize = function() {
  * @returns {string} BASE64URL(UTF8(PROTECTED HEADER)).BASE64URL(PAYLOAD).BASE64URL(SIGNATURE)
  */
 JWS.prototype.CompactSerialize = function() {
-<<<<<<< HEAD
-  return this.protected + '.' + this.payload + '.' + this.signature;
-=======
   var that = this;
   return that.protected + '.' + that.payload + '.' + that.signature;
->>>>>>> 49895cb3712e078a86f6af98f822ac380cc57856
 };
 
 /*-
@@ -1386,10 +1331,7 @@ JWS.prototype.CompactSerialize = function() {
  * @author Patrizio Bruno <patrizio@desertconsulting.net>
  */
 JoseJWS.Verifier = function (cryptographer, message, rsa_key) {
-<<<<<<< HEAD
-=======
   "use strict";
->>>>>>> 49895cb3712e078a86f6af98f822ac380cc57856
 
   var that = this,
     alg,
@@ -1427,15 +1369,9 @@ JoseJWS.Verifier = function (cryptographer, message, rsa_key) {
   header = message.header;
   payload = message.payload;
   signature = message.signature;
-<<<<<<< HEAD
 
   that.signature = Utils.arrayFromString(Utils.Base64Url.decode(signature));
 
-=======
-
-  that.signature = Utils.arrayFromString(Utils.Base64Url.decode(signature));
-
->>>>>>> 49895cb3712e078a86f6af98f822ac380cc57856
   that.aad = aad;
   protectedHeader = Utils.Base64Url.decode(aad);
   try {
@@ -1461,11 +1397,7 @@ JoseJWS.Verifier = function (cryptographer, message, rsa_key) {
 
   that.payload = payload;
 
-<<<<<<< HEAD
-  that.key_promise = JoseJWE.Utils.importRsaPublicKey(rsa_key, alg, "verify");
-=======
   that.key_promise = Jose.Utils.importRsaPublicKey(rsa_key, alg, "verify");
->>>>>>> 49895cb3712e078a86f6af98f822ac380cc57856
 };
 
 /**
@@ -1474,15 +1406,8 @@ JoseJWS.Verifier = function (cryptographer, message, rsa_key) {
  * @returns Promise<bool>
  */
 JoseJWS.Verifier.prototype.verify = function () {
-<<<<<<< HEAD
-  var that = this;
-
-  return that.cryptographer.verify(that.aad, that.payload, that.signature, that.key_promise);
-};}());
-=======
   "use strict";
   var that = this;
 
   return that.cryptographer.verify(that.aad, that.payload, that.signature, that.key_promise);
 };}(window, window.crypto, window.Promise, window.Error, window.Uint8Array));
->>>>>>> 49895cb3712e078a86f6af98f822ac380cc57856
