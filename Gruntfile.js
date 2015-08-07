@@ -10,8 +10,8 @@ module.exports = function(grunt) {
     concat: {
       dist: {
         options: {
-          banner: "(function(){\n",
-          footer: "}());\n"
+          banner: '(function(exports, crypto, Promise, Error, Uint8Array, undefined){\n"use strict";\n',
+          footer: "}(window, window.crypto, window.Promise, window.Error, window.Uint8Array));\n"
         },
         src: [
           'lib/jose-core.js',
@@ -20,7 +20,8 @@ module.exports = function(grunt) {
           'lib/jose-jwe-encrypt.js',
           'lib/jose-jwe-decrypt.js',
           'lib/jose-jws-sign.js',
-          'lib/jose-jws-verify.js'
+          'lib/jose-jws-verify.js',
+          'lib/jose-backward-compatibility.js'
         ],
         dest: 'dist/jose-jwe.js'
       }

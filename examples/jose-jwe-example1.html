@@ -34,8 +34,8 @@ var rsa_key = {
 
 var cryptographer = new Jose.WebCryptographer();
 
-var public_rsa_key = JoseJWE.Utils.importRsaPublicKey(rsa_key);
-var private_rsa_key = JoseJWE.Utils.importRsaPrivateKey(rsa_key);
+var public_rsa_key = Jose.Utils.importRsaPublicKey(rsa_key);
+var private_rsa_key = Jose.Utils.importRsaPrivateKey(rsa_key);
 
 var encrypter = new JoseJWE.Encrypter(cryptographer, public_rsa_key);
 

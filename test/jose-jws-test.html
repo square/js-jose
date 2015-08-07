@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Jose JWS Test</title>
+
+    <script src="qunit-promises.js"></script>
+    <script src="../dist/jose-jwe.js"></script>
+    <script>
+        test("signature using RSASSA-PKCS1-v1_5 with SHA-256 (keys from appendix-A.2.1)", function(assert) {
+            var cryptographer = new Jose.WebCryptographer();
+            var signer = new JoseJWS.Signer(cryptographer, rsa_key);
+        });
+    </script>
+</head>
+<body>
+<div id="qunit"></div>
+</body>
+</html>
