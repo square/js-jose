@@ -1,4 +1,5 @@
-(function(){
+(function(exports, crypto, Promise, Error, Uint8Array, undefined){
+"use strict";
 /*-
  * Copyright 2014 Square Inc.
  *
@@ -15,7 +16,7 @@
  * limitations under the License.
  */
 
-Jose = {};
+var Jose = {};
 
 /**
  * Javascript Object Signing and Encryption library.
@@ -26,12 +27,12 @@ Jose = {};
 /**
  * Initializes a JoseJWE object.
  */
-JoseJWE = {};
+var JoseJWE = {};
 
 /**
  * Initializes a JoseJWS object.
  */
-JoseJWS = {};
+var JoseJWS = {};
 
 /**
  * Checks if we have all the required APIs.
@@ -109,6 +110,9 @@ Jose.assert = function(expr, msg) {
   }
 };
 
+exports.Jose = Jose;
+exports.JoseJWE = JoseJWE;
+exports.JoseJWS = JoseJWS;
 /*-
  * Copyright 2014 Square Inc.
  *
@@ -132,9 +136,10 @@ Jose.assert = function(expr, msg) {
  * duplication or callback vs Promise based API issues.
  */
 Jose.WebCryptographer = function() {
-  this.setKeyEncryptionAlgorithm("RSA-OAEP");
-  this.setContentEncryptionAlgorithm("A256GCM");
-  this.setContentSignAlgorithm("RS256");
+  var that = this;
+  that.setKeyEncryptionAlgorithm("RSA-OAEP");
+  that.setContentEncryptionAlgorithm("A256GCM");
+  that.setContentSignAlgorithm("RS256");
 };
 
 /**
@@ -181,8 +186,7 @@ Jose.WebCryptographer.prototype.getContentSignAlgorithm = function() {
  */
 Jose.WebCryptographer.prototype.createIV = function() {
   var iv = new Uint8Array(new Array(this.content_encryption.iv_bytes));
-  var r = crypto.getRandomValues(iv);
-  return r;
+  return crypto.getRandomValues(iv);
 };
 
 /**
@@ -201,9 +205,10 @@ Jose.WebCryptographer.prototype.wrapCek = function(cek, key) {
 };
 
 Jose.WebCryptographer.prototype.unwrapCek = function(cek, key) {
-  var hack = getCekWorkaround(this.content_encryption);
-  var extractable = (this.content_encryption.specific_cek_bytes > 0);
-  var key_encryption = this.key_encryption.id;
+  var that = this;
+  var hack = getCekWorkaround(that.content_encryption);
+  var extractable = (that.content_encryption.specific_cek_bytes > 0);
+  var key_encryption = that.key_encryption.id;
 
   return crypto.subtle.unwrapKey("raw", cek, key, key_encryption, hack.id, extractable, hack.dec_op);
 };
@@ -675,7 +680,7 @@ var getKeyUsageByAlg = function(alg){
  * limitations under the License.
  */
 
-JoseJWE.Utils = {};
+Jose.Utils = {};
 var Utils = {};
 
 /**
@@ -690,13 +695,13 @@ var Utils = {};
  * @param alg      String, name of the algorithm
  * @return Promise<CryptoKey>
  */
-JoseJWE.Utils.importRsaPublicKey = function(rsa_key, alg) {
+Jose.Utils.importRsaPublicKey = function(rsa_key, alg) {
   var jwk,
     config = null,
     rk,
     usage;
 
-  alg = alg || "RSA-OAEP";
+  alg = alg || rsa_key.alg || "RSA-OAEP";
 
   usage = getKeyUsageByAlg(alg);
 
@@ -710,10 +715,11 @@ JoseJWE.Utils.importRsaPublicKey = function(rsa_key, alg) {
         rk[name] = rsa_key[name];
       }
     }
-    config = getSignConfig(alg);
+
     if (!rk.alg && alg) {
       rk.alg = alg;
     }
+    config = getSignConfig(rk.alg);
     jwk = Utils.convertRsaKey(rk, ["n", "e"]);
     jwk.ext = true;
   }
@@ -732,13 +738,13 @@ JoseJWE.Utils.importRsaPublicKey = function(rsa_key, alg) {
  * @param alg      String, name of the algorithm
  * @return Promise<CryptoKey>
  */
-JoseJWE.Utils.importRsaPrivateKey = function(rsa_key, alg) {
+Jose.Utils.importRsaPrivateKey = function(rsa_key, alg) {
   var jwk,
     config,
     rk,
     usage;
 
-  alg = alg || "RSA-OAEP";
+  alg = alg || rsa_key.alg || "RSA-OAEP";
 
   usage = getKeyUsageByAlg(alg);
 
@@ -873,7 +879,7 @@ Utils.arrayFromString = function(str) {
 Utils.stringFromArray = function(arr) {
   Jose.assert(arr instanceof ArrayBuffer, "stringFromArray: invalid input");
   arr = new Uint8Array(arr);
-  r = '';
+  var r = '';
   for (var i = 0; i < arr.length; i++) {
     r += String.fromCharCode(arr[i]);
   }
@@ -970,7 +976,7 @@ Utils.Base64Url.encode = function(str) {
 Utils.Base64Url.encodeArray = function(arr) {
   arr = Utils.arrayish(arr);
   var r = "";
-  for (i = 0; i < arr.length; i++) {
+  for (var i = 0; i < arr.length; i++) {
     r += String.fromCharCode(arr[i]);
   }
   return Utils.Base64Url.encode(r);
@@ -1213,7 +1219,7 @@ JoseJWE.Decrypter.prototype.decrypt = function(cipher_text) {
 JoseJWS.Signer = function(cryptographer, rsa_key) {
   "use strict";
   this.cryptographer = cryptographer;
-  this.key_promise = JoseJWE.Utils.importRsaPrivateKey(rsa_key, cryptographer.getContentSignAlgorithm(), "sign");
+  this.key_promise = Jose.Utils.importRsaPrivateKey(rsa_key, cryptographer.getContentSignAlgorithm(), "sign");
 
   this.headers = {};
 };
@@ -1271,10 +1277,11 @@ JoseJWS.Signer.prototype.sign = function(payload, aad, header) {
  * @constructor
  */
 var JWS = function(protectedHeader, header, payload, signature) {
-  this.header = header;
-  this.payload = Utils.Base64Url.encodeArray(payload);
-  this.signature = Utils.Base64Url.encodeArray(signature);
-  this.protected = Utils.Base64Url.encode(JSON.stringify(protectedHeader));
+  var that = this;
+  that.header = header;
+  that.payload = Utils.Base64Url.encodeArray(payload);
+  that.signature = Utils.Base64Url.encodeArray(signature);
+  that.protected = Utils.Base64Url.encode(JSON.stringify(protectedHeader));
 };
 
 /**
@@ -1292,7 +1299,8 @@ JWS.prototype.JsonSerialize = function() {
  * @returns {string} BASE64URL(UTF8(PROTECTED HEADER)).BASE64URL(PAYLOAD).BASE64URL(SIGNATURE)
  */
 JWS.prototype.CompactSerialize = function() {
-  return this.protected + '.' + this.payload + '.' + this.signature;
+  var that = this;
+  return that.protected + '.' + that.payload + '.' + that.signature;
 };
 
 /*-
@@ -1389,7 +1397,7 @@ JoseJWS.Verifier = function (cryptographer, message, rsa_key) {
 
   that.payload = payload;
 
-  that.key_promise = JoseJWE.Utils.importRsaPublicKey(rsa_key, alg, "verify");
+  that.key_promise = Jose.Utils.importRsaPublicKey(rsa_key, alg, "verify");
 };
 
 /**
@@ -1402,4 +1410,4 @@ JoseJWS.Verifier.prototype.verify = function () {
   var that = this;
 
   return that.cryptographer.verify(that.aad, that.payload, that.signature, that.key_promise);
-};}());
+};}(window, window.crypto, window.Promise, window.Error, window.Uint8Array));
