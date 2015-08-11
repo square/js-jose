@@ -45,7 +45,7 @@
         signtext.textContent = JSON.stringify(message, null, 4);
         var verifier = new JoseJWS.Verifier(cryptographer, message, rsa_key);
         verifier.verify().then(function(verified) {
-            signtext.textContent += '\n\nverified: ' + verified;
+            signtext.textContent += '\n\nverified: ' + JSON.stringify(verified, null, 4);
         }).catch(function(err) {
             error.textContent = "verification failed: " + err;
         });
