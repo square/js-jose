@@ -337,7 +337,7 @@ Jose.WebCryptographer.prototype.decrypt = function(cek_promise, aad, iv, cipher_
         if (hash1.length != hash2.length) {
           throw new Error("compare failed");
         }
-        for (var i=0; i<hash1.length; i++) {
+        for (var i = 0; i < hash1.length; i++) {
           if (hash1[i] != hash2[i]) {
             throw new Error("compare failed");
           }
@@ -387,7 +387,7 @@ Jose.WebCryptographer.prototype.decrypt = function(cek_promise, aad, iv, cipher_
           iv: iv
         };
         return crypto.subtle.decrypt(dec, enc_key, cipher_text);
-      }).catch(function () {
+      }).catch(function() {
         return Promise.reject(Error("decryptCiphertext: MAC failed."));
       });
     });
@@ -432,6 +432,10 @@ Jose.WebCryptographer.prototype.verify = function(aad, payload, signature, key_p
   return key_promise.then(function(key) {
     return crypto.subtle.verify(config.id, key, signature, Utils.arrayFromString(aad + "." + payload));
   });
+};
+
+Jose.WebCryptographer.keyId = function(rsa_key) {
+  return Utils.crc32(rsa_key.n + "+" + rsa_key.d);
 };
 
 /**
@@ -634,9 +638,9 @@ var getSignConfig = function(alg) {
  * @param alg String algorithm name
  * @returns {*}
  */
-var getKeyUsageByAlg = function(alg){
+var getKeyUsageByAlg = function(alg) {
   "use strict";
-  switch (alg){
+  switch (alg) {
     // signature
     case "RS256":
     case "RS384":
@@ -999,6 +1003,42 @@ Utils.Base64Url.decodeArray = function(str) {
   return Utils.arrayFromString(Utils.Base64Url.decode(str));
 };
 
+Utils.crc32 = (function()
+{
+  var table = new Uint32Array(256);
+
+  // Pre-generate crc32 polynomial lookup table
+  // http://wiki.osdev.org/CRC32#Building_the_Lookup_Table
+  // ... Actually use Alex's because it generates the correct bit order
+  //     so no need for the reversal function
+  for(var i=256; i--;)
+  {
+    var tmp = i;
+
+    for(var k=8; k--;)
+    {
+      tmp = tmp & 1 ? 3988292384 ^ tmp >>> 1 : tmp >>> 1;
+    }
+
+    table[i] = tmp;
+  }
+
+  // crc32b
+  // Example input        : [97, 98, 99, 100, 101] (Uint8Array)
+  // Example output       : 2240272485 (Uint32)
+  return function( data )
+  {
+    var crc = -1; // Begin with all bits set ( 0xffffffff )
+
+    for(var i=0, l=data.length; i<l; i++)
+    {
+      crc = crc >>> 8 ^ table[ crc & 255 ^ data[i] ];
+    }
+
+    return (crc ^ -1) >>> 0; // Apply binary NOT
+  };
+
+})();
 /*-
  * Copyright 2014 Square Inc.
  *
@@ -1219,6 +1259,7 @@ JoseJWE.Decrypter.prototype.decrypt = function(cipher_text) {
 JoseJWS.Signer = function(cryptographer, rsa_key) {
   "use strict";
   this.cryptographer = cryptographer;
+  this.rsa_key = rsa_key;
   this.key_promise = Jose.Utils.importRsaPrivateKey(rsa_key, cryptographer.getContentSignAlgorithm(), "sign");
 
   this.headers = {};
@@ -1240,6 +1281,9 @@ JoseJWS.Signer.prototype.getHeaders = function() {
 JoseJWS.Signer.prototype.sign = function(payload, aad, header) {
   "use strict";
 
+  var that = this,
+    kid = Jose.WebCryptographer.keyId(that.rsa_key);
+
   if (!aad) {
     aad = {};
   }
@@ -1247,6 +1291,14 @@ JoseJWS.Signer.prototype.sign = function(payload, aad, header) {
   if (!aad.alg) {
     aad.alg = cryptographer.getContentSignAlgorithm();
     aad.typ = "JWT";
+  }
+
+  if(!aad.kid) {
+    aad.kid = kid;
+  }
+
+  if(!header.kid) {
+    header.kid = kid;
   }
 
   if (Utils.isString(payload)) {
@@ -1281,6 +1333,7 @@ var JWS = function(protectedHeader, header, payload, signature) {
   that.header = header;
   that.payload = Utils.Base64Url.encodeArray(payload);
   that.signature = Utils.Base64Url.encodeArray(signature);
+  that.signatures = [{kid: header.kid, signature: that.signature}];
   that.protected = Utils.Base64Url.encode(JSON.stringify(protectedHeader));
 };
 
@@ -1326,11 +1379,12 @@ JWS.prototype.CompactSerialize = function() {
  *                       in mind that decryption mutates the cryptographer.
  * @param message        a JWS message
  * @param rsa_key        public RSA key in json format. Parameters can be base64
- *                       encoded, strings or number (for 'e').
+ *                       encoded, strings or number (for 'e'). OPTIONAL
+ * @param key_id         a string identifying the rsa_key. OPTIONAL
  *
  * @author Patrizio Bruno <patrizio@desertconsulting.net>
  */
-JoseJWS.Verifier = function (cryptographer, message, rsa_key) {
+JoseJWS.Verifier = function(cryptographer, message, rsa_key, key_id) {
   "use strict";
 
   var that = this,
@@ -1339,7 +1393,7 @@ JoseJWS.Verifier = function (cryptographer, message, rsa_key) {
     aad,
     header,
     payload,
-    signature,
+    signatures,
     protectedHeader,
     jwtRx = /^([a-z_\\-])\\.([a-z_\\-])\\.([a-z_\\-])$/i;
 
@@ -1368,9 +1422,7 @@ JoseJWS.Verifier = function (cryptographer, message, rsa_key) {
   aad = message.protected;
   header = message.header;
   payload = message.payload;
-  signature = message.signature;
-
-  that.signature = Utils.arrayFromString(Utils.Base64Url.decode(signature));
+  signatures = message.signatures || [];
 
   that.aad = aad;
   protectedHeader = Utils.Base64Url.decode(aad);
@@ -1395,9 +1447,52 @@ JoseJWS.Verifier = function (cryptographer, message, rsa_key) {
     throw new Error("typ '" + protectedHeader.typ + "' not supported");
   }
 
+  if (message.signature) {
+    signatures.unshift({kid: protectedHeader.kid, signature: message.signature});
+  }
+
+  that.signatures = {};
+  for (var i = 0; i < signatures.length; i++) {
+    that.signatures[signatures[i].kid] = Utils.arrayFromString(Utils.Base64Url.decode(signatures[i].signature));
+  }
+
   that.payload = payload;
 
-  that.key_promise = Jose.Utils.importRsaPublicKey(rsa_key, alg, "verify");
+  if (rsa_key) {
+    if (!key_id) {
+      key_id = Jose.WebCryptographer.keyId(rsa_key);
+    } else {
+      console.warn("it's not safe to not pass a key_id");
+    }
+
+    that.key_promises = {};
+    that.key_promises[key_id] = Jose.Utils.importRsaPublicKey(rsa_key, alg, "verify");
+  }
+};
+
+/**
+ * Add supported recipients to verify multiple signatures
+ *
+ * @param rsa_key        public RSA key in json format. Parameters can be base64
+ *                       encoded, strings or number (for 'e').
+ * @param key_id         a string identifying the rsa_key. OPTIONAL
+ */
+JoseJWS.Verifier.prototype.addRecipient = function(rsa_key, key_id) {
+
+  var that = this,
+    promise = Jose.Utils.importRsaPublicKey(rsa_key, alg, "verify");
+
+  if (!key_id) {
+    key_id = Jose.WebCryptographer.keyId(rsa_key);
+  } else {
+    console.warn("it's not safe to not pass a key_id");
+  }
+
+  if (!(that.recipients instanceof Object)) {
+    that.key_promises = {};
+  }
+
+  that.key_promises[key_id] = promise;
 };
 
 /**
@@ -1405,9 +1500,27 @@ JoseJWS.Verifier = function (cryptographer, message, rsa_key) {
  *
  * @returns Promise<bool>
  */
-JoseJWS.Verifier.prototype.verify = function () {
+JoseJWS.Verifier.prototype.verify = function() {
   "use strict";
-  var that = this;
+  var that = this,
+    promises = [];
 
-  return that.cryptographer.verify(that.aad, that.payload, that.signature, that.key_promise);
-};}(window, window.crypto, window.Promise, window.Error, window.Uint8Array));
+  if (that.key_promises instanceof  Object) {
+    for (var kid in that.key_promises) {
+      var k_id;
+      if(that.key_promises.hasOwnProperty(kid)) {
+        promises.push(that.cryptographer.verify(that.aad, that.payload, that.signatures[kid], that.key_promises[kid], kid).then(function(res) {
+          return {kid: k_id, verified: res};
+        }));
+      }
+    }
+    return Promise.all(promises);
+  } else {
+    throw new Error("at least a recipient is needed to verify the JWS signature")
+  }
+};
+// this file exists for backward compatibility only
+
+JoseJWE.Utils = Jose.Utils;
+JoseJWE.WebCryptographer = Jose.WebCryptographer;
+}(window, window.crypto, window.Promise, window.Error, window.Uint8Array));
