@@ -20,7 +20,7 @@ multiple recipients in JWE messages. It should be easy to add that if needed.
 The library partially supports extra headers.
 
 The library uses the Web Crypto API, which is available in recent browsers
-(http://caniuse.com/#feat=cryptography). As of March 2015, it seems ~68%
+(http://caniuse.com/#feat=cryptography). As of August 2015, it seems +70%
 of users have some form of Web Crypto support.
 
 This code has been tested in Chrome 38 and is compatible with the [Golang
