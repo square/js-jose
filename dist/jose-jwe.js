@@ -438,7 +438,7 @@ WebCryptographer.prototype.verify = function(aad, payload, signature, key_promis
 };
 
 Jose.WebCryptographer.keyId = function(rsa_key) {
-  return Utils.sha256(rsa_key.n.replace(':', '') + "+" + rsa_key.d);
+  return Utils.sha256(rsa_key.n + "+" + rsa_key.d);
 };
 
 /**
@@ -1228,8 +1228,6 @@ JoseJWE.Decrypter.prototype.decrypt = function(cipher_text) {
  *
  * @param cryptographer  an instance of WebCryptographer (or equivalent). Keep
  *                       in mind that decryption mutates the cryptographer.
- * @param rsa_key        private RSA key in json format. Parameters can be base64
- *                       encoded, strings or number (for 'e').
  *
  * @author Patrizio Bruno <patrizio@desertconsulting.net>
  */
@@ -1248,18 +1246,25 @@ JoseJWS.Signer = function(cryptographer) {
 /**
  * Adds a signer to JoseJWS instance. It'll be the on of the signers of the resulting JWS.
  *
- * @param rsa_key        private RSA key in json format. Parameters can be base64
- *                       encoded, strings or number (for 'e').
+ * @param rsa_key        private RSA key in json format, Parameters can be base64
+ *                       encoded, strings or number (for 'e'). Or CryptoKey
+ * @param key_id         a string identifying the rsa_key. OPTIONAL
+ * @param aad            Object protected header
+ * @param header         Object unprotected header
  */
 JoseJWS.Signer.prototype.addSigner = function(rsa_key, key_id, aad, header) {
   var that = this,
-    key_promise = Jose.Utils.importRsaPrivateKey(rsa_key, cryptographer.getContentSignAlgorithm(), "sign"),
+    key_promise = rsa_key instanceof CryptoKey ? new Promise(function(resolve) {
+      resolve(rsa_key);
+    }) : Jose.Utils.importRsaPrivateKey(rsa_key, cryptographer.getContentSignAlgorithm(), "sign"),
     kid_promise;
 
   if (key_id) {
-    kid_promise = new Promise(function(resolve, reject) {
+    kid_promise = new Promise(function(resolve) {
       resolve(key_id);
     });
+  } else if (rsa_key instanceof CryptoKey) {
+    throw new Error("key_id is a mandatory argument when the key is a CryptoKey");
   } else {
     kid_promise = Jose.WebCryptographer.keyId(rsa_key);
   }
@@ -1273,11 +1278,6 @@ JoseJWS.Signer.prototype.addSigner = function(rsa_key, key_id, aad, header) {
     if (header) that.signer_headers[kid] = header;
     return kid;
   });
-};
-
-JoseJWS.Signer.prototype.getHeaders = function() {
-  "use strict";
-  return this.headers;
 };
 
 /**
@@ -1317,13 +1317,8 @@ JoseJWS.Signer.prototype.sign = function(payload, aad, header) {
   "use strict";
 
   var that = this,
-    check,
+    check = Object.keys(that.key_promises).length > 0,
     kids = [];
-
-  for (var ck in that.key_promises) {
-    check = true;
-    break;
-  }
 
   if (!check) {
     throw new Error("No signers defined. At least one is required to sign the JWS.");
@@ -1384,8 +1379,8 @@ JoseJWS.Signer.prototype.sign = function(payload, aad, header) {
   function doSign(pl, ph, uh, kps, kids) {
     if (kids.length) {
       var k_id = kids.shift();
-      var rv = sign(pl, ph || that.signer_aads[k_id], uh || that.signer_headers[k_id], kps[k_id], k_id);
-      if(kids.length) {
+      var rv = sign(pl, that.signer_aads[k_id] || ph, that.signer_headers[k_id] || uh, kps[k_id], k_id);
+      if (kids.length) {
         rv = rv.then(function(jws) {
           return doSign(jws, null, null, kps, kids);
         });
@@ -1395,7 +1390,9 @@ JoseJWS.Signer.prototype.sign = function(payload, aad, header) {
   }
 
   for (var kid in that.key_promises) {
-    kids.push(kid);
+    if(that.key_promises.hasOwnProperty(kid)) {
+      kids.push(kid);
+    }
   }
   return doSign(payload, aad, header, that.key_promises, kids);
 };
@@ -1512,7 +1509,12 @@ JoseJWS.Verifier = function(cryptographer, message) {
   aad = message.protected;
   header = message.header;
   payload = message.payload;
-  signatures = message.signatures || [];
+  signatures = message.signatures instanceof Array ? message.signatures.slice(0) : [];
+
+  signatures.forEach(function(sign) {
+    sign.aad = sign.protected;
+    sign.protected = JSON.parse(Utils.Base64Url.decode(sign.protected));
+  });
 
   that.aad = aad;
   protectedHeader = Utils.Base64Url.decode(aad);
@@ -1538,12 +1540,18 @@ JoseJWS.Verifier = function(cryptographer, message) {
   }
 
   if (message.signature) {
-    signatures.unshift({kid: protectedHeader.kid, signature: message.signature});
+    signatures.unshift({
+      aad: aad,
+      protected: protectedHeader,
+      header: header,
+      signature: message.signature
+    });
   }
 
   that.signatures = {};
   for (var i = 0; i < signatures.length; i++) {
-    that.signatures[signatures[i].kid] = Utils.arrayFromString(Utils.Base64Url.decode(signatures[i].signature));
+    that.signatures[signatures[i].protected.kid] = JSON.parse(JSON.stringify(signatures[i]));
+    that.signatures[signatures[i].protected.kid].signature = Utils.arrayFromString(Utils.Base64Url.decode(signatures[i].signature));
   }
 
   that.payload = payload;
@@ -1557,20 +1565,24 @@ JoseJWS.Verifier = function(cryptographer, message) {
  *
  * @param rsa_key        public RSA key in json format. Parameters can be base64
  *                       encoded, strings or number (for 'e').
- * @param alg            String signature algorithm
  * @param key_id         a string identifying the rsa_key. OPTIONAL
+ * @param alg            String signature algorithm. OPTIONAL
  * @returns Promise<string> a Promise of a key id
  */
-JoseJWS.Verifier.prototype.addRecipient = function(rsa_key, alg, key_id) {
+JoseJWS.Verifier.prototype.addRecipient = function(rsa_key, key_id, alg) {
 
   var that = this,
     kid_promise,
-    key_promise = Jose.Utils.importRsaPublicKey(rsa_key, alg || that.cryptographer.getContentSignAlgorithm(), "verify");
+    key_promise = rsa_key instanceof CryptoKey ? new Promise(function(resolve) {
+      resolve(rsa_key);
+    }) : Jose.Utils.importRsaPublicKey(rsa_key, alg || that.cryptographer.getContentSignAlgorithm(), "verify");
 
   if (key_id) {
-    kid_promise = new Promise(function(resolve, reject) {
+    kid_promise = new Promise(function(resolve) {
       resolve(key_id);
     });
+  } else if (rsa_key instanceof CryptoKey) {
+    throw new Error("key_id is a mandatory argument when the key is a CryptoKey");
   } else {
     console.warn("it's not safe to not pass a key_id");
     kid_promise = Jose.WebCryptographer.keyId(rsa_key);
@@ -1594,12 +1606,7 @@ JoseJWS.Verifier.prototype.verify = function() {
   "use strict";
   var that = this,
     promises = [],
-    check;
-
-  for (var ck in that.key_promises) {
-    check = true;
-    break;
-  }
+    check = Object.keys(that.key_promises).length > 0;
 
   if (!check) {
     throw new Error("No recipients defined. At least one is required to verify the JWS.");
@@ -1611,13 +1618,16 @@ JoseJWS.Verifier.prototype.verify = function() {
 
   for (var kid in that.key_promises) {
     if (that.key_promises.hasOwnProperty(kid)) {
-      promises.push(that.cryptographer.verify(that.aad, that.payload, that.signatures[kid], that.key_promises[kid], kid));
+      promises.push(that.cryptographer.verify(that.signatures[kid].aad, that.payload, that.signatures[kid].signature, that.key_promises[kid], kid));
     }
   }
   return Promise.all(promises);
 };
 // this file exists for backward compatibility only
 
+console.warn("JoseJWE.Utils namespace is obsolete and it'll be removed in future releases");
 JoseJWE.Utils = Jose.Utils;
+
+console.warn("JoseJWE.WebCryptographer namespace is obsolete and it'll be removed in future releases");
 JoseJWE.WebCryptographer = Jose.WebCryptographer;
 }(window, window.crypto, window.Promise, window.Error, window.Uint8Array));
