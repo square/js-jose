@@ -49,7 +49,7 @@ module.exports = function(grunt) {
           files: [
             {pattern: 'dist/jose-jwe.js', watching: false, included: false},
             {pattern: 'test/qunit-promises.js', watching: false, included: false},
-            'test/jose-jwe-test.html'
+            'test/jose-jws-test.html'
           ],
           autoWatch: true,
           browsers: ['Chrome'],
@@ -69,7 +69,7 @@ module.exports = function(grunt) {
           files: [
             {pattern: 'dist/jose-jwe.js', watching: false, included: false},
             {pattern: 'test/qunit-promises.js', watching: false, included: false},
-            'test/jose-jwe-test.html'
+            'test/jose-jws-test.html'
           ],
           autoWatch: true,
           browsers: ['Chrome'],
