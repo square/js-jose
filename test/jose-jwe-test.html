@@ -9,14 +9,14 @@
 
   <script>
   test("encryption using RSAES OAEP and AES GCM (keys & IV from appendix-A.1)", function(assert) {
-    var cryptographer = new JoseJWE.WebCryptographer();
+    var cryptographer = new Jose.WebCryptographer();
     cryptographer.createIV = function() {
       return new Uint8Array([227, 197, 117, 252, 2, 219, 233, 68, 180, 225, 77, 219]);
-    }
+    };
     cryptographer.createCek = function() {
       var cek = new Uint8Array([177, 161, 244, 128, 84, 143, 225, 115, 63, 180, 3, 255, 107, 154, 212, 246, 138, 7, 110, 91, 112, 46, 34, 105, 47, 130, 203, 46, 122, 234, 64, 252]);
       return crypto.subtle.importKey("raw", cek, {name: "AES-GCM"}, true, ["encrypt"]);
-    }
+    };
     var rsa_key =
       {
         "kty": "RSA",
@@ -49,7 +49,7 @@
                "AlWAyLWybqq6t16VFd7hQd0y6flUK4SlOydB61gwanOsXGOAOv82cHq0E3"+
                "eL4HrtZkUuKvnPrMnsUUFlfUdybVzxyjz9JF_XyaY14ardLSjf4L_FNY"
       };
-    var public_rsa_key = JoseJWE.Utils.importRsaPublicKey(rsa_key);
+    var public_rsa_key = Jose.Utils.importRsaPublicKey(rsa_key);
     var plain_text = "The true sign of intelligence is not knowledge but imagination.";
     var encrypter = new JoseJWE.Encrypter(cryptographer, public_rsa_key);
     var cipher_text_promise = encrypter.encrypt(plain_text);
@@ -73,7 +73,7 @@
       "XFBoMYUZodetZdvTiFvSkQ",
       "got expected tag");
 
-    var private_rsa_key = JoseJWE.Utils.importRsaPrivateKey(rsa_key);
+    var private_rsa_key = Jose.Utils.importRsaPrivateKey(rsa_key);
     var decrypter = new JoseJWE.Decrypter(cryptographer, private_rsa_key);
     var decrypted_plain_text_promise = cipher_text_promise.then(function(cipher_text){
       return decrypter.decrypt(cipher_text);
@@ -82,7 +82,7 @@
 
     // Modify string and check for invalid tag
     var mac_failure = cipher_text_promise.then(function(cipher_text) {
-      var cipher_text = cipher_text.split('.');
+      cipher_text = cipher_text.split('.');
       cipher_text.pop();
       cipher_text.push("WFBoMYUZodetZdvTiFvSkQ");
       return decrypter.decrypt(cipher_text.join('.'));
@@ -92,17 +92,17 @@
 
   // We can't test appendix-A.2 because Chrome dropped support for RSAES-PKCS1-V1_5.
   test("encryption using AES Key Wrap and AES_128_CBC_HMAC_SHA_256 (keys & IV from appendix-A.3)", function(assert) {
-    var cryptographer = new JoseJWE.WebCryptographer();
+    var cryptographer = new Jose.WebCryptographer();
     cryptographer.setKeyEncryptionAlgorithm("A128KW");
     cryptographer.setContentEncryptionAlgorithm("A128CBC-HS256");
 
     cryptographer.createIV = function() {
       return new Uint8Array([3, 22, 60, 12, 43, 67, 104, 105, 108, 108, 105, 99, 111, 116, 104, 101]);
-    }
+    };
     cryptographer.createCek = function() {
       var cek = new Uint8Array([4, 211, 31, 197, 84, 157, 252, 254, 11, 100, 157, 250, 63, 170, 106, 206, 107, 124, 212, 45, 111, 107, 9, 219, 200, 177, 0, 240, 143, 156, 44, 207]);
       return crypto.subtle.importKey("raw", cek, {name: "AES-GCM"}, true, ["encrypt"]);
-    }
+    };
     var shared_key = {"kty":"oct", "k":"GawgguFyGrWKav7AX4VKUg"};
     shared_key = crypto.subtle.importKey("jwk", shared_key, {name: "AES-KW"}, true, ["wrapKey", "unwrapKey"]);
 
@@ -141,7 +141,7 @@
 
     // Modify string and check for invalid tag
     var mac_failure = cipher_text_promise.then(function(cipher_text) {
-      var cipher_text = cipher_text.split('.');
+      cipher_text = cipher_text.split('.');
       cipher_text.pop();
       cipher_text.push("WEm_YmjN04DJvceFICbCVQ");
       return decrypter.decrypt(cipher_text.join('.'));
@@ -150,7 +150,7 @@
   });
 
   test("key import", function(assert) {
-    var cryptographer = new JoseJWE.WebCryptographer();
+    var cryptographer = new Jose.WebCryptographer();
     cryptographer.setContentEncryptionAlgorithm("A128CBC-HS256");
 
     // Key was generated with: `openssl genrsa 1024 | openssl rsa -text`
@@ -162,15 +162,15 @@
       "q": "00:dc:8a:57:d7:1a:ba:2d:e9:07:39:bf:64:ef:b2:f2:91:20:6c:32:4b:0d:15:2e:78:ab:a5:99:c5:4f:25:40:cc:8a:9c:d4:f5:3d:ab:a7:e1:e6:d4:97:90:66:bc:fb:45:af:c6:84:1d:1c:56:f6:18:7a:b2:81:27:e3:fa:38:85",
       "dp": "00:9b:4b:2e:61:4f:aa:d1:98:bd:8f:61:a0:13:6c:b2:fd:0f:ee:34:c0:b2:83:e2:aa:e2:1e:68:c6:76:c5:a5:19:a3:a8:07:36:0c:20:70:f5:d0:05:9b:de:f5:75:76:e1:16:59:22:52:f4:2e:c7:95:96:63:92:5d:82:af:c8:e1",
       "dq": "74:1d:fb:05:ec:b2:9e:3d:95:6a:58:55:82:c7:4b:64:12:18:25:9a:d2:76:96:93:3e:7c:e0:ab:bc:72:36:dd:fb:15:7c:22:eb:a7:97:ab:1f:68:4b:ac:e2:0b:1a:99:a4:64:f7:66:84:67:5d:07:a2:82:9d:f2:2c:dc:b0:29",
-      "qi": "0c:c8:32:20:2e:df:d7:85:0f:e6:50:ec:ba:1b:6f:60:dd:18:79:3f:d4:ac:d8:6c:bf:05:d7:68:11:3f:2e:1b:26:d5:63:9d:c7:02:0f:e0:c2:70:49:c9:d1:7b:68:66:da:17:36:f5:f2:6b:4e:06:bd:db:29:04:c6:34:7a:e0",
+      "qi": "0c:c8:32:20:2e:df:d7:85:0f:e6:50:ec:ba:1b:6f:60:dd:18:79:3f:d4:ac:d8:6c:bf:05:d7:68:11:3f:2e:1b:26:d5:63:9d:c7:02:0f:e0:c2:70:49:c9:d1:7b:68:66:da:17:36:f5:f2:6b:4e:06:bd:db:29:04:c6:34:7a:e0"
     };
 
-    var public_rsa_key = JoseJWE.Utils.importRsaPublicKey(rsa_key);
-    var plain_text = "Look deep into nature, and then you will understand everything better. --Albert Einstein"
+    var public_rsa_key = Jose.Utils.importRsaPublicKey(rsa_key);
+    var plain_text = "Look deep into nature, and then you will understand everything better. --Albert Einstein";
     var encrypter = new JoseJWE.Encrypter(cryptographer, public_rsa_key);
     var cipher_text_promise = encrypter.encrypt(plain_text);
 
-    var private_rsa_key = JoseJWE.Utils.importRsaPrivateKey(rsa_key);
+    var private_rsa_key = Jose.Utils.importRsaPrivateKey(rsa_key);
     var decrypted_plain_text_promise = cipher_text_promise.then(function(cipher_text){
       var decrypter = new JoseJWE.Decrypter(cryptographer, private_rsa_key);
       return decrypter.decrypt(cipher_text);
@@ -179,7 +179,7 @@
   });
 
   test("extra headers", function(assert) {
-    var cryptographer = new JoseJWE.WebCryptographer();
+    var cryptographer = new Jose.WebCryptographer();
     cryptographer.setKeyEncryptionAlgorithm("A128KW");
     var shared_key = {"kty":"oct", "k":"GawgguFyGrWKav7AX4VKUg"};
     shared_key = crypto.subtle.importKey("jwk", shared_key, cryptographer.key_encryption.id, true, ["wrapKey", "unwrapKey"]);
@@ -197,7 +197,7 @@
   });
 
   test("RSA-OAEP-256 with A256CBC-HS512", function(assert) {
-    var cryptographer = new JoseJWE.WebCryptographer();
+    var cryptographer = new Jose.WebCryptographer();
     cryptographer.setKeyEncryptionAlgorithm("RSA-OAEP-256");
     cryptographer.setContentEncryptionAlgorithm("A256CBC-HS512");
     var key_promise = crypto.subtle.generateKey({
@@ -218,7 +218,7 @@
   });
 
   test("A256KW with A128GCM", function(assert) {
-    var cryptographer = new JoseJWE.WebCryptographer();
+    var cryptographer = new Jose.WebCryptographer();
     cryptographer.setKeyEncryptionAlgorithm("A256KW");
     cryptographer.setContentEncryptionAlgorithm("A128GCM");
 
@@ -237,7 +237,7 @@
   });
 
   test("setting invalid algorithm", function(assert) {
-    var cryptographer = new JoseJWE.WebCryptographer();
+    var cryptographer = new Jose.WebCryptographer();
     assert.throws(function(){cryptographer.setKeyEncryptionAlgorithm("blah")}, "got exception when setting invalid algorithm");
   });
 
@@ -245,24 +245,24 @@
     var rsa_key = {
       "e": 65537
     };
-    assert.throws(function(){JoseJWE.Utils.importRsaPublicKey(rsa_key)}, "got exception when importing invalid key");
+    assert.throws(function(){Jose.Utils.importRsaPublicKey(rsa_key)}, "got exception when importing invalid key");
 
     rsa_key = {
       "alg": "foo",
       "e": 65537,
       "n": "bf:53:bf:5b:19:bc:80"
     };
-    assert.throws(function(){JoseJWE.Utils.importRsaPublicKey(rsa_key)}, "got exception when importing invalid key");
+    assert.throws(function(){Jose.Utils.importRsaPublicKey(rsa_key)}, "got exception when importing invalid key");
 
     rsa_key = {
       "e": 65537,
-      "n": [],
+      "n": []
     };
-    assert.throws(function(){JoseJWE.Utils.importRsaPublicKey(rsa_key)}, "got exception when importing invalid key");
+    assert.throws(function(){Jose.Utils.importRsaPublicKey(rsa_key)}, "got exception when importing invalid key");
   });
 
   test("various decryption failures", function(assert) {
-    var cryptographer = new JoseJWE.WebCryptographer();
+    var cryptographer = new Jose.WebCryptographer();
     cryptographer.setKeyEncryptionAlgorithm("A128KW");
 
     var shared_key = {"kty":"oct", "k":"GawgguFyGrWKav7AX4VKUg"};
@@ -307,7 +307,7 @@
     });
     assert.wontEqual(decrypt_invalid_iv_promise, "Error: decryptCiphertext: invalid IV", "invalid IV did not cause failure");
 
-    var cryptographer2 = new JoseJWE.WebCryptographer();
+    var cryptographer2 = new Jose.WebCryptographer();
     cryptographer2.setKeyEncryptionAlgorithm("A128KW");
     cryptographer2.createIV = function() { return new Uint8Array(new Array(11)); };
     var encrypter2 = new JoseJWE.Encrypter(cryptographer2, shared_key);
@@ -315,7 +315,7 @@
   });
 
   test("caniuse", function(assert) {
-    assert.equal(JoseJWE.caniuse(), true);
+    assert.equal(Jose.caniuse(), true);
   });
   </script>
 </head>

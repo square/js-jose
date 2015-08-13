@@ -32,10 +32,10 @@ var rsa_key = {
   "qi": "0a:ed:5f:30:67:d5:e5:6e:4a:7a:35:49:fe:16:2f:1e:91:2b:39:c3:01:d3:d4:c0:4d:b3:fc:08:b0:66:e9:44:10:9e:5b:5a:ea:83:a5:9c:95:7a:58:70:35:28:e5:4d:ba:19:de:0d:66:f9:db:5c:f6:5b:24:27:9d:0b:2d:44:40:eb:33:3a:19:e2:1d:c0:b0:16:99:d1:c1:52:84:02:d6:67:06:32:f8:4d:cb:42:9f:7c:8a:e0:ad:df:40:6f:e4:8c:f6:f6:9e:1d:bd:43:e3:38:91:a2:d0:9e:60:ff:9d:8c:fb:72:5b:df:95:30:17:d2:f2:cb:7d:92:56:0a"
 };
 
-var cryptographer = new JoseJWE.WebCryptographer();
+var cryptographer = new Jose.WebCryptographer();
 
-var public_rsa_key = JoseJWE.Utils.importRsaPublicKey(rsa_key);
-var private_rsa_key = JoseJWE.Utils.importRsaPrivateKey(rsa_key);
+var public_rsa_key = Jose.Utils.importRsaPublicKey(rsa_key);
+var private_rsa_key = Jose.Utils.importRsaPrivateKey(rsa_key);
 
 var encrypter = new JoseJWE.Encrypter(cryptographer, public_rsa_key);
 
