@@ -90,21 +90,21 @@ Example signature
     var cryptographer = new Jose.WebCryptographer();
     cryptographer.setContentSignAlgorithm("RS256");
 
-    var signer = new JoseJWS.Signer(cryptographer, rsa_key);
-
-    signer.sign(plaintext.textContent, null, {}).then(function(message) {
-
-        console.log(message);
-        var verifier = new JoseJWS.Verifier(cryptographer, message, rsa_key);
-        verifier.verify().then(function(verified) {
-            console.log(verified: ' + verified);
+    var signer = new JoseJWS.Signer(cryptographer);
+    signer.addSigner(rsa_key).then(function() {
+        signer.sign(plaintext.textContent, null, {}).then(function(message) {
+    
+            console.log(message);
+            var verifier = new JoseJWS.Verifier(cryptographer, message, rsa_key);
+            verifier.verify().then(function(verified) {
+                console.log(verified: ' + verified);
+            }).catch(function(err) {
+                console.error(err);
+            });
         }).catch(function(err) {
             console.error(err);
         });
-    }).catch(function(err) {
-        console.error(err);
     });
-
 
 Algorithms exposed by this library
 ----------------------------------
