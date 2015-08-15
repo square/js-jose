@@ -51,25 +51,25 @@
 
     var signer = new JoseJWS.Signer(cryptographer);
 
-    var signers =[];
+    var signers = [];
     signers.push(signer.addSigner(rsa_key));
-    signers.push(signer.addSigner(rsa_key2));
-    Promise.all(signers).then(function() {
+    signers.push(signer.addSigner(rsa_key2, null, {alg: 'RS384'}));
+    Promise.all(signers).then(function () {
 
-        signer.sign(plaintext.textContent, null, {}).then(function(message) {
+        signer.sign(plaintext.textContent, null, {}).then(function (message) {
 
             signtext.textContent = JSON.stringify(message, null, 4);
             var verifier = new JoseJWS.Verifier(cryptographer, message);
-            verifier.addRecipient(rsa_key).then(function() {
-                verifier.addRecipient(rsa_key2, null, "RS384").then(function() {
-                    verifier.verify().then(function(verified) {
+            verifier.addRecipient(rsa_key).then(function () {
+                verifier.addRecipient(rsa_key2, null, "RS384").then(function () {
+                    verifier.verify().then(function (verified) {
                         signtext.textContent += '\n\nverified: ' + JSON.stringify(verified, null, 4);
-                    }).catch(function(err) {
+                    }).catch(function (err) {
                         error.textContent = "verification failed: " + err;
                     });
                 });
             });
-        }).catch(function(err) {
+        }).catch(function (err) {
             error.textContent = "sign failed: " + err;
         });
     });
