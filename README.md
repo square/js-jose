@@ -95,11 +95,13 @@ Example signature
         signer.sign(plaintext.textContent, null, {}).then(function(message) {
     
             console.log(message);
-            var verifier = new JoseJWS.Verifier(cryptographer, message, rsa_key);
-            verifier.verify().then(function(verified) {
-                console.log(verified: ' + verified);
-            }).catch(function(err) {
-                console.error(err);
+            var verifier = new JoseJWS.Verifier(cryptographer, message);
+            verifier.addRecipient(rsa_key).then(function() {
+                verifier.verify().then(function(verified) {
+                    console.log(verified: ' + verified);
+                }).catch(function(err) {
+                    console.error(err);
+                });
             });
         }).catch(function(err) {
             console.error(err);
