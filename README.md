@@ -133,9 +133,9 @@ Content signature:
 * RS256 (default)
 * RS384
 * RS512
-* PS256
-* PS384
-* PS512
+* PS256 (Windows only)
+* PS384 (Windows only)
+* PS512 (Windows only)
 
 Algorithms not exposed (and reason why)
 ---------------------------------------
@@ -151,6 +151,7 @@ Algorithms not exposed (and reason why)
 * ECDH-ES+A192KW (Chrome and IE currently don't support it)
 * ECDH-ES+A256KW (Chrome and IE currently don't support it)
 * ECDSA (could be added once Chrome supports these)
+* RSA-PSS on Linux, OSX and iOS (Chrome supports it only on Windows)
 * HS256, HS384, HS512 (message authentication support could be added in future releases, at the moment only RSA signatures are supported)
 
 
