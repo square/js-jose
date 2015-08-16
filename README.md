@@ -128,6 +128,14 @@ Content Encryption:
 * A128CBC-HS256
 * A256CBC-HS512
 
+Content signature:
+
+* RS256 (default)
+* RS384
+* RS512
+* PS256
+* PS384
+* PS512
 
 Algorithms not exposed (and reason why)
 ---------------------------------------
@@ -142,7 +150,8 @@ Algorithms not exposed (and reason why)
 * ECDH-ES+A128KW (Chrome and IE currently don't support it)
 * ECDH-ES+A192KW (Chrome and IE currently don't support it)
 * ECDH-ES+A256KW (Chrome and IE currently don't support it)
-* RSA-PSS, ECDSA (could be added once Chrome supports these)
+* ECDSA (could be added once Chrome supports these)
+* HS256, HS384, HS512 (message autghentication support could be added in future releases, at the moment only RSA signatures are supported)
 
 
 Building
