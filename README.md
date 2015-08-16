@@ -151,7 +151,7 @@ Algorithms not exposed (and reason why)
 * ECDH-ES+A192KW (Chrome and IE currently don't support it)
 * ECDH-ES+A256KW (Chrome and IE currently don't support it)
 * ECDSA (could be added once Chrome supports these)
-* HS256, HS384, HS512 (message autghentication support could be added in future releases, at the moment only RSA signatures are supported)
+* HS256, HS384, HS512 (message authentication support could be added in future releases, at the moment only RSA signatures are supported)
 
 
 Building
