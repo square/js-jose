@@ -165,12 +165,12 @@
       "qi": "0c:c8:32:20:2e:df:d7:85:0f:e6:50:ec:ba:1b:6f:60:dd:18:79:3f:d4:ac:d8:6c:bf:05:d7:68:11:3f:2e:1b:26:d5:63:9d:c7:02:0f:e0:c2:70:49:c9:d1:7b:68:66:da:17:36:f5:f2:6b:4e:06:bd:db:29:04:c6:34:7a:e0"
     };
 
-    var public_rsa_key = Jose.Utils.importRsaPublicKey(rsa_key);
+    var public_rsa_key = Jose.Utils.importRsaPublicKey(rsa_key, "RSA-OAEP");
     var plain_text = "Look deep into nature, and then you will understand everything better. --Albert Einstein";
     var encrypter = new JoseJWE.Encrypter(cryptographer, public_rsa_key);
     var cipher_text_promise = encrypter.encrypt(plain_text);
 
-    var private_rsa_key = Jose.Utils.importRsaPrivateKey(rsa_key);
+    var private_rsa_key = Jose.Utils.importRsaPrivateKey(rsa_key, "RSA-OAEP");
     var decrypted_plain_text_promise = cipher_text_promise.then(function(cipher_text){
       var decrypter = new JoseJWE.Decrypter(cryptographer, private_rsa_key);
       return decrypter.decrypt(cipher_text);
@@ -245,20 +245,20 @@
     var rsa_key = {
       "e": 65537
     };
-    assert.throws(function(){Jose.Utils.importRsaPublicKey(rsa_key)}, "got exception when importing invalid key");
+    assert.throws(function(){Jose.Utils.importRsaPublicKey(rsa_key, "RSA-OAEP")}, "got exception when importing invalid key");
 
     rsa_key = {
       "alg": "foo",
       "e": 65537,
       "n": "bf:53:bf:5b:19:bc:80"
     };
-    assert.throws(function(){Jose.Utils.importRsaPublicKey(rsa_key)}, "got exception when importing invalid key");
+    assert.throws(function(){Jose.Utils.importRsaPublicKey(rsa_key, "RSA-OAEP")}, "got exception when importing invalid key");
 
     rsa_key = {
       "e": 65537,
       "n": []
     };
-    assert.throws(function(){Jose.Utils.importRsaPublicKey(rsa_key)}, "got exception when importing invalid key");
+    assert.throws(function(){Jose.Utils.importRsaPublicKey(rsa_key, "RSA-OAEP")}, "got exception when importing invalid key");
   });
 
   test("various decryption failures", function(assert) {
