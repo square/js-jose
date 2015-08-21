@@ -1649,8 +1649,7 @@ JoseJWS.Verifier.prototype.verify = function () {
     signatures = that.signatures,
     key_promises = that.key_promises,
     promises = [],
-    check = Object.keys(that.key_promises).length > 0,
-    sig;
+    check = Object.keys(that.key_promises).length > 0;
 
   if (!check) {
     throw new Error("No recipients defined. At least one is required to verify the JWS.");

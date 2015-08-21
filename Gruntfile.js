@@ -20,17 +20,16 @@ module.exports = function(grunt) {
           'lib/jose-jwe-encrypt.js',
           'lib/jose-jwe-decrypt.js',
           'lib/jose-jws-sign.js',
-          'lib/jose-jws-verify.js',
-          'lib/jose-backward-compatibility.js'
+          'lib/jose-jws-verify.js'
         ],
-        dest: 'dist/jose-jwe.js'
+        dest: 'dist/jose.js'
       }
     },
 
     uglify: {
       dist: {
-        src: 'dist/jose-jwe.js',
-        dest: 'dist/jose-jwe.min.js'
+        src: 'dist/jose.js',
+        dest: 'dist/jose.min.js'
       }
     },
 
@@ -47,8 +46,9 @@ module.exports = function(grunt) {
           },
           frameworks: ['qunit'],
           files: [
-            {pattern: 'dist/jose-jwe.js', watching: false, included: false},
+            {pattern: 'dist/jose.js', watching: false, included: false},
             {pattern: 'test/qunit-promises.js', watching: false, included: false},
+            'test/jose-jwe-test.html',
             'test/jose-jws-test.html'
           ],
           autoWatch: true,
@@ -67,8 +67,9 @@ module.exports = function(grunt) {
         options: {
           frameworks: ['qunit'],
           files: [
-            {pattern: 'dist/jose-jwe.js', watching: false, included: false},
+            {pattern: 'dist/jose.js', watching: false, included: false},
             {pattern: 'test/qunit-promises.js', watching: false, included: false},
+            'test/jose-jwe-test.html',
             'test/jose-jws-test.html'
           ],
           autoWatch: true,
