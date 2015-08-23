@@ -10,24 +10,26 @@ module.exports = function(grunt) {
     concat: {
       dist: {
         options: {
-          banner: "(function(){\n",
-          footer: "}());\n"
+          banner: '(function(exports, crypto, Promise, Error, Uint8Array){\n"use strict";\n\n// supporting Safari and its vendor prefix\nif(!crypto.subtle) crypto.subtle = crypto.webkitSubtle;\n',
+          footer: "}(window, window.crypto, window.Promise, window.Error, window.Uint8Array));\n"
         },
         src: [
-          'lib/jose-jwe-core.js',
+          'lib/jose-core.js',
           'lib/jose-jwe-webcryptographer.js',
           'lib/jose-jwe-utils.js',
           'lib/jose-jwe-encrypt.js',
           'lib/jose-jwe-decrypt.js',
+          'lib/jose-jws-sign.js',
+          'lib/jose-jws-verify.js'
         ],
-        dest: 'dist/jose-jwe.js'
+        dest: 'dist/jose.js'
       }
     },
 
     uglify: {
       dist: {
-        src: 'dist/jose-jwe.js',
-        dest: 'dist/jose-jwe.min.js'
+        src: 'dist/jose.js',
+        dest: 'dist/jose.min.js'
       }
     },
 
@@ -44,9 +46,10 @@ module.exports = function(grunt) {
           },
           frameworks: ['qunit'],
           files: [
-            {pattern: 'dist/jose-jwe.js', watching: false, included: false},
+            {pattern: 'dist/jose.js', watching: false, included: false},
             {pattern: 'test/qunit-promises.js', watching: false, included: false},
-            'test/jose-jwe-test.html'
+            'test/jose-jwe-test.html',
+            'test/jose-jws-test.html'
           ],
           autoWatch: true,
           browsers: ['Chrome'],
@@ -64,9 +67,10 @@ module.exports = function(grunt) {
         options: {
           frameworks: ['qunit'],
           files: [
-            {pattern: 'dist/jose-jwe.js', watching: false, included: false},
+            {pattern: 'dist/jose.js', watching: false, included: false},
             {pattern: 'test/qunit-promises.js', watching: false, included: false},
-            'test/jose-jwe-test.html'
+            'test/jose-jwe-test.html',
+            'test/jose-jws-test.html'
           ],
           autoWatch: true,
           browsers: ['Chrome'],
