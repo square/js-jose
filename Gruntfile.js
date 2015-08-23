@@ -10,7 +10,7 @@ module.exports = function(grunt) {
     concat: {
       dist: {
         options: {
-          banner: '(function(exports, crypto, Promise, Error, Uint8Array, undefined){\n"use strict";\n\n// supporting Safari and its vendor prefix\nif(!crypto.subtle) crypto.subtle = crypto.webkitSubtle;\n',
+          banner: '(function(exports, crypto, Promise, Error, Uint8Array){\n"use strict";\n\n// supporting Safari and its vendor prefix\nif(!crypto.subtle) crypto.subtle = crypto.webkitSubtle;\n',
           footer: "}(window, window.crypto, window.Promise, window.Error, window.Uint8Array));\n"
         },
         src: [
