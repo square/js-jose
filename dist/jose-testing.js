@@ -1,4 +1,6 @@
-(function(){
+(function(exports, crypto, Promise, Error, Uint8Array){
+// supporting Safari and its vendor prefix
+if(!crypto.subtle) crypto.subtle = crypto.webkitSubtle;
 /*-
  * Copyright 2014 Square Inc.
  *
@@ -15,8 +17,10 @@
  * limitations under the License.
  */
 
+var Jose = {};
+
 /**
- * JSON Web Encryption (JWE) library for JavaScript.
+ * Javascript Object Signing and Encryption library.
  *
  * @author Alok Menghrajani <alok@squareup.com>
  */
@@ -24,7 +28,12 @@
 /**
  * Initializes a JoseJWE object.
  */
-JoseJWE = {};
+var JoseJWE = {};
+
+/**
+ * Initializes a JoseJWS object.
+ */
+var JoseJWS = {};
 
 /**
  * Checks if we have all the required APIs.
@@ -49,7 +58,7 @@ JoseJWE = {};
  *
  * @return bool
  */
-JoseJWE.caniuse = function() {
+Jose.caniuse = function() {
   var r = true;
 
   // Promises/A+ (https://promisesaplus.com/)
@@ -96,12 +105,15 @@ JoseJWE.caniuse = function() {
 /**
  * Feel free to override this function.
  */
-JoseJWE.assert = function(expr, msg) {
+Jose.assert = function(expr, msg) {
   if (!expr) {
     throw new Error(msg);
   }
 };
 
+exports.Jose = Jose;
+exports.JoseJWE = JoseJWE;
+exports.JoseJWS = JoseJWS;
 /*-
  * Copyright 2014 Square Inc.
  *
@@ -124,20 +136,23 @@ JoseJWE.assert = function(expr, msg) {
  * different underlying crypto APIs. I'm however unclear if we'll run into code
  * duplication or callback vs Promise based API issues.
  */
-JoseJWE.WebCryptographer = function() {
+var WebCryptographer = function() {
   this.setKeyEncryptionAlgorithm("RSA-OAEP");
   this.setContentEncryptionAlgorithm("A256GCM");
+  this.setContentSignAlgorithm("RS256");
 };
+
+Jose.WebCryptographer = WebCryptographer;
 
 /**
  * Overrides the default key encryption algorithm
  * @param alg  string
  */
-JoseJWE.WebCryptographer.prototype.setKeyEncryptionAlgorithm = function(alg) {
+WebCryptographer.prototype.setKeyEncryptionAlgorithm = function(alg) {
   this.key_encryption = getCryptoConfig(alg);
 };
 
-JoseJWE.WebCryptographer.prototype.getKeyEncryptionAlgorithm = function() {
+WebCryptographer.prototype.getKeyEncryptionAlgorithm = function() {
   return this.key_encryption.jwe_name;
 };
 
@@ -145,12 +160,24 @@ JoseJWE.WebCryptographer.prototype.getKeyEncryptionAlgorithm = function() {
  * Overrides the default content encryption algorithm
  * @param alg  string
  */
-JoseJWE.WebCryptographer.prototype.setContentEncryptionAlgorithm = function(alg) {
+WebCryptographer.prototype.setContentEncryptionAlgorithm = function(alg) {
   this.content_encryption = getCryptoConfig(alg);
 };
 
-JoseJWE.WebCryptographer.prototype.getContentEncryptionAlgorithm = function() {
+WebCryptographer.prototype.getContentEncryptionAlgorithm = function() {
   return this.content_encryption.jwe_name;
+};
+
+/**
+ * Overrides the default content sign algorithm
+ * @param alg  string
+ */
+WebCryptographer.prototype.setContentSignAlgorithm = function(alg) {
+  this.content_sign = getSignConfig(alg);
+};
+
+WebCryptographer.prototype.getContentSignAlgorithm = function() {
+  return this.content_sign.jwa_name;
 };
 
 /**
@@ -159,10 +186,9 @@ JoseJWE.WebCryptographer.prototype.getContentEncryptionAlgorithm = function() {
  *
  * @return Uint8Array with random bytes
  */
-JoseJWE.WebCryptographer.prototype.createIV = function() {
+WebCryptographer.prototype.createIV = function() {
   var iv = new Uint8Array(new Array(this.content_encryption.iv_bytes));
-  var r = crypto.getRandomValues(iv);
-  return r;
+  return crypto.getRandomValues(iv);
 };
 
 /**
@@ -171,16 +197,16 @@ JoseJWE.WebCryptographer.prototype.createIV = function() {
  *
  * @return Promise<CryptoKey>
  */
-JoseJWE.WebCryptographer.prototype.createCek = function() {
+WebCryptographer.prototype.createCek = function() {
   var hack = getCekWorkaround(this.content_encryption);
   return crypto.subtle.generateKey(hack.id, true, hack.enc_op);
 };
 
-JoseJWE.WebCryptographer.prototype.wrapCek = function(cek, key) {
+WebCryptographer.prototype.wrapCek = function(cek, key) {
   return crypto.subtle.wrapKey("raw", cek, key, this.key_encryption.id);
 };
 
-JoseJWE.WebCryptographer.prototype.unwrapCek = function(cek, key) {
+WebCryptographer.prototype.unwrapCek = function(cek, key) {
   var hack = getCekWorkaround(this.content_encryption);
   var extractable = (this.content_encryption.specific_cek_bytes > 0);
   var key_encryption = this.key_encryption.id;
@@ -209,7 +235,7 @@ var getCekWorkaround = function(alg) {
     } else if (len == 128) {
       return {id: {name: "HMAC", hash: {name: "SHA-384"}}, enc_op: ["sign"], dec_op: ["verify"]};
     } else {
-      JoseJWE.assert(false, "getCekWorkaround: invalid len");
+      Jose.assert(false, "getCekWorkaround: invalid len");
     }
   }
   return {id: alg.id, enc_op: ["encrypt"], dec_op: ["decrypt"]};
@@ -224,7 +250,7 @@ var getCekWorkaround = function(alg) {
  * @param plain_text  Uint8Array
  * @return Promise<json>
  */
-JoseJWE.WebCryptographer.prototype.encrypt = function(iv, aad, cek_promise, plain_text) {
+WebCryptographer.prototype.encrypt = function(iv, aad, cek_promise, plain_text) {
   var config = this.content_encryption;
   if (iv.length != config.iv_bytes) {
     return Promise.reject(Error("invalid IV length"));
@@ -257,7 +283,7 @@ JoseJWE.WebCryptographer.prototype.encrypt = function(iv, aad, cek_promise, plai
     var cipher_text_promise = enc_key_promise.then(function(enc_key) {
       var enc = {
         name: config.id.name,
-        iv: iv,
+        iv: iv
       };
       return crypto.subtle.encrypt(enc, enc_key, plain_text);
     });
@@ -283,21 +309,25 @@ JoseJWE.WebCryptographer.prototype.encrypt = function(iv, aad, cek_promise, plai
   }
 };
 
- /**
-  * Decrypts cipher_text with cek. Validates the tag.
-  *
-  * @param key_promise    Promise<CryptoKey>
-  * @return Promise<string>
-  */
-JoseJWE.WebCryptographer.prototype.decrypt = function(cek_promise, aad, iv, cipher_text, tag) {
+/**
+ * Decrypts cipher_text with cek. Validates the tag.
+ *
+ * @param cek_promise    Promise<CryptoKey>
+ * @param aad protected header
+ * @param iv IV
+ * @param cipher_text text to be decrypted
+ * @param tag to be verified
+ * @return Promise<string>
+ */
+WebCryptographer.prototype.decrypt = function(cek_promise, aad, iv, cipher_text, tag) {
   /**
    * Compares two Uint8Arrays in constant time.
    *
    * @return Promise<void>
    */
   var compare = function(config, mac_key_promise, arr1, arr2) {
-    JoseJWE.assert(arr1 instanceof Uint8Array, "compare: invalid input");
-    JoseJWE.assert(arr2 instanceof Uint8Array, "compare: invalid input");
+    Jose.assert(arr1 instanceof Uint8Array, "compare: invalid input");
+    Jose.assert(arr2 instanceof Uint8Array, "compare: invalid input");
 
     return mac_key_promise.then(function(mac_key) {
       var hash1 = crypto.subtle.sign(config.auth.id, mac_key, arr1);
@@ -308,7 +338,7 @@ JoseJWE.WebCryptographer.prototype.decrypt = function(cek_promise, aad, iv, ciph
         if (hash1.length != hash2.length) {
           throw new Error("compare failed");
         }
-        for (var i=0; i<hash1.length; i++) {
+        for (var i = 0; i < hash1.length; i++) {
           if (hash1[i] != hash2[i]) {
             throw new Error("compare failed");
           }
@@ -355,14 +385,60 @@ JoseJWE.WebCryptographer.prototype.decrypt = function(cek_promise, aad, iv, ciph
       return compare(config, mac_key_promise, new Uint8Array(mac), tag).then(function() {
         var dec = {
           name: config.id.name,
-          iv: iv,
+          iv: iv
         };
         return crypto.subtle.decrypt(dec, enc_key, cipher_text);
-      }).catch(function (err) {
+      }).catch(function(err) {
         return Promise.reject(Error("decryptCiphertext: MAC failed."));
       });
     });
   }
+};
+
+/**
+ * Signs plain_text.
+ *
+ * @param aad         json
+ * @param key_promise Promise<CryptoKey>
+ * @param payload     String or json
+ * @return Promise<ArrayBuffer>
+ */
+WebCryptographer.prototype.sign = function(aad, payload, key_promise) {
+  var config = this.content_sign;
+
+  if (aad.alg) {
+    config = getSignConfig(aad.alg);
+  }
+
+  // Encrypt the plain text
+  return key_promise.then(function(key) {
+    return crypto.subtle.sign(config.id, key, Utils.arrayFromString(Utils.Base64Url.encode(JSON.stringify(aad)) + '.' + Utils.Base64Url.encodeArray(payload)));
+  });
+};
+
+/**
+ * Verify JWS.
+ *
+ * @param payload     Base64Url encoded payload
+ * @param aad         String Base64Url encoded JSON representation of the protected JWS header
+ * @param signature   Uint8Array containing the signature
+ * @param key_promise Promise<CryptoKey>
+ * @param key_id      value of the kid JoseHeader, it'll be passed as part of the result to the returned promise
+ * @return Promise<json>
+ */
+WebCryptographer.prototype.verify = function(aad, payload, signature, key_promise, key_id) {
+  var config = this.content_sign;
+
+  return key_promise.then(function(key) {
+    config = getSignConfig(getJwaNameForSignKey(key));
+    return crypto.subtle.verify(config.id, key, signature, Utils.arrayFromString(aad + "." + payload)).then(function(res) {
+      return {kid: key_id, verified: res};
+    });
+  });
+};
+
+Jose.WebCryptographer.keyId = function(rsa_key) {
+  return Utils.sha256(rsa_key.n + "+" + rsa_key.d);
 };
 
 /**
@@ -372,8 +448,9 @@ JoseJWE.WebCryptographer.prototype.decrypt = function(cek_promise, aad, iv, ciph
  * a way to validate truncated MACs. The MAC key is therefore always imported to
  * sign data.
  *
- * @param hash                config (used for key lengths & algorithms)
- * @param Promise<CryptoKey>  CEK key to split
+ * @param config (used for key lengths & algorithms)
+ * @param cek_promise Promise<CryptoKey>  CEK key to split
+ * @param purpose Array<String> usages of the imported key
  * @return [Promise<mac key>, Promise<enc key>]
  */
 var splitKey = function(config, cek_promise, purpose) {
@@ -399,28 +476,6 @@ var splitKey = function(config, cek_promise, purpose) {
 };
 
 /**
- * Computes a truncated MAC.
- *
- * @param hash                config
- * @param Promise<CryptoKey>  mac key
- * @param Uint8Array          aad
- * @param Uint8Array          iv
- * @param Uint8Array          cipher_text
- * @return Promise<buffer>    truncated MAC
- */
-var truncatedMac = function(config, mac_key_promise, aad, iv, cipher_text) {
-  return mac_key_promise.then(function(mac_key) {
-    var al = new Uint8Array(Utils.arrayFromInt32(aad.length * 8));
-    var al_full = new Uint8Array(8);
-    al_full.set(al, 4);
-    var buf = Utils.arrayBufferConcat(aad, iv, cipher_text, al_full);
-    return crypto.subtle.sign(config.auth.id, mac_key, buf).then(function(bytes) {
-      return bytes.slice(0, config.auth.truncated_bytes);
-    });
-  });
-};
-
-/**
  * Converts the Jose web algorithms into data which is
  * useful for the Web Crypto API.
  *
@@ -436,7 +491,7 @@ var getCryptoConfig = function(alg) {
         id: {name: "RSA-OAEP", hash: {name: "SHA-1"}}
       };
     case "RSA-OAEP-256":
-     return {
+      return {
         jwe_name: "RSA-OAEP-256",
         id: {name: "RSA-OAEP", hash: {name: "SHA-256"}}
       };
@@ -501,6 +556,168 @@ var getCryptoConfig = function(alg) {
   }
 };
 
+/**
+ * Computes a truncated MAC.
+ *
+ * @param config              configuration
+ * @param mac_key_promise     Promise<CryptoKey>  mac key
+ * @param aad                 Uint8Array
+ * @param iv                  Uint8Array
+ * @param cipher_text         Uint8Array
+ * @return Promise<buffer>    truncated MAC
+ */
+var truncatedMac = function(config, mac_key_promise, aad, iv, cipher_text) {
+  return mac_key_promise.then(function(mac_key) {
+    var al = new Uint8Array(Utils.arrayFromInt32(aad.length * 8));
+    var al_full = new Uint8Array(8);
+    al_full.set(al, 4);
+    var buf = Utils.arrayBufferConcat(aad, iv, cipher_text, al_full);
+    return crypto.subtle.sign(config.auth.id, mac_key, buf).then(function(bytes) {
+      return bytes.slice(0, config.auth.truncated_bytes);
+    });
+  });
+};
+
+/**
+ * Converts the Jose web algorithms into data which is
+ * useful for the Web Crypto API.
+ */
+var getSignConfig = function(alg) {
+
+  switch (alg) {
+    case "RS256":
+      return {
+        jwa_name: "RS256",
+        id: {name: "RSASSA-PKCS1-v1_5", hash: {name: "SHA-256"}}
+      };
+    case "RS384":
+      return {
+        jwa_name: "RS384",
+        id: {name: "RSASSA-PKCS1-v1_5", hash: {name: "SHA-384"}}
+      };
+    case "RS512":
+      return {
+        jwa_name: "RS512",
+        id: {name: "RSASSA-PKCS1-v1_5", hash: {name: "SHA-512"}}
+      };
+    case "PS256":
+      return {
+        jwa_name: "PS256",
+        id: {name: "RSA-PSS", hash: {name: "SHA-256"}, saltLength: 20}
+      };
+    case "PS384":
+      return {
+        jwa_name: "PS384",
+        id: {name: "RSA-PSS", hash: {name: "SHA-384"}, saltLength: 20}
+      };
+    case "PS512":
+      return {
+        jwa_name: "PS512",
+        id: {name: "RSA-PSS", hash: {name: "SHA-512"}, saltLength: 20}
+      };
+    case "HS256":
+      return {
+        jwa_name: "HS256",
+        id: {name: "HMAC", hash: {name: "SHA-256"}}
+      };
+    case "HS384":
+      return {
+        jwa_name: "HS384",
+        id: {name: "HMAC", hash: {name: "SHA-384"}}
+      };
+    case "HS512":
+      return {
+        jwa_name: "HS512",
+        id: {name: "HMAC", hash: {name: "SHA-512"}}
+      };
+    case "ES256":
+      return {
+        jwa_name: "ES256",
+        id: {name: "ECDSA", hash: {name: "SHA-256"}}
+      };
+    case "ES384":
+      return {
+        jwa_name: "ES384",
+        id: {name: "ECDSA", hash: {name: "SHA-384"}}
+      };
+    case "ES512":
+      return {
+        jwa_name: "ES512",
+        id: {name: "ECDSA", hash: {name: "SHA-512"}}
+      };
+    default:
+      throw Error("unsupported algorithm: " + alg);
+  }
+};
+
+/**
+ * Returns JWA name for a given CryptoKey
+ * @param key CryptoKey
+ */
+var getJwaNameForSignKey = function(key) {
+
+  var rv = "",
+    sign_algo = key.algorithm.name,
+    hash_algo = key.algorithm.hash.name;
+
+  if(sign_algo == "RSASSA-PKCS1-v1_5") {
+    rv = "R";
+  } else if(sign_algo == "RSA-PSS") {
+    rv = "P";
+  } else {
+    throw new Error("unsupported sign/verify algorithm " + sign_algo);
+  }
+
+  if(hash_algo.indexOf("SHA-") === 0) {
+    rv += "S";
+  } else {
+    throw new Error("unsupported hash algorithm " + sign_algo);
+  }
+
+  rv += hash_algo.substring(4);
+
+  return rv;
+};
+
+/**
+ * Derives key usage from algorithm's name
+ *
+ * @param alg String algorithm name
+ * @returns {*}
+ */
+var getKeyUsageByAlg = function(alg) {
+
+  switch (alg) {
+    // signature
+    case "RS256":
+    case "RS384":
+    case "RS512":
+    case "PS256":
+    case "PS384":
+    case "PS512":
+    case "HS256":
+    case "HS384":
+    case "HS512":
+    case "ES256":
+    case "ES384":
+    case "ES512":
+      return {
+        publicKey: "verify",
+        privateKey: "sign"
+      };
+    // key encryption
+    case "RSA-OAEP":
+    case "RSA-OAEP-256":
+    case "A128KW":
+    case "A256KW":
+      return {
+        publicKey: "wrapKey",
+        privateKey: "unwrapKey"
+      };
+    default:
+      throw Error("unsupported algorithm: " + alg);
+  }
+};
 /*-
  * Copyright 2014 Square Inc.
  *
@@ -517,7 +734,7 @@ var getCryptoConfig = function(alg) {
  * limitations under the License.
  */
 
-JoseJWE.Utils = {};
+Jose.Utils = {};
 var Utils = {};
 
 /**
@@ -532,15 +749,38 @@ var Utils = {};
  * @param alg      String, name of the algorithm
  * @return Promise<CryptoKey>
  */
-JoseJWE.Utils.importRsaPublicKey = function(rsa_key) {
-  var jwk = Utils.convertRsaKey(rsa_key, ["n", "e"]);
-  var config = getCryptoConfig("RSA-OAEP");
-  return crypto.subtle.importKey("jwk", jwk, config.id, false, ["wrapKey"]);
+Jose.Utils.importRsaPublicKey = function(rsa_key, alg) {
+  var jwk;
+  var config;
+  var usage = getKeyUsageByAlg(alg);
+
+  if (usage.publicKey == "wrapKey") {
+    if (!rsa_key.alg) {
+      rsa_key.alg = alg;
+    }
+    jwk = Utils.convertRsaKey(rsa_key, ["n", "e"]);
+    config = getCryptoConfig(alg);
+  } else {
+    var rk = {};
+    for (var name in rsa_key) {
+      if (rsa_key.hasOwnProperty(name)) {
+        rk[name] = rsa_key[name];
+      }
+    }
+
+    if (!rk.alg && alg) {
+      rk.alg = alg;
+    }
+    config = getSignConfig(rk.alg);
+    jwk = Utils.convertRsaKey(rk, ["n", "e"]);
+    jwk.ext = true;
+  }
+  return crypto.subtle.importKey("jwk", jwk, config.id, false, [usage.publicKey]);
 };
 
 /**
  * Converts the output from `openssl x509 -text` or `openssl rsa -text` into a
- * CryptoKey which can then be used with RSA-OAEP. Also accepts (and validates)
+ * CryptoKey which can then be used with RSA-OAEP and RSA. Also accepts (and validates)
  * JWK keys.
  *
  * TODO: this code probably belongs in the webcryptographer.
@@ -550,10 +790,32 @@ JoseJWE.Utils.importRsaPublicKey = function(rsa_key) {
  * @param alg      String, name of the algorithm
  * @return Promise<CryptoKey>
  */
-JoseJWE.Utils.importRsaPrivateKey = function(rsa_key) {
-  var jwk = Utils.convertRsaKey(rsa_key, ["n", "e", "d", "p", "q", "dp", "dq", "qi"]);
-  var config = getCryptoConfig("RSA-OAEP");
-  return crypto.subtle.importKey("jwk", jwk, config.id, false, ["unwrapKey"]);
+Jose.Utils.importRsaPrivateKey = function(rsa_key, alg) {
+  var jwk;
+  var config;
+  var usage = getKeyUsageByAlg(alg);
+
+  if (usage.privateKey == "unwrapKey") {
+    if (!rsa_key.alg) {
+      rsa_key.alg = alg;
+    }
+    jwk = Utils.convertRsaKey(rsa_key, ["n", "e", "d", "p", "q", "dp", "dq", "qi"]);
+    config = getCryptoConfig("RSA-OAEP");
+  } else {
+    var rk = {};
+    for (var name in rsa_key) {
+      if (rsa_key.hasOwnProperty(name)) {
+        rk[name] = rsa_key[name];
+      }
+    }
+    config = getSignConfig(alg);
+    if (!rk.alg && alg) {
+      rk.alg = alg;
+    }
+    jwk = Utils.convertRsaKey(rk, ["n", "e", "d", "p", "q", "dp", "dq", "qi"]);
+    jwk.ext = true;
+  }
+  return crypto.subtle.importKey("jwk", jwk, config.id, false, [usage.privateKey]);
 };
 
 // Private functions
@@ -579,7 +841,7 @@ Utils.arrayish = function(arr) {
   if (arr instanceof ArrayBuffer) {
     return new Uint8Array(arr);
   }
-  JoseJWE.assert(false, "arrayish: invalid input");
+  Jose.assert(false, "arrayish: invalid input");
 };
 
 /**
@@ -600,25 +862,34 @@ Utils.convertRsaKey = function(rsa_key, parameters) {
   parameters.map(function(p){if (typeof(rsa_key[p]) == "undefined") { missing.push(p); }});
 
   if (missing.length > 0) {
-    JoseJWE.assert(false, "convertRsaKey: Was expecting " + missing.join());
+    Jose.assert(false, "convertRsaKey: Was expecting " + missing.join());
   }
 
   // kty is either missing or is set to "RSA"
   if (typeof(rsa_key.kty) != "undefined") {
-    JoseJWE.assert(rsa_key.kty == "RSA", "convertRsaKey: expecting rsa_key['kty'] to be 'RSA'");
+    Jose.assert(rsa_key.kty == "RSA", "convertRsaKey: expecting rsa_key['kty'] to be 'RSA'");
   }
   r.kty = "RSA";
 
-  // alg is either missing or is set to "RSA-OAEP"
-  if (typeof(rsa_key.alg) != "undefined") {
-    JoseJWE.assert(rsa_key.alg == "RSA-OAEP", "convertRsaKey: expecting rsa_key['alg'] to be 'RSA-OAEP'");
+  try {
+    getSignConfig(rsa_key.alg);
+    alg = rsa_key.alg;
+  } catch (err) {
+    try {
+      getCryptoConfig(rsa_key.alg);
+      alg = rsa_key.alg;
+    } catch (er) {
+      Jose.assert(alg, "convertRsaKey: expecting rsa_key['alg'] to have a valid value");
+    }
   }
-  r.alg = "RSA-OAEP";
+  r.alg = alg;
 
   // note: we punt on checking key_ops
 
-  var intFromHex = function(e){return parseInt(e, 16);};
-  for (var i=0; i<parameters.length; i++) {
+  var intFromHex = function(e) {
+    return parseInt(e, 16);
+  };
+  for (var i = 0; i < parameters.length; i++) {
     var p = parameters[i];
     var v = rsa_key[p];
     if (p == "e") {
@@ -629,7 +900,7 @@ Utils.convertRsaKey = function(rsa_key, parameters) {
       var arr = v.split(":").map(intFromHex);
       v = Utils.Base64Url.encodeArray(Utils.stripLeadingZeros(arr));
     } else if (typeof(v) != "string") {
-      JoseJWE.assert(false, "convertRsaKey: expecting rsa_key['" + p + "'] to be a string");
+      Jose.assert(false, "convertRsaKey: expecting rsa_key['" + p + "'] to be a string");
     }
     r[p] = v;
   }
@@ -644,8 +915,10 @@ Utils.convertRsaKey = function(rsa_key, parameters) {
  * @return Uint8Array
  */
 Utils.arrayFromString = function(str) {
-  JoseJWE.assert(Utils.isString(str), "arrayFromString: invalid input");
-  var arr = str.split('').map(function(c){return c.charCodeAt(0);});
+  Jose.assert(Utils.isString(str), "arrayFromString: invalid input");
+  var arr = str.split('').map(function(c) {
+    return c.charCodeAt(0);
+  });
   return new Uint8Array(arr);
 };
 
@@ -656,7 +929,7 @@ Utils.arrayFromString = function(str) {
  * @return string
  */
 Utils.stringFromArray = function(arr) {
-  JoseJWE.assert(arr instanceof ArrayBuffer, "stringFromArray: invalid input");
+  Jose.assert(arr instanceof ArrayBuffer, "stringFromArray: invalid input");
   arr = new Uint8Array(arr);
   var r = '';
   for (var i = 0; i < arr.length; i++) {
@@ -694,8 +967,8 @@ Utils.stripLeadingZeros = function(arr) {
  * @return ArrayBuffer
  */
 Utils.arrayFromInt32 = function(i) {
-  JoseJWE.assert(typeof(i) == "number", "arrayFromInt32: invalid input");
-  JoseJWE.assert(i == i|0, "arrayFromInt32: out of range");
+  Jose.assert(typeof(i) == "number", "arrayFromInt32: invalid input");
+  Jose.assert(i == i | 0, "arrayFromInt32: out of range");
 
   var buf = new Uint8Array(new Uint32Array([i]).buffer);
   var r = new Uint8Array(4);
@@ -726,7 +999,7 @@ Utils.arrayBufferConcat = function(/* ... */) {
       r[offset++] = args[i][j];
     }
   }
-  JoseJWE.assert(offset == total, "arrayBufferConcat: unexpected offset");
+  Jose.assert(offset == total, "arrayBufferConcat: unexpected offset");
   return r;
 };
 
@@ -739,7 +1012,7 @@ Utils.Base64Url = {};
  * @return string
  */
 Utils.Base64Url.encode = function(str) {
-  JoseJWE.assert(Utils.isString(str), "Base64Url.encode: invalid input");
+  Jose.assert(Utils.isString(str), "Base64Url.encode: invalid input");
   return btoa(str)
     .replace(/\+/g, "-")
     .replace(/\//g, "_")
@@ -768,16 +1041,40 @@ Utils.Base64Url.encodeArray = function(arr) {
  * @return string
  */
 Utils.Base64Url.decode = function(str) {
-  JoseJWE.assert(Utils.isString(str), "Base64Url.decode: invalid input");
+  Jose.assert(Utils.isString(str), "Base64Url.decode: invalid input");
   // atob is nice and ignores missing '='
   return atob(str.replace(/-/g, "+").replace(/_/g, "/"));
 };
 
 Utils.Base64Url.decodeArray = function(str) {
-  JoseJWE.assert(Utils.isString(str), "Base64Url.decodeArray: invalid input");
+  Jose.assert(Utils.isString(str), "Base64Url.decodeArray: invalid input");
   return Utils.arrayFromString(Utils.Base64Url.decode(str));
 };
 
+Utils.sha256 = function(str) {
+  return crypto.subtle.digest("SHA-256", Utils.arrayFromString(str)).then(function(hash) {
+    return Utils.Base64Url.encodeArray(hash);
+  });
+};
+
+Utils.isCryptoKey = function(rsa_key) {
+  var hexStr = /[a-f0-9]{2}(:[a-f0-9]{2})+/i;
+
+  if (typeof(window.CryptoKey) != 'undefined') {
+    return rsa_key instanceof CryptoKey;
+  }
+
+  if (rsa_key instanceof Object) {
+    return hexStr.test(rsa_key.n) &&
+      ((hexStr.test(rsa_key.e) || typeof(rsa_key.e) == 'number') ||
+      (hexStr.test(rsa_key.d) &&
+      hexStr.test(rsa_key.p) &&
+      hexStr.test(rsa_key.q) &&
+      hexStr.test(rsa_key.qi) &&
+      hexStr.test(rsa_key.dq) &&
+      hexStr.test(rsa_key.dp)));
+  }
+};
 /*-
  * Copyright 2014 Square Inc.
  *
@@ -968,4 +1265,421 @@ JoseJWE.Decrypter.prototype.decrypt = function(cipher_text) {
 
   return plain_text_promise.then(Utils.stringFromArray);
 };
-}());
+
+/*-
+ * Copyright 2015 Peculiar Ventures
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Handles decryption.
+ *
+ * @param cryptographer  an instance of WebCryptographer (or equivalent). Keep
+ *                       in mind that decryption mutates the cryptographer.
+ *
+ * @author Patrizio Bruno <patrizio@desertconsulting.net>
+ */
+JoseJWS.Signer = function (cryptographer) {
+
+  var that = this;
+  that.cryptographer = cryptographer;
+
+  that.key_promises = {};
+  that.waiting_kid = 0;
+  that.headers = {};
+  that.signer_aads = {};
+  that.signer_headers = {};
+};
+
+/**
+ * Adds a signer to JoseJWS instance. It'll be the on of the signers of the resulting JWS.
+ *
+ * @param rsa_key        private RSA key in json format, Parameters can be base64
+ *                       encoded, strings or number (for 'e'). Or CryptoKey
+ * @param key_id         a string identifying the rsa_key. OPTIONAL
+ * @param aad            Object protected header
+ * @param header         Object unprotected header
+ */
+JoseJWS.Signer.prototype.addSigner = function (rsa_key, key_id, aad, header) {
+  var that = this,
+    key_promise = Utils.isCryptoKey(rsa_key) ? new Promise(function (resolve) {
+      resolve(rsa_key);
+    }) : Jose.Utils.importRsaPrivateKey(rsa_key, aad && aad.alg ? aad.alg : that.cryptographer.getContentSignAlgorithm(), "sign"),
+    kid_promise;
+
+  if (key_id) {
+    kid_promise = new Promise(function (resolve) {
+      resolve(key_id);
+    });
+  } else if (Utils.isCryptoKey(rsa_key)) {
+    throw new Error("key_id is a mandatory argument when the key is a CryptoKey");
+  } else {
+    kid_promise = Jose.WebCryptographer.keyId(rsa_key);
+  }
+
+  that.waiting_kid++;
+
+  return kid_promise.then(function (kid) {
+    that.key_promises[kid] = key_promise;
+    that.waiting_kid--;
+    if (aad) that.signer_aads[kid] = aad;
+    if (header) that.signer_headers[kid] = header;
+    return kid;
+  });
+};
+
+/**
+ * Adds a signature to a JWS object
+ * @param jws JWS Object to be signed or its representation
+ * @param aad     Object protected header
+ * @param header  Object unprotected header
+ * @return Promise<String>
+ */
+JoseJWS.Signer.prototype.addSignature = function (jws, aad, header) {
+
+  var that = this;
+
+  if (Utils.isString(jws)) {
+    jws = JSON.parse(jws);
+  }
+
+  if (jws.payload && Utils.isString(jws.payload) &&
+    jws.protected && Utils.isString(jws.protected) &&
+    jws.header && jws.header instanceof Object &&
+    jws.signature && Utils.isString(jws.signature)) {
+    return that.sign(JWS.fromObject(jws), aad, header);
+  } else {
+    throw new Error("JWS is not a valid JWS object");
+  }
+};
+
+/**
+ * Computes signature.
+ *
+ * @param payload JWS Object or String to be signed
+ * @param aad     Object protected header
+ * @param header  Object unprotected header
+ * @return Promise<JWS>
+ */
+JoseJWS.Signer.prototype.sign = function (payload, aad, header) {
+
+  var that = this,
+    check = Object.keys(that.key_promises).length > 0,
+    kids = [];
+
+  if (!check) {
+    throw new Error("No signers defined. At least one is required to sign the JWS.");
+  }
+
+  if (that.waiting_kid) {
+    throw new Error("still generating key IDs");
+  }
+
+  function sign (message, protectedHeader, unprotectedHeader, rsa_key_promise, kid) {
+
+    var toBeSigned;
+
+    if (!protectedHeader) {
+      protectedHeader = {};
+    }
+
+    if (!protectedHeader.alg) {
+      protectedHeader.alg = that.cryptographer.getContentSignAlgorithm();
+      protectedHeader.typ = "JWT";
+    }
+
+    if (!protectedHeader.kid) {
+      protectedHeader.kid = kid;
+    }
+
+    if (Utils.isString(message)) {
+      toBeSigned = Utils.arrayFromString(message);
+    } else {
+      try {
+        toBeSigned = Utils.arrayish(message);
+      } catch (e) {
+        if (message instanceof JWS) {
+          toBeSigned = Utils.arrayFromString(Utils.Base64Url.decode(message.payload));
+        } else if (message instanceof Object) {
+          toBeSigned = Utils.arrayFromString(JSON.stringify(message));
+        } else {
+          throw new Error("cannot sign this message");
+        }
+      }
+    }
+
+    return that.cryptographer.sign(protectedHeader, toBeSigned, rsa_key_promise).then(function (signature) {
+      var jws = new JWS(protectedHeader, unprotectedHeader, toBeSigned, signature);
+      if (message instanceof JWS) {
+        delete jws.payload;
+        if (!message.signatures) {
+          message.signatures = [jws];
+        } else {
+          message.signatures.push(jws);
+        }
+        return message;
+      }
+      return jws;
+    });
+  }
+
+  function doSign (pl, ph, uh, kps, kids) {
+    if (kids.length) {
+      var k_id = kids.shift();
+      var rv = sign(pl, that.signer_aads[k_id] || ph, that.signer_headers[k_id] || uh, kps[k_id], k_id);
+      if (kids.length) {
+        rv = rv.then(function (jws) {
+          return doSign(jws, null, null, kps, kids);
+        });
+      }
+      return rv;
+    }
+  }
+
+  for(var kid in that.key_promises) {
+    if (that.key_promises.hasOwnProperty(kid)) {
+      kids.push(kid);
+    }
+  }
+  return doSign(payload, aad, header, that.key_promises, kids);
+};
+
+
+/**
+ * Initialize a JWS object.
+ *
+ * @param protectedHeader protected header (JS object)
+ * @param payload Uint8Array payload to be signed
+ * @param signature ArrayBuffer signature of the payload
+ * @param header unprotected header (JS object)
+ *
+ * @constructor
+ */
+var JWS = function (protectedHeader, header, payload, signature) {
+  var that = this;
+  that.header = header;
+  that.payload = Utils.Base64Url.encodeArray(payload);
+  if (signature) {
+    that.signature = Utils.Base64Url.encodeArray(signature);
+  }
+  that.protected = Utils.Base64Url.encode(JSON.stringify(protectedHeader));
+};
+
+JWS.fromObject = function (obj) {
+  var rv = new JWS(obj.protected, obj.header, obj.payload, null);
+  rv.signature = obj.signature;
+  rv.signatures = obj.signatures;
+  return rv;
+};
+
+/**
+ * Serialize a JWS object using the JSON serialization format
+ *
+ * @returns {Object} a copy of this
+ */
+JWS.prototype.JsonSerialize = function () {
+  return JSON.stringify(this);
+};
+
+/**
+ * Serialize a JWS object using the Compact Serialization Format
+ *
+ * @returns {string} BASE64URL(UTF8(PROTECTED HEADER)).BASE64URL(PAYLOAD).BASE64URL(SIGNATURE)
+ */
+JWS.prototype.CompactSerialize = function () {
+  var that = this;
+  return that.protected + '.' + that.payload + '.' + that.signature;
+};
+
+/*-
+ * Copyright 2015 Peculiar Ventures
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Handles signature verification.
+ *
+ * @param cryptographer  an instance of WebCryptographer (or equivalent). Keep
+ *                       in mind that decryption mutates the cryptographer.
+ * @param message        a JWS message
+ *
+ * @author Patrizio Bruno <patrizio@desertconsulting.net>
+ */
+JoseJWS.Verifier = function (cryptographer, message) {
+
+  var that = this,
+    alg,
+    jwt,
+    aad,
+    header,
+    payload,
+    signatures,
+    protectedHeader,
+    jwtRx = /^([0-9a-z_\-]+)\.([0-9a-z_\-]+)\.([0-9a-z_\-]+)$/i;
+
+  that.cryptographer = cryptographer;
+
+  alg = cryptographer.getContentSignAlgorithm();
+
+  that.cryptographer = new Jose.WebCryptographer();
+
+  if (Utils.isString(message)) {
+    if ((jwt = jwtRx.exec(message))) {
+      if (jwt.length != 4) {
+        throw new Error("wrong JWS compact serialization format");
+      }
+
+      message = {
+        protected: jwt[1],
+        payload: jwt[2],
+        signature: jwt[3]
+      };
+    } else {
+      message = JSON.parse(message);
+    }
+  } else if (typeof message != "object") {
+    throw new Error("data format not supported");
+  }
+
+  aad = message.protected;
+  header = message.header;
+  payload = message.payload;
+  signatures = message.signatures instanceof Array ? message.signatures.slice(0) : [];
+
+  signatures.forEach(function (sign) {
+    sign.aad = sign.protected;
+    sign.protected = JSON.parse(Utils.Base64Url.decode(sign.protected));
+  });
+
+  that.aad = aad;
+  protectedHeader = Utils.Base64Url.decode(aad);
+  try {
+    protectedHeader = JSON.parse(protectedHeader);
+  } catch (e) {
+  }
+
+  if (!protectedHeader && !header) {
+    throw new Error("at least one header is required");
+  }
+
+  if (!protectedHeader.alg) {
+    throw new Error("'alg' is a mandatory header");
+  }
+
+  if (protectedHeader.alg != alg) {
+    throw new Error("the alg header '" + protectedHeader.alg + "' doesn't match the requested algorithm '" + alg + "'");
+  }
+
+  if (protectedHeader && protectedHeader.typ && protectedHeader.typ != "JWT") {
+    throw new Error("typ '" + protectedHeader.typ + "' not supported");
+  }
+
+  if (message.signature) {
+    signatures.unshift({
+      aad: aad,
+      protected: protectedHeader,
+      header: header,
+      signature: message.signature
+    });
+  }
+
+  that.signatures = [];
+  for(var i = 0; i < signatures.length; i++) {
+    that.signatures[i] = JSON.parse(JSON.stringify(signatures[i]));
+    that.signatures[i].signature = Utils.arrayFromString(Utils.Base64Url.decode(signatures[i].signature));
+  }
+
+  that.payload = payload;
+
+  that.key_promises = {};
+  that.waiting_kid = 0;
+};
+
+/**
+ * Add supported recipients to verify multiple signatures
+ *
+ * @param rsa_key        public RSA key in json format. Parameters can be base64
+ *                       encoded, strings or number (for 'e').
+ * @param key_id         a string identifying the rsa_key. OPTIONAL
+ * @param alg            String signature algorithm. OPTIONAL
+ * @returns Promise<string> a Promise of a key id
+ */
+JoseJWS.Verifier.prototype.addRecipient = function (rsa_key, key_id, alg) {
+
+  var that = this,
+    kid_promise,
+    key_promise = Utils.isCryptoKey(rsa_key) ? new Promise(function (resolve) {
+      resolve(rsa_key);
+    }) : Jose.Utils.importRsaPublicKey(rsa_key, alg || that.cryptographer.getContentSignAlgorithm(), "verify");
+
+  if (key_id) {
+    kid_promise = new Promise(function (resolve) {
+      resolve(key_id);
+    });
+  } else if (Utils.isCryptoKey(rsa_key)) {
+    throw new Error("key_id is a mandatory argument when the key is a CryptoKey");
+  } else {
+    console.log("it's not safe to not pass a key_id");
+    kid_promise = Jose.WebCryptographer.keyId(rsa_key);
+  }
+
+  that.waiting_kid++;
+
+  return kid_promise.then(function (kid) {
+    that.key_promises[kid] = key_promise;
+    that.waiting_kid--;
+    return kid;
+  });
+};
+
+/**
+ * Verifies a JWS signature
+ *
+ * @returns Promise<Array> a Promise of an array  of objects { kid: string, verified: bool }
+ */
+JoseJWS.Verifier.prototype.verify = function () {
+
+  var that = this,
+    signatures = that.signatures,
+    key_promises = that.key_promises,
+    promises = [],
+    check = Object.keys(that.key_promises).length > 0;
+
+  if (!check) {
+    throw new Error("No recipients defined. At least one is required to verify the JWS.");
+  }
+
+  if (that.waiting_kid) {
+    throw new Error("still generating key IDs");
+  }
+
+  signatures.forEach(function (sig) {
+    var kid = sig.protected.kid;
+    promises.push(that.cryptographer.verify(sig.aad, that.payload, sig.signature, key_promises[kid], kid));
+  });
+  return Promise.all(promises);
+};
+
+}(window, window.crypto, window.Promise, window.Error, window.Uint8Array));
