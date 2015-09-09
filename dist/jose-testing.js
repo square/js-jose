@@ -1333,8 +1333,12 @@ JoseJWS.Signer.prototype.addSigner = function (rsa_key, key_id, aad, header) {
   return kid_promise.then(function (kid) {
     that.key_promises[kid] = key_promise;
     that.waiting_kid--;
-    if (aad) that.signer_aads[kid] = aad;
-    if (header) that.signer_headers[kid] = header;
+    if (aad) {
+      that.signer_aads[kid] = aad;
+    }
+    if (header) {
+      that.signer_headers[kid] = header;
+    }
     return kid;
   });
 };
