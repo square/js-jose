@@ -529,6 +529,7 @@ var Utils = {};
  *
  * @param rsa_key  public RSA key in json format. Parameters can be base64
  *                 encoded, strings or number (for 'e').
+ * @param alg      String, name of the algorithm
  * @return Promise<CryptoKey>
  */
 JoseJWE.Utils.importRsaPublicKey = function(rsa_key) {
@@ -546,6 +547,7 @@ JoseJWE.Utils.importRsaPublicKey = function(rsa_key) {
  *
  * @param rsa_key  private RSA key in json format. Parameters can be base64
  *                 encoded, strings or number (for 'e').
+ * @param alg      String, name of the algorithm
  * @return Promise<CryptoKey>
  */
 JoseJWE.Utils.importRsaPrivateKey = function(rsa_key) {
@@ -591,23 +593,24 @@ Utils.arrayish = function(arr) {
  */
 Utils.convertRsaKey = function(rsa_key, parameters) {
   var r = {};
+  var alg;
 
   // Check that we have all the parameters
   var missing = [];
-  parameters.map(function(p){if (rsa_key[p] === undefined) { missing.push(p); }});
+  parameters.map(function(p){if (typeof(rsa_key[p]) == "undefined") { missing.push(p); }});
 
   if (missing.length > 0) {
     JoseJWE.assert(false, "convertRsaKey: Was expecting " + missing.join());
   }
 
   // kty is either missing or is set to "RSA"
-  if (rsa_key.kty !== undefined) {
+  if (typeof(rsa_key.kty) != "undefined") {
     JoseJWE.assert(rsa_key.kty == "RSA", "convertRsaKey: expecting rsa_key['kty'] to be 'RSA'");
   }
   r.kty = "RSA";
 
   // alg is either missing or is set to "RSA-OAEP"
-  if (rsa_key.alg !== undefined) {
+  if (typeof(rsa_key.alg) != "undefined") {
     JoseJWE.assert(rsa_key.alg == "RSA-OAEP", "convertRsaKey: expecting rsa_key['alg'] to be 'RSA-OAEP'");
   }
   r.alg = "RSA-OAEP";
@@ -655,8 +658,8 @@ Utils.arrayFromString = function(str) {
 Utils.stringFromArray = function(arr) {
   JoseJWE.assert(arr instanceof ArrayBuffer, "stringFromArray: invalid input");
   arr = new Uint8Array(arr);
-  r = '';
-  for (var i = 0; i<arr.length; i++) {
+  var r = '';
+  for (var i = 0; i < arr.length; i++) {
     r += String.fromCharCode(arr[i]);
   }
   return r;
@@ -674,7 +677,7 @@ Utils.stripLeadingZeros = function(arr) {
   }
   var is_leading_zero = true;
   var r = [];
-  for (var i=0; i<arr.length; i++) {
+  for (var i = 0; i < arr.length; i++) {
     if (is_leading_zero && arr[i] === 0) {
       continue;
     }
@@ -696,8 +699,8 @@ Utils.arrayFromInt32 = function(i) {
 
   var buf = new Uint8Array(new Uint32Array([i]).buffer);
   var r = new Uint8Array(4);
-  for (var j=0; j<4; j++) {
-    r[j] = buf[3-j];
+  for (var j = 0; j < 4; j++) {
+    r[j] = buf[3 - j];
   }
   return r.buffer;
 };
@@ -705,21 +708,21 @@ Utils.arrayFromInt32 = function(i) {
 /**
  * Concatenates arrayishes.
  *
- * @param two or more arrayishes
+ * @param arguments two or more arrayishes
  * @return Uint8Array
  */
 Utils.arrayBufferConcat = function(/* ... */) {
   // Compute total size
   var args = [];
   var total = 0;
-  for (var i=0; i<arguments.length; i++) {
+  for (var i = 0; i < arguments.length; i++) {
     args.push(Utils.arrayish(arguments[i]));
     total += args[i].length;
   }
   var r = new Uint8Array(total);
   var offset = 0;
-  for (i=0; i<arguments.length; i++) {
-    for (var j=0; j<args[i].length; j++) {
+  for (i = 0; i < arguments.length; i++) {
+    for (var j = 0; j < args[i].length; j++) {
       r[offset++] = args[i][j];
     }
   }
@@ -746,14 +749,14 @@ Utils.Base64Url.encode = function(str) {
 /**
  * Base64Url encodes an array
  *
- * @param buf  array or ArrayBuffer
+ * @param arr array or ArrayBuffer
  * @return string
  */
 Utils.Base64Url.encodeArray = function(arr) {
   arr = Utils.arrayish(arr);
   var r = "";
-  for (i=0; i<arr.length; i++) {
-    r+=String.fromCharCode(arr[i]);
+  for (var i = 0; i < arr.length; i++) {
+    r += String.fromCharCode(arr[i]);
   }
   return Utils.Base64Url.encode(r);
 };
