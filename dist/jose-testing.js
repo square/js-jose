@@ -1290,16 +1290,14 @@ JoseJWE.Decrypter.prototype.decrypt = function(cipher_text) {
  *
  * @author Patrizio Bruno <patrizio@desertconsulting.net>
  */
-JoseJWS.Signer = function (cryptographer) {
+JoseJWS.Signer = function(cryptographer) {
+  this.cryptographer = cryptographer;
 
-  var that = this;
-  that.cryptographer = cryptographer;
-
-  that.key_promises = {};
-  that.waiting_kid = 0;
-  that.headers = {};
-  that.signer_aads = {};
-  that.signer_headers = {};
+  this.key_promises = {};
+  this.waiting_kid = 0;
+  this.headers = {};
+  this.signer_aads = {};
+  this.signer_headers = {};
 };
 
 /**
@@ -1311,15 +1309,26 @@ JoseJWS.Signer = function (cryptographer) {
  * @param aad            Object protected header
  * @param header         Object unprotected header
  */
-JoseJWS.Signer.prototype.addSigner = function (rsa_key, key_id, aad, header) {
-  var that = this,
-    key_promise = Utils.isCryptoKey(rsa_key) ? new Promise(function (resolve) {
+JoseJWS.Signer.prototype.addSigner = function(rsa_key, key_id, aad, header) {
+  var that = this;
+  var key_promise;
+  if (Utils.isCryptoKey(rsa_key)) {
+    key_promise = new Promise(function(resolve) {
       resolve(rsa_key);
-    }) : Jose.Utils.importRsaPrivateKey(rsa_key, aad && aad.alg ? aad.alg : that.cryptographer.getContentSignAlgorithm(), "sign"),
-    kid_promise;
+    });
+  } else {
+    var alg;
+    if (aad && aad.alg) {
+      alg = aad.alg;
+    } else {
+      alg = that.cryptographer.getContentSignAlgorithm();
+    }
+    key_promise = Jose.Utils.importRsaPrivateKey(rsa_key, alg, "sign");
+  }
 
+  var kid_promise;
   if (key_id) {
-    kid_promise = new Promise(function (resolve) {
+    kid_promise = new Promise(function(resolve) {
       resolve(key_id);
     });
   } else if (Utils.isCryptoKey(rsa_key)) {
@@ -1330,7 +1339,7 @@ JoseJWS.Signer.prototype.addSigner = function (rsa_key, key_id, aad, header) {
 
   that.waiting_kid++;
 
-  return kid_promise.then(function (kid) {
+  return kid_promise.then(function(kid) {
     that.key_promises[kid] = key_promise;
     that.waiting_kid--;
     if (aad) {
@@ -1350,10 +1359,7 @@ JoseJWS.Signer.prototype.addSigner = function (rsa_key, key_id, aad, header) {
  * @param header  Object unprotected header
  * @return Promise<String>
  */
-JoseJWS.Signer.prototype.addSignature = function (jws, aad, header) {
-
-  var that = this;
-
+JoseJWS.Signer.prototype.addSignature = function(jws, aad, header) {
   if (Utils.isString(jws)) {
     jws = JSON.parse(jws);
   }
@@ -1362,7 +1368,7 @@ JoseJWS.Signer.prototype.addSignature = function (jws, aad, header) {
     jws.protected && Utils.isString(jws.protected) &&
     jws.header && jws.header instanceof Object &&
     jws.signature && Utils.isString(jws.signature)) {
-    return that.sign(JWS.fromObject(jws), aad, header);
+    return this.sign(JWS.fromObject(jws), aad, header);
   } else {
     throw new Error("JWS is not a valid JWS object");
   }
@@ -1376,13 +1382,12 @@ JoseJWS.Signer.prototype.addSignature = function (jws, aad, header) {
  * @param header  Object unprotected header
  * @return Promise<JWS>
  */
-JoseJWS.Signer.prototype.sign = function (payload, aad, header) {
+JoseJWS.Signer.prototype.sign = function(payload, aad, header) {
 
-  var that = this,
-    check = Object.keys(that.key_promises).length > 0,
-    kids = [];
+  var that = this;
+  var kids = [];
 
-  if (!check) {
+  if (Object.keys(that.key_promises).length === 0) {
     throw new Error("No signers defined. At least one is required to sign the JWS.");
   }
 
@@ -1391,7 +1396,6 @@ JoseJWS.Signer.prototype.sign = function (payload, aad, header) {
   }
 
   function sign (message, protectedHeader, unprotectedHeader, rsa_key_promise, kid) {
-
     var toBeSigned;
 
     if (!protectedHeader) {
@@ -1423,7 +1427,7 @@ JoseJWS.Signer.prototype.sign = function (payload, aad, header) {
       }
     }
 
-    return that.cryptographer.sign(protectedHeader, toBeSigned, rsa_key_promise).then(function (signature) {
+    return that.cryptographer.sign(protectedHeader, toBeSigned, rsa_key_promise).then(function(signature) {
       var jws = new JWS(protectedHeader, unprotectedHeader, toBeSigned, signature);
       if (message instanceof JWS) {
         delete jws.payload;
@@ -1443,7 +1447,7 @@ JoseJWS.Signer.prototype.sign = function (payload, aad, header) {
       var k_id = kids.shift();
       var rv = sign(pl, that.signer_aads[k_id] || ph, that.signer_headers[k_id] || uh, kps[k_id], k_id);
       if (kids.length) {
-        rv = rv.then(function (jws) {
+        rv = rv.then(function(jws) {
           return doSign(jws, null, null, kps, kids);
         });
       }
@@ -1470,17 +1474,16 @@ JoseJWS.Signer.prototype.sign = function (payload, aad, header) {
  *
  * @constructor
  */
-var JWS = function (protectedHeader, header, payload, signature) {
-  var that = this;
-  that.header = header;
-  that.payload = Utils.Base64Url.encodeArray(payload);
+var JWS = function(protectedHeader, header, payload, signature) {
+  this.header = header;
+  this.payload = Utils.Base64Url.encodeArray(payload);
   if (signature) {
-    that.signature = Utils.Base64Url.encodeArray(signature);
+    this.signature = Utils.Base64Url.encodeArray(signature);
   }
-  that.protected = Utils.Base64Url.encode(JSON.stringify(protectedHeader));
+  this.protected = Utils.Base64Url.encode(JSON.stringify(protectedHeader));
 };
 
-JWS.fromObject = function (obj) {
+JWS.fromObject = function(obj) {
   var rv = new JWS(obj.protected, obj.header, obj.payload, null);
   rv.signature = obj.signature;
   rv.signatures = obj.signatures;
@@ -1492,7 +1495,7 @@ JWS.fromObject = function (obj) {
  *
  * @returns {Object} a copy of this
  */
-JWS.prototype.JsonSerialize = function () {
+JWS.prototype.JsonSerialize = function() {
   return JSON.stringify(this);
 };
 
@@ -1501,9 +1504,8 @@ JWS.prototype.JsonSerialize = function () {
  *
  * @returns {string} BASE64URL(UTF8(PROTECTED HEADER)).BASE64URL(PAYLOAD).BASE64URL(SIGNATURE)
  */
-JWS.prototype.CompactSerialize = function () {
-  var that = this;
-  return that.protected + '.' + that.payload + '.' + that.signature;
+JWS.prototype.CompactSerialize = function() {
+  return this.protected + '.' + this.payload + '.' + this.signature;
 };
 
 /*-
