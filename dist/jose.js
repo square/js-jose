@@ -401,8 +401,8 @@ WebCryptographer.prototype.decrypt = function(cek_promise, aad, iv, cipher_text,
  * Signs plain_text.
  *
  * @param aad         json
- * @param key_promise Promise<CryptoKey>
  * @param payload     String or json
+ * @param key_promise Promise<CryptoKey>
  * @return Promise<ArrayBuffer>
  */
 WebCryptographer.prototype.sign = function(aad, payload, key_promise) {
@@ -1054,29 +1054,20 @@ Utils.Base64Url.decodeArray = function(str) {
 };
 
 Utils.sha256 = function(str) {
-  return crypto.subtle.digest("SHA-256", Utils.arrayFromString(str)).then(function(hash) {
+  // Browser docs indicate the first parameter to crypto.subtle.digest to be a
+  // DOMString. This was initially implemented as an object and continues to be
+  // supported, so we favor the older form for backwards compatibility.
+  return crypto.subtle.digest({name: "SHA-256"}, Utils.arrayFromString(str)).then(function(hash) {
     return Utils.Base64Url.encodeArray(hash);
   });
 };
 
 Utils.isCryptoKey = function(rsa_key) {
-  var hexStr = /[a-f0-9]{2}(:[a-f0-9]{2})+/i;
-
-  if (typeof(window.CryptoKey) != 'undefined') {
-    return rsa_key instanceof CryptoKey;
-  }
-
-  if (rsa_key instanceof Object) {
-    return hexStr.test(rsa_key.n) &&
-      ((hexStr.test(rsa_key.e) || typeof(rsa_key.e) == 'number') ||
-      (hexStr.test(rsa_key.d) &&
-      hexStr.test(rsa_key.p) &&
-      hexStr.test(rsa_key.q) &&
-      hexStr.test(rsa_key.qi) &&
-      hexStr.test(rsa_key.dq) &&
-      hexStr.test(rsa_key.dp)));
-  }
+  // Some browsers don't expose the CryptoKey as an object, so we need to check
+  // the constructor's name.
+  return rsa_key.constructor.name == 'CryptoKey';
 };
+
 /*-
  * Copyright 2014 Square Inc.
  *
