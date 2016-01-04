@@ -236,6 +236,28 @@
       assert.willEqual(decrypted_plain_text_promise, plain_text, "got expected decrypted plain text");
     });
 
+    test("direct A256GCM", function(assert) {
+      var cryptographer = new Jose.WebCryptographer();
+      cryptographer.setKeyEncryptionAlgorithm("dir");
+
+      var shared_jwk = {"alg":"A256GCM","ext":true,"k":"Wx5b1Z2nZFgZ8wrEXHo497ZWuvpej1m3PVCgTReiMic","key_ops":["encrypt","decrypt"],"kty":"oct"};
+      var plaintext = "Idealism increases in direct proportion to one's distance from the problem. --John Galsworthy";
+      var shared_key;
+
+      var roundtrip = crypto.subtle.importKey("jwk", shared_jwk, {name: "AES-GCM"}, true, ["encrypt", "decrypt"])
+              .then(function(key) {
+                shared_key = key;
+                var encrypter = new JoseJWE.Encrypter(cryptographer, shared_key);
+                return encrypter.encrypt(plaintext);
+              })
+              .then(function(ciphertext) {
+                var decrypter = new JoseJWE.Decrypter(cryptographer, shared_key);
+                return decrypter.decrypt(ciphertext);
+              });
+
+      assert.willEqual(roundtrip, plaintext, "got expected decrypted plain text");
+    });
+
     test("setting invalid algorithm", function(assert) {
       var cryptographer = new Jose.WebCryptographer();
       assert.throws(function(){cryptographer.setKeyEncryptionAlgorithm("blah")}, "got exception when setting invalid algorithm");
