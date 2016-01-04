@@ -56,6 +56,93 @@
             }), true, "JWS message has been correctly verified");
 
         });
+
+        test("keyfinder", function(assert) {
+            var prvjwk = {
+                "alg": "RS256",
+                "d": "l0-Bq8hePldybBsBUon7eGgwD53XfzZNXKB9yq6V6DyOxpAP2KpASdCcTYlDWJb_tqdWSjqxDuWox0l6S3l-f6xjWu5Du1u0DATjzgtdGyrNw-yX0SZlVq_Nbotw0-0GT1VpyUmvNvCS_gy9tONDv4PIrfMe0fwaRoMFmVo40o18At6y4DMxWkH63wUTtXYFlGLH9dNd1yq4odIoqWYpA_aE0pxz1aGpqJzY0_-mXfB8oH-uAY6a474kAJV2PE25_mLxFRmT0qB-0qcpjoTn1SVQfMRaeWvh4YzU-o30mCKWmDgU5Obc0fK9buMoM3uQKFUkRNsCOg1o1_cjx6epsQ",
+                "dp": "R5dAKUQsBjKUCcoczkn5KOI3du5SU0F_p_2lpogHtR5vJcTZjluSm2lB7qgFheB80ZcVPtFiRN5h9A8qWmhHh5DIHibaQ0J_dVLH4CmmlKOBORzNJPicy54G99gsBzvTeqZ8_CYsrj1fRREMJxiHRk1uqe1VQ19nZQDZwrd8Q5E",
+                "dq": "pfXdH9NJdsMkKVUKruaw4K5jYONKVz499dbdTT8LgkkxoQy1Tvm_C1xJYO4KiK1qvjV9_jazqvGkvdxddPQOIc6bOmtm_UfSoMAdussi2spTK6eO5EAzDRcPfXqdgSc7ihjBdklma33q9iMhtIA2SE3IDG0QXswjKDfQ435n8Qk",
+                "e": "AQAB",
+                "ext": true,
+                "key_ops": ["sign"],
+                "kid": "76d4d722-4398-4fc4-a47e-df3d15de7fab",
+                "kty": "RSA",
+                "n": "xw6vxkASH4Jz23XLQMAj3FB55Dq4xCBwaTtUZpKSddMx3hvVeZb_nWv2Ogu18vL-x8LaYGYYG_LSirVA_tJ3ArEw_rqQDJOvsHTAuGrSOJkusJeC46Z5ZP0TndpunV6-04rxltjUVriwO8XzZdH4RnX_kSUEz3qeUc5j-OhTj59sG1-Os51iYiUEwDa6z8fn20wHRtEvPzG0MNQBX58CPuIM9bS8eNOZKUG-oVWAoWcbMfqEE5D8YsW_cZUWY9OLRa5C6xNRMfwlxYeMedJgehXJmxqaxSn0fe6-VZk9qcJDLiWg6vy1NYOJ8UOgtKtSPr7uL4Kc8K8akYVq-qHXAQ",
+                "p": "7ZYCLz4jFWW2ody4tPPOrDJn7dKXvkytUC6jL0_iGHNgjbcV3zEDkJC9eJWZaCXIwFKjnzlP4iQTHRqvE8pOFtHLaCj4MpEe9EIg6cZSoc866dVAD9aKS74TeCIQ5YBEvOAa_3h3Uecui0g_Xd0Hm3cr6VcNIMer2OffRmGTJcU",
+                "q": "1nw5av78m5eTQv9IgOuxzvy9NQfm2hw8eq2eBduYalIvpa_3QTWXzvJ7_iOomNzZyEm6AjmKQu1Ualfgqq5YDU-jKBY4Pd27SQXHFwO75dsOZc7Xn2QQbHLNNOL8vNSy9ZeEkvDJtwX1lJ9x9XLXztRqJZr_UqS5680zCPO__A0",
+                "qi": "Zv9pwzMgWoAFu9hwp-foLoCYaFdVGj8vV-QovqW507TzhRiZuaP9SsYEF5ZizhEDLtjSxX2KycQUt-EEP9piUvgPiF_K7zXmQ-clvh_qzXrOE4UhfXbAjLFCUBf8YcgFsCYzvvqom3ktxOC0FPhfJr7s2EXQIQjzK5Drm-fZTZc"
+            };
+            var pubjwk = {
+                "alg": "RS256",
+                "e": "AQAB",
+                "ext": true,
+                "key_ops": ["verify"],
+                "kid": "76d4d722-4398-4fc4-a47e-df3d15de7fab",
+                "kty": "RSA",
+                "n": "xw6vxkASH4Jz23XLQMAj3FB55Dq4xCBwaTtUZpKSddMx3hvVeZb_nWv2Ogu18vL-x8LaYGYYG_LSirVA_tJ3ArEw_rqQDJOvsHTAuGrSOJkusJeC46Z5ZP0TndpunV6-04rxltjUVriwO8XzZdH4RnX_kSUEz3qeUc5j-OhTj59sG1-Os51iYiUEwDa6z8fn20wHRtEvPzG0MNQBX58CPuIM9bS8eNOZKUG-oVWAoWcbMfqEE5D8YsW_cZUWY9OLRa5C6xNRMfwlxYeMedJgehXJmxqaxSn0fe6-VZk9qcJDLiWg6vy1NYOJ8UOgtKtSPr7uL4Kc8K8akYVq-qHXAQ"
+            };
+            var plaintext = "When you make the finding yourself - even if you're the last person on Earth to see the light - you'll never forget it. --Carl Sagan";
+
+            var pubjwks = {};
+            pubjwks[pubjwk.kid] = pubjwk;
+
+            var keyfinder = function (kid) {
+                var jwk = pubjwks[kid];
+                if (jwk) {
+                    return window.crypto.subtle.importKey("jwk", jwk,
+                            {name: "RSASSA-PKCS1-v1_5", hash: {name: "SHA-256"}},
+                            true, ['verify']);
+                } else {
+                    return Promise.reject(Error("unknown sender key id " + kid));
+                }
+            };
+
+            var cryptographer, signer;
+
+            assert.willEqual(window.crypto.subtle.importKey("jwk", prvjwk,
+                    {name: "RSASSA-PKCS1-v1_5", hash: {name: "SHA-256"}},
+                    true, ["sign"])
+                    .then(function (prvkey) {
+                        cryptographer = new Jose.WebCryptographer();
+                        cryptographer.setContentSignAlgorithm("RS256");
+                        signer = new JoseJWS.Signer(cryptographer);
+                        return signer.addSigner(prvkey, prvjwk.kid);
+                    })
+                    .then(function () {
+                        return signer.sign(plaintext);
+                    })
+                    .then(function (signed) {
+                        var verifier = new JoseJWS.Verifier(cryptographer, signed, keyfinder);
+                        return verifier.verify().then(function (result) {
+                            return result.filter(function (value) {
+                                        return !value.verified;
+                                    }).length == 0;
+                        });
+                    }),
+                    true, "keyfinder found key");
+
+            assert.wont(window.crypto.subtle.importKey("jwk", prvjwk,
+                    {name: "RSASSA-PKCS1-v1_5", hash: {name: "SHA-256"}},
+                    true, ["sign"])
+                    .then(function (prvkey) {
+                        cryptographer = new Jose.WebCryptographer();
+                        cryptographer.setContentSignAlgorithm("RS256");
+                        signer = new JoseJWS.Signer(cryptographer);
+                        return signer.addSigner(prvkey, "unknown");
+                    })
+                    .then(function () {
+                        return signer.sign(plaintext);
+                    })
+                    .then(function (signed) {
+                        var verifier = new JoseJWS.Verifier(cryptographer, signed, keyfinder);
+                        return verifier.verify().then(function (result) {
+                            return result.filter(function (value) {
+                                        return !value.verified;
+                                    }).length == 0;
+                        });
+                    }), "keyfinder rejected properly on unknown key");
+        });
     </script>
   </head>
   <body>
