@@ -100,15 +100,11 @@
 
             var cryptographer, signer;
 
-            assert.willEqual(window.crypto.subtle.importKey("jwk", prvjwk,
-                    {name: "RSASSA-PKCS1-v1_5", hash: {name: "SHA-256"}},
-                    true, ["sign"])
-                    .then(function (prvkey) {
-                        cryptographer = new Jose.WebCryptographer();
-                        cryptographer.setContentSignAlgorithm("RS256");
-                        signer = new JoseJWS.Signer(cryptographer);
-                        return signer.addSigner(prvkey, prvjwk.kid);
-                    })
+            cryptographer = new Jose.WebCryptographer();
+            cryptographer.setContentSignAlgorithm("RS256");
+            signer = new JoseJWS.Signer(cryptographer);
+
+            assert.willEqual(signer.addSigner(prvjwk, prvjwk.kid)
                     .then(function () {
                         return signer.sign(plaintext);
                     })
@@ -122,9 +118,11 @@
                     }),
                     true, "keyfinder found key");
 
-            assert.wont(window.crypto.subtle.importKey("jwk", prvjwk,
-                    {name: "RSASSA-PKCS1-v1_5", hash: {name: "SHA-256"}},
-                    true, ["sign"])
+            cryptographer = new Jose.WebCryptographer();
+            cryptographer.setContentSignAlgorithm("RS256");
+            signer = new JoseJWS.Signer(cryptographer);
+
+            assert.wont(signer.addSigner(prvjwk, prvjwk.kid)
                     .then(function (prvkey) {
                         cryptographer = new Jose.WebCryptographer();
                         cryptographer.setContentSignAlgorithm("RS256");
