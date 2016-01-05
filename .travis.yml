@@ -11,7 +11,6 @@ before_install:
 
 install: npm install
 
-#script: grunt with_coverage
-script: grunt concat uglify karma --force
+script: grunt with_coverage
 
 after_success: grunt coveralls
