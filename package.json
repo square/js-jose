@@ -21,5 +21,6 @@
     "karma-coverage": "^0.2.7",
     "karma-qunit": "^0.1.4",
     "qunitjs": "^1.15.0"
-  }
+  },
+  "typings": "jose-jwe-jws.d.ts"
 }
