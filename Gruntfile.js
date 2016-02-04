@@ -39,6 +39,18 @@ module.exports = function(grunt) {
           'lib/jose-jws-verify.js'
         ],
         dest: 'dist/jose-testing.js'
+      },
+      commonjs: {
+        src: [
+          'lib/jose-core.js',
+          'lib/jose-jwe-webcryptographer.js',
+          'lib/jose-utils.js',
+          'lib/jose-jwe-encrypt.js',
+          'lib/jose-jwe-decrypt.js',
+          'lib/jose-jws-sign.js',
+          'lib/jose-jws-verify.js'
+        ],
+        dest: 'dist/jose-commonjs.js'
       }
     },
 
