@@ -36,6 +36,34 @@ var JoseJWE = {};
 var JoseJWS = {};
 
 /**
+ * Set crypto provider to use (window.crypto, node-webcrypto-ossl, node-webcrypto-pkcs11 etc.).
+ */
+exports.setCrypto = function (cp) {
+  crypto = cp;
+};
+
+/**
+ * Use Node versions of atob, btoa functions outside the browser
+ */
+if (typeof atob !== "function") {
+  atob = function (str) {
+    return new Buffer(str, 'base64').toString('binary');
+  };
+}
+
+if (typeof btoa !== "function") {
+  btoa = function (str) {
+    var buffer;
+    if (str instanceof Buffer) {
+      buffer = str;
+    } else {
+      buffer = new Buffer(str.toString(), 'binary');
+    }
+    return buffer.toString('base64');
+  };
+}
+
+/**
  * Checks if we have all the required APIs.
  *
  * It might make sense to take a Cryptographer and delegate some of the checks
