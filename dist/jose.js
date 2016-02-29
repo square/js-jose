@@ -507,6 +507,10 @@ var getCryptoConfig = function(alg) {
         jwe_name: "A256KW",
         id: {name: "AES-KW", length: 256}
       };
+    case "dir":
+      return {
+        jwe_name: "dir"
+      };
 
     // Content encryption
     case "A128CBC-HS256":
@@ -1151,15 +1155,24 @@ JoseJWE.Encrypter.prototype.encrypt = function(plain_text) {
     });
   };
 
-  // Create a CEK key
-  var cek_promise = this.cryptographer.createCek();
+  var cek_promise, encrypted_cek;
 
-  // Key & Cek allows us to create the encrypted_cek
-  var encrypted_cek = Promise.all([this.key_promise, cek_promise]).then(function(all) {
+  if (this.cryptographer.getKeyEncryptionAlgorithm() == "dir") {
+    // with direct encryption, this.key_promise provides the cek
+    // and encrypted_cek is empty
+    cek_promise = Promise.resolve(this.key_promise);
+    encrypted_cek = [];
+  } else {
+    // Create a CEK key
+    cek_promise = this.cryptographer.createCek();
+
+    // Key & Cek allows us to create the encrypted_cek
+    encrypted_cek = Promise.all([this.key_promise, cek_promise]).then(function (all) {
       var key = all[0];
       var cek = all[1];
       return this.cryptographer.wrapCek(cek, key);
     }.bind(this));
+  }
 
   // Cek allows us to encrypy the plain text
   var enc_promise = encryptPlainText.bind(this, cek_promise, plain_text)();
@@ -1238,15 +1251,22 @@ JoseJWE.Decrypter.prototype.decrypt = function(cipher_text) {
     return Promise.reject(Error("decrypt: crit is not supported"));
   }
 
-  // part 2: decrypt the CEK
-  // In some modes (e.g. RSA-PKCS1v1.5), you must take precautions to prevent
-  // chosen-ciphertext attacks as described in RFC 3218, "Preventing
-  // the Million Message Attack on Cryptographic Message Syntax". We currently
-  // only support RSA-OAEP, so we don't generate a key if unwrapping fails.
-  var encrypted_cek = Utils.Base64Url.decodeArray(parts[1]);
-  var cek_promise = this.key_promise.then(function(key) {
-    return this.cryptographer.unwrapCek(encrypted_cek, key);
-  }.bind(this));
+  var cek_promise;
+
+  if (this.headers.alg == "dir") {
+    // with direct mode, we already have the cek
+    cek_promise = Promise.resolve(this.key_promise);
+  } else {
+    // part 2: decrypt the CEK
+    // In some modes (e.g. RSA-PKCS1v1.5), you must take precautions to prevent
+    // chosen-ciphertext attacks as described in RFC 3218, "Preventing
+    // the Million Message Attack on Cryptographic Message Syntax". We currently
+    // only support RSA-OAEP, so we don't generate a key if unwrapping fails.
+    var encrypted_cek = Utils.Base64Url.decodeArray(parts[1]);
+    cek_promise = this.key_promise.then(function (key) {
+      return this.cryptographer.unwrapCek(encrypted_cek, key);
+    }.bind(this));
+  }
 
   // part 3: decrypt the cipher text
   var plain_text_promise = this.cryptographer.decrypt(
@@ -1523,10 +1543,12 @@ JWS.prototype.CompactSerialize = function() {
  * @param cryptographer  an instance of WebCryptographer (or equivalent). Keep
  *                       in mind that decryption mutates the cryptographer.
  * @param message        a JWS message
+ * @param keyfinder (optional) a function returning a Promise<CryptoKey> given
+ *                             a key id
  *
  * @author Patrizio Bruno <patrizio@desertconsulting.net>
  */
-JoseJWS.Verifier = function (cryptographer, message) {
+JoseJWS.Verifier = function (cryptographer, message, keyfinder) {
 
   var that = this,
     alg,
@@ -1614,6 +1636,10 @@ JoseJWS.Verifier = function (cryptographer, message) {
 
   that.key_promises = {};
   that.waiting_kid = 0;
+
+  if (keyfinder) {
+    that.keyfinder = keyfinder;
+  }
 };
 
 /**
@@ -1663,8 +1689,9 @@ JoseJWS.Verifier.prototype.verify = function () {
   var that = this,
     signatures = that.signatures,
     key_promises = that.key_promises,
+      keyfinder = that.keyfinder,
     promises = [],
-    check = Object.keys(that.key_promises).length > 0;
+      check = !!keyfinder || Object.keys(that.key_promises).length > 0;
 
   if (!check) {
     throw new Error("No recipients defined. At least one is required to verify the JWS.");
@@ -1676,9 +1703,11 @@ JoseJWS.Verifier.prototype.verify = function () {
 
   signatures.forEach(function (sig) {
     var kid = sig.protected.kid;
+    if (keyfinder) {
+      key_promises[kid] = keyfinder(kid);
+    }
     promises.push(that.cryptographer.verify(sig.aad, that.payload, sig.signature, key_promises[kid], kid));
   });
   return Promise.all(promises);
 };
-
 }(window, window.crypto, window.Promise, window.Error, window.Uint8Array));
