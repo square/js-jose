@@ -18,8 +18,7 @@ multiple recipients in JWE messages. It should be easy to add that if needed.
 
 The library partially supports extra headers.
 
-The library uses the Web Crypto API, which is available in (recent browsers)
-[http://caniuse.com/#feat=cryptography]. As of March 2016, it seems +80%
+The library uses the Web Crypto API, which is available in (recent browsers)[http://caniuse.com/#feat=cryptography]. As of March 2016, it seems +80%
 of users have some form of Web Crypto support. It works fine on Node but requires a [polyfill for WebCrypto](https://github.com/PeculiarVentures/node-webcrypto-ossl) to be used.
 
 This code has been tested in Chrome 38 and is compatible with the [Golang
