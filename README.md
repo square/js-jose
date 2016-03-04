@@ -6,9 +6,8 @@ Javascript library for Jose JWE and JWS
 Overview
 --------
 JavaScript library to sign/verify and encrypt/decrypt data in JSON Web
-Signatures and Web Encryption (JWE) formats. This library is designed to work in
-the browser (tested in Chrome 38). It can do RSA-based public/private crypto as
-well as shared key encryption.
+Signatures and Web Encryption (JWE) formats. It can do RSA-based public/private
+crypto as well as shared key encryption.
 
 Both JWE and JWS are encapsulation formats which makes it easy to share
 signatures and ciphertext between different platforms: data signed or encrypted
@@ -19,9 +18,9 @@ multiple recipients in JWE messages. It should be easy to add that if needed.
 
 The library partially supports extra headers.
 
-The library uses the Web Crypto API, which is available in recent browsers
-(http://caniuse.com/#feat=cryptography). As of August 2015, it seems +70%
-of users have some form of Web Crypto support.
+The library uses the Web Crypto API, which is available in (recent browsers)
+[http://caniuse.com/#feat=cryptography]. As of March 2016, it seems +80%
+of users have some form of Web Crypto support. It works fine on Node but requires [polyfill for WebCrypto](https://github.com/PeculiarVentures/node-webcrypto-ossl) to be used.
 
 This code has been tested in Chrome 38 and is compatible with the [Golang
 implementation](https://github.com/square/go-jose).
@@ -180,14 +179,14 @@ things](https://status.modern.ie/webcryptoapi?term=crypto).
 
 Random other interesting resources
 ----------------------------------
-
-* Web Crypto API polyfill (_no longer under active development_): http://polycrypt.net/
-* Netflix' Web Crypto API polyfill: https://github.com/Netflix/NfWebCrypto
+* Web Crypto API polyfill for Node: https://github.com/PeculiarVentures/node-webcrypto-ossl
+* Web Crypto API polyfill for browsers: https://github.com/vibornoff/webcrypto-shim
+* MSR Web Crypto API Polyfill: http://research.microsoft.com/en-us/downloads/29f9385d-da4c-479a-b2ea-2a7bb335d727/
+* PKIjs - https://github.com/GlobalSign/PKI.js
+* ASN1js - https://github.com/GlobalSign/ASN1.js
 * JWT: https://github.com/michaelrhanson/jwt-js
 * BigInt, RSA, ECC: http://www-cs-students.stanford.edu/~tjw/jsbn/
 * asn1, pem, x509 and more: http://kjur.github.io/jsrsasign/ and
   https://github.com/michaelrhanson/jwt-js/tree/master/lib/kurushima-jsrsa
 * Stanford Javascript Crypto library: https://github.com/bitwiseshiftleft/sjcl
-* PKIjs - https://github.com/GlobalSign/PKI.js
-* ASN1js - https://github.com/GlobalSign/ASN1.js
 * https://gist.github.com/jo/8619441
