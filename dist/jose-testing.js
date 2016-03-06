@@ -1118,11 +1118,17 @@ Utils.isCryptoKey = function(rsa_key) {
  * Handles encryption.
  *
  * @param cryptographer  an instance of WebCryptographer (or equivalent).
- * @param key_promise    Promise<CryptoKey>, either RSA or shared key
+ * @param key    CryptoKey or Promise<CryptoKey>. Either RSA or a shared key.
  */
-JoseJWE.Encrypter = function(cryptographer, key_promise) {
+JoseJWE.Encrypter = function(cryptographer, key) {
   this.cryptographer = cryptographer;
-  this.key_promise = key_promise;
+  if (typeof key.then === 'function') {
+    this.key_promise = key;
+  } else if (Utils.isCryptoKey(key)) {
+    this.key_promise = Promise.resolve(key);
+  } else {
+    throw new Error('Unexpected argument \'key\': should be a CryptoKey promise or a CryptoKey object.');
+  }
   this.userHeaders = {};
 };
 
@@ -1236,15 +1242,17 @@ JoseJWE.Encrypter.prototype.encrypt = function(plain_text) {
  *
  * @param cryptographer  an instance of WebCryptographer (or equivalent). Keep
  *                       in mind that decryption mutates the cryptographer.
- * @param key    CryptoKey, Promise<CryptoKey>, either RSA or shared key
+ * @param key    CryptoKey or Promise<CryptoKey>. Either RSA or a shared key.
  */
 JoseJWE.Decrypter = function(cryptographer, key) {
   this.cryptographer = cryptographer;
-  // Identify JWK by kty property, try to import it
-  // or convert any passed key value into a promise
-  this.key_promise = (key.kty) ? Jose.Utils.importRsaPrivateKey(key) : new Promise(function (resolve) {
-    resolve(key);
-  });
+  if (typeof key.then === 'function') {
+    this.key_promise = key;
+  } else if (Utils.isCryptoKey(key)) {
+    this.key_promise = Promise.resolve(key);
+  } else {
+    throw new Error('Unexpected argument \'key\': should be a CryptoKey promise or a CryptoKey object.');
+  }
   this.headers = {};
 };
 

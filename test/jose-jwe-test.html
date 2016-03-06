@@ -336,6 +336,27 @@
       assert.wontEqual(encrypter2.encrypt(plain_text), "Error: invalid IV length", "fails to encrypt when we don't have the right IV length");
     });
 
+    test("Pass a CryptoKey object directly to Encrypter and Decrypter", function(assert) {
+      var cryptographer = new Jose.WebCryptographer();
+      cryptographer.setKeyEncryptionAlgorithm("RSA-OAEP-256");
+      cryptographer.setContentEncryptionAlgorithm("A256CBC-HS512");
+      var key_promise = crypto.subtle.generateKey({
+        name: "RSA-OAEP",
+        hash: {name: "SHA-256"},
+        modulusLength: 2048,
+        publicExponent: new Uint8Array([0x01, 0x00, 0x01])}, false, ["wrapKey", "unwrapKey"]);
+      var plain_text = "Always remember that you are absolutely unique. Just like everyone else. --Margaret Mead";
+
+      var decrypted_plain_text_promise = key_promise.then(function(key) {
+        var encrypter = new JoseJWE.Encrypter(cryptographer, key.publicKey);
+        return encrypter.encrypt(plain_text).then(function(cipher_text) {
+          var decrypter = new JoseJWE.Decrypter(cryptographer, key.privateKey);
+          return decrypter.decrypt(cipher_text);
+        });
+      });
+      assert.willEqual(decrypted_plain_text_promise, plain_text, "got expected decrypted plain text");
+    });
+
     test("caniuse", function(assert) {
       assert.equal(Jose.caniuse(), true);
     });
