@@ -67,7 +67,7 @@ module.exports = function(grunt) {
           preprocessors: {
             'dist/jose-testing.js': ['coverage']
           },
-          reporters: ['coverage'],
+          reporters: ['coverage', 'progress'],
           coverageReporter: {
             type : 'lcovonly',
             dir : 'coverage/'
