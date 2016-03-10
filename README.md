@@ -18,9 +18,8 @@ multiple recipients in JWE messages. It should be easy to add that if needed.
 
 The library partially supports extra headers.
 
-The library uses the Web Crypto API, which is available in (recent browsers)
-[http://caniuse.com/#feat=cryptography]. As of March 2016, it seems +80%
-of users have some form of Web Crypto support. It works fine on Node but requires [polyfill for WebCrypto](https://github.com/PeculiarVentures/node-webcrypto-ossl) to be used.
+The library uses the Web Crypto API, which is available in [recent browsers](http://caniuse.com/#feat=cryptography). As of March 2016, it seems +80%
+of users have some form of Web Crypto support. It works fine on Node but requires a [polyfill for WebCrypto](https://github.com/PeculiarVentures/node-webcrypto-ossl) to be used.
 
 This code has been tested in Chrome 38 and is compatible with the [Golang
 implementation](https://github.com/square/go-jose).
@@ -190,3 +189,4 @@ Random other interesting resources
   https://github.com/michaelrhanson/jwt-js/tree/master/lib/kurushima-jsrsa
 * Stanford Javascript Crypto library: https://github.com/bitwiseshiftleft/sjcl
 * https://gist.github.com/jo/8619441
+    
