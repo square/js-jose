@@ -120,6 +120,11 @@ export interface JoseJWE {
     Decrypter:Decrypter;
 }
 
+export interface setCrypto {
+    (cryptoProvider: any): any;
+}
+
+export var setCrypto: setCrypto;
 export var Jose: Jose;
 export var JoseJWE: JoseJWE;
 export var JoseJWS: JoseJWS;
