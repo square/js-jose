@@ -68,7 +68,13 @@ export interface Headers {
     crit?: string[];
 }
 
+export interface Utils {
+    importRsaPublicKey(rsa_key: JWKRSA, alg: string): PromiseLike<CryptoKey>;
+    importRsaPrivateKey(rsa_key: JWKRSA, alg: string): PromiseLike<CryptoKey>;
+}
+
 export interface Jose {
+    Utils: Utils;
     caniuse():boolean;
     WebCryptographer:WebCryptographer;
 }
