@@ -22,6 +22,34 @@ export interface WebCryptographer {
     verify(aad: string, payload: string, signature: Uint8Array, key: CryptoKey|PromiseLike<CryptoKey>, kid: string):PromiseLike<VerificationResult>;
 }
 
+export interface JsonWebKey {
+    kty: string;
+    alg?: string;
+    kid?: string;
+    use?: string;
+    key_ops?: string[];
+    x5u?: string;
+    x5c?: string[];
+    x5t?: string;
+    'x5t#S256'?: string;
+}
+
+export interface JWKRSA extends JsonWebKey {
+    n?: string;
+    e?: string;
+    d?: string;
+    p?: string;
+    q?: string;
+    dp?: string;
+    dq?: string;
+    qi?: string;
+    oth?: {
+        r: string;
+        d: string;
+        t: string;
+    }[];
+}
+
 export interface JwkSet {
     keys: JsonWebKey[];
 }
@@ -59,7 +87,7 @@ export interface Signer {
 export interface Verifier {
     new(cryptographer: WebCryptographer, msg: string,
         keyfinder?: (kid: string) => PromiseLike<CryptoKey>):Verifier;
-    addRecipient(pk: CryptoKey|string|JsonWebKey, kid?: string, alg?: string):PromiseLike<string>;
+    addRecipient(pk: CryptoKey|string|JWKRSA, kid?: string, alg?: string):PromiseLike<string>;
     verify(): PromiseLike<VerificationResult[]>;
 }
 
