@@ -80,6 +80,8 @@ export interface Jose {
 }
 
 export interface SignedJws {
+    JsonSerialize():Object;
+    CompactSerialize():string;
     header: string;
     protected: string;
     payload: string;
