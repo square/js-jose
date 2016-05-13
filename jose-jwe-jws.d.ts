@@ -84,6 +84,8 @@ export interface SignedJws {
     protected: string;
     payload: string;
     signature: string;
+    JsonSerialize(): Object;
+    CompactSerialize(): string;
 }
 
 export interface Signer {
