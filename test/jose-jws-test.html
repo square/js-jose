@@ -43,7 +43,7 @@
 
             assert.willEqual(ads_promise.then(function () {
                 return signer.sign(plain_text, null, {}).then(function (signature) {
-                    var verifier = new JoseJWS.Verifier(cryptographer, signature);
+                   var verifier = new JoseJWS.Verifier(cryptographer, signature);
                     return verifier.addRecipient(rsa_key).then(function() {
                         return verifier.verify().then(function(result) {
                             return result.filter(function(value) {

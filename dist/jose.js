@@ -973,6 +973,75 @@ Utils.stringFromArray = function(arr) {
 };
 
 /**
+ * Converts string into array of UTF-8 bytes. Implementation from Google closure:
+ * https://github.com/google/closure-library
+ * @param str string
+ * @return Uint8Array
+ */
+Utils.utf8BytesFromString = function(str) {
+  var out = [], p = 0;
+  for (var i = 0; i < str.length; i++) {
+    var c = str.charCodeAt(i);
+    if (c < 128) {
+      out[p++] = c;
+    } else if (c < 2048) {
+      out[p++] = (c >> 6) | 192;
+      out[p++] = (c & 63) | 128;
+    } else if (
+      ((c & 0xFC00) == 0xD800) && (i + 1) < str.length &&
+      ((str.charCodeAt(i + 1) & 0xFC00) == 0xDC00)) {
+      // Surrogate Pair
+      c = 0x10000 + ((c & 0x03FF) << 10) + (str.charCodeAt(++i) & 0x03FF);
+      out[p++] = (c >> 18) | 240;
+      out[p++] = ((c >> 12) & 63) | 128;
+      out[p++] = ((c >> 6) & 63) | 128;
+      out[p++] = (c & 63) | 128;
+    } else {
+      out[p++] = (c >> 12) | 224;
+      out[p++] = ((c >> 6) & 63) | 128;
+      out[p++] = (c & 63) | 128;
+    }
+  }
+  return new Uint8Array(out);
+};
+
+/**
+ * Converts UTF-8 byte array into string. Implementation from Google closure:
+ * https://github.com/google/closure-library
+ * @param utf8 arrayish
+ * @return string
+ */
+Utils.stringFromUtf8Bytes = function(utf8) {
+  var bytes = Utils.arrayish(utf8);
+  var out = [], pos = 0, c = 0;
+  var c2, c3, c4;
+  while (pos < bytes.length) {
+    var c1 = bytes[pos++];
+    if (c1 < 128) {
+      out[c++] = String.fromCharCode(c1);
+    } else if (c1 > 191 && c1 < 224) {
+      c2 = bytes[pos++];
+      out[c++] = String.fromCharCode((c1 & 31) << 6 | c2 & 63);
+    } else if (c1 > 239 && c1 < 365) {
+      // Surrogate Pair
+      c2 = bytes[pos++];
+      c3 = bytes[pos++];
+      c4 = bytes[pos++];
+      var u = ((c1 & 7) << 18 | (c2 & 63) << 12 | (c3 & 63) << 6 | c4 & 63) -
+        0x10000;
+      out[c++] = String.fromCharCode(0xD800 + (u >> 10));
+      out[c++] = String.fromCharCode(0xDC00 + (u & 1023));
+    } else {
+      c2 = bytes[pos++];
+      c3 = bytes[pos++];
+      out[c++] =
+        String.fromCharCode((c1 & 15) << 12 | (c2 & 63) << 6 | c3 & 63);
+    }
+  }
+  return out.join('');
+};
+
+/**
  * Strips leading zero in an array.
  *
  * @param arr  arrayish
@@ -1040,17 +1109,91 @@ Utils.arrayBufferConcat = function(/* ... */) {
 Utils.Base64Url = {};
 
 /**
- * Base64Url encodes a string (no trailing '=')
- *
- * @param str  string
- * @return string
+ * base64-js modified for URL-safe use. original from
+ * https://github.com/beatgammit/base64-js
  */
-Utils.Base64Url.encode = function(str) {
-  Jose.assert(Utils.isString(str), "Base64Url.encode: invalid input");
-  return btoa(str)
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_")
-    .replace(/=+$/, "");
+
+Utils.Base64Url.lookup = [];
+Utils.Base64Url.revLookup = [];
+
+Utils.Base64Url.initTables = function() {
+  var code = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
+  for (var i = 0, len = code.length; i < len; ++i) {
+    Utils.Base64Url.lookup[i] = code[i];
+    Utils.Base64Url.revLookup[code.charCodeAt(i)] = i;
+  }
+
+  //Utils.Base64Url.revLookup['-'.charCodeAt(0)] = 62;
+  //Utils.Base64Url.revLookup['_'.charCodeAt(0)] = 63;
+};
+
+Utils.Base64Url.initTables();
+
+/**
+ * Decode URL-safe base64 into an array of bytes. When dealing with
+ * arbitrary binary data, you must use this function directly, as
+ * opposed to calling decode and then arrayFromString, as decode
+ * will assume that the data is UTF-8.
+ *
+ * @param b64
+ * @returns {Uint8Array}
+ */
+
+Utils.Base64Url.decodeArray = function(b64) {
+  var i, j, l, tmp, placeHolders, arr;
+  var len = b64.length;
+
+  if (len % 4 > 0) {
+    b64 += ('===').slice(0, 4 - (b64.length % 4));
+    len = b64.length;
+  }
+
+  // the number of equal signs (place holders)
+  // if there are two placeholders, than the two characters before it
+  // represent one byte
+  // if there is only one, then the three characters before it represent 2 bytes
+  // this is just a cheap hack to not do indexOf twice
+  placeHolders = b64[len - 2] === '=' ? 2 : b64[len - 1] === '=' ? 1 : 0;
+
+  // base64 is 4/3 + up to two characters of the original data
+  arr = new Uint8Array(len * 3 / 4 - placeHolders);
+
+  // if there are placeholders, only get up to the last complete 4 chars
+  l = placeHolders > 0 ? len - 4 : len;
+
+  var L = 0;
+
+  for (i = 0, j = 0; i < l; i += 4, j += 3) {
+    tmp = (Utils.Base64Url.revLookup[b64.charCodeAt(i)] << 18) | (Utils.Base64Url.revLookup[b64.charCodeAt(i + 1)] << 12) | (Utils.Base64Url.revLookup[b64.charCodeAt(i + 2)] << 6) | Utils.Base64Url.revLookup[b64.charCodeAt(i + 3)];
+    arr[L++] = (tmp >> 16) & 0xFF;
+    arr[L++] = (tmp >> 8) & 0xFF;
+    arr[L++] = tmp & 0xFF;
+  }
+
+  if (placeHolders === 2) {
+    tmp = (Utils.Base64Url.revLookup[b64.charCodeAt(i)] << 2) | (Utils.Base64Url.revLookup[b64.charCodeAt(i + 1)] >> 4);
+    arr[L++] = tmp & 0xFF;
+  } else if (placeHolders === 1) {
+    tmp = (Utils.Base64Url.revLookup[b64.charCodeAt(i)] << 10) | (Utils.Base64Url.revLookup[b64.charCodeAt(i + 1)] << 4) | (Utils.Base64Url.revLookup[b64.charCodeAt(i + 2)] >> 2);
+    arr[L++] = (tmp >> 8) & 0xFF;
+    arr[L++] = tmp & 0xFF;
+  }
+
+  return arr;
+};
+
+Utils.Base64Url.tripletToBase64 = function(num) {
+  return Utils.Base64Url.lookup[num >> 18 & 0x3F] + Utils.Base64Url.lookup[num >> 12 & 0x3F] + Utils.Base64Url.lookup[num >> 6 & 0x3F] + Utils.Base64Url.lookup[num & 0x3F];
+};
+
+Utils.Base64Url.encodeChunk = function(uint8, start, end) {
+  var tmp;
+  var output = [];
+  for (var i = start; i < end; i += 3) {
+    tmp = (uint8[i] << 16) + (uint8[i + 1] << 8) + (uint8[i + 2]);
+    output.push(Utils.Base64Url.tripletToBase64(tmp));
+  }
+  return output.join('');
 };
 
 /**
@@ -1059,30 +1202,63 @@ Utils.Base64Url.encode = function(str) {
  * @param arr array or ArrayBuffer
  * @return string
  */
-Utils.Base64Url.encodeArray = function(arr) {
-  arr = Utils.arrayish(arr);
-  var r = "";
-  for (var i = 0; i < arr.length; i++) {
-    r += String.fromCharCode(arr[i]);
+Utils.Base64Url.encodeArray = function(uint8) {
+  uint8 = Utils.arrayish(uint8);
+  var tmp;
+  var len = uint8.length;
+  var extraBytes = len % 3; // if we have 1 byte left, pad 2 bytes
+  var output = '';
+  var parts = [];
+  var maxChunkLength = 16383; // must be multiple of 3
+
+  // go through the array every three bytes, we'll deal with trailing stuff later
+  for (var i = 0, len2 = len - extraBytes; i < len2; i += maxChunkLength) {
+    parts.push(Utils.Base64Url.encodeChunk(uint8, i, (i + maxChunkLength) > len2 ? len2 : (i + maxChunkLength)));
   }
-  return Utils.Base64Url.encode(r);
+
+  // pad the end with zeros, but make sure to not forget the extra bytes
+  if (extraBytes === 1) {
+    tmp = uint8[len - 1];
+    output += Utils.Base64Url.lookup[tmp >> 2];
+    output += Utils.Base64Url.lookup[(tmp << 4) & 0x3F];
+    //output += '=='
+  } else if (extraBytes === 2) {
+    tmp = (uint8[len - 2] << 8) + (uint8[len - 1]);
+    output += Utils.Base64Url.lookup[tmp >> 10];
+    output += Utils.Base64Url.lookup[(tmp >> 4) & 0x3F];
+    output += Utils.Base64Url.lookup[(tmp << 2) & 0x3F];
+    //output += '='
+  }
+
+  parts.push(output);
+
+  return parts.join('');
 };
 
 /**
- * Base64Url decodes a string
+ * Base64Url encodes a Unicode string (no trailing '=')
+ *
+ * @param str  string
+ * @return string
+ */
+Utils.Base64Url.encode = function(str) {
+  Jose.assert(Utils.isString(str), "Base64Url.encode: invalid input");
+  var utf8 = Utils.utf8BytesFromString(str);
+  var rv = Utils.Base64Url.encodeArray(utf8);
+  return rv.replace(/=+$/, "");
+};
+
+/**
+ * Base64Url decodes a Unicode string
  *
  * @param str  string
  * @return string
  */
 Utils.Base64Url.decode = function(str) {
   Jose.assert(Utils.isString(str), "Base64Url.decode: invalid input");
-  // atob is nice and ignores missing '='
-  return atob(str.replace(/-/g, "+").replace(/_/g, "/"));
-};
-
-Utils.Base64Url.decodeArray = function(str) {
-  Jose.assert(Utils.isString(str), "Base64Url.decodeArray: invalid input");
-  return Utils.arrayFromString(Utils.Base64Url.decode(str));
+  var utf8 = Utils.Base64Url.decodeArray(str);
+  var rv = Utils.stringFromUtf8Bytes(utf8);
+  return rv;
 };
 
 Utils.sha256 = function(str) {
@@ -1174,7 +1350,7 @@ JoseJWE.Encrypter.prototype.encrypt = function(plain_text) {
 
     // Create the AAD
     var aad = Utils.arrayFromString(jwe_protected_header);
-    plain_text = Utils.arrayFromString(plain_text);
+    plain_text = Utils.utf8BytesFromString(plain_text);
 
     return this.cryptographer.encrypt(iv, aad, cek_promise, plain_text).then(function(r) {
       r.header = jwe_protected_header;
@@ -1304,7 +1480,7 @@ JoseJWE.Decrypter.prototype.decrypt = function(cipher_text) {
     Utils.Base64Url.decodeArray(parts[3]),
     Utils.Base64Url.decodeArray(parts[4]));
 
-  return plain_text_promise.then(Utils.stringFromArray);
+  return plain_text_promise.then(Utils.stringFromUtf8Bytes);
 };
 
 /*-
@@ -1453,7 +1629,7 @@ JoseJWS.Signer.prototype.sign = function(payload, aad, header) {
     }
 
     if (Utils.isString(message)) {
-      toBeSigned = Utils.arrayFromString(message);
+      toBeSigned = Utils.utf8BytesFromString(message);
     } else {
       try {
         toBeSigned = Utils.arrayish(message);
@@ -1657,7 +1833,7 @@ JoseJWS.Verifier = function (cryptographer, message, keyfinder) {
   that.signatures = [];
   for(var i = 0; i < signatures.length; i++) {
     that.signatures[i] = JSON.parse(JSON.stringify(signatures[i]));
-    that.signatures[i].signature = Utils.arrayFromString(Utils.Base64Url.decode(signatures[i].signature));
+    that.signatures[i].signature = Utils.Base64Url.decodeArray(signatures[i].signature);
   }
 
   that.payload = payload;
