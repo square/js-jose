@@ -368,7 +368,7 @@ WebCryptographer.prototype.decrypt = function(cek_promise, aad, iv, cipher_text,
             throw new Error("compare failed");
           }
         }
-        return Promise.accept(null);
+        return Promise.resolve(null);
       });
     });
   };
@@ -747,6 +747,7 @@ var getKeyUsageByAlg = function(alg) {
       throw Error("unsupported algorithm: " + alg);
   }
 };
+
 /*-
  * Copyright 2014 Square Inc.
  *
