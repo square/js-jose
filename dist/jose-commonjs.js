@@ -941,7 +941,7 @@ Utils.convertRsaKey = function(rsa_key, parameters) {
 /**
  * Converts a string into an array of ascii codes.
  *
- * @param str  string
+ * @param str  ascii string
  * @return Uint8Array
  */
 Utils.arrayFromString = function(str) {
@@ -953,19 +953,48 @@ Utils.arrayFromString = function(str) {
 };
 
 /**
- * Converts an array of ascii codes into a string.
+ * Converts a string into an array of utf-8 codes.
  *
- * @param arr  ArrayBuffer
- * @return string
+* @param str  utf-8 string
+ * @return Uint8Array
+ */
+Utils.arrayFromUtf8String = function(str) {
+  Jose.assert(Utils.isString(str), "arrayFromUtf8String: invalid input");
+  // javascript represents strings as utf-16. Jose imposes the use of
+  // utf-8, so we need to convert from one representation to the other.
+  str = unescape(encodeURIComponent(str));
+  return Utils.arrayFromString(str);
+};
+
+/**
+ * Converts an array of ascii bytes into a string.
+ *
+ * @param arr  arrayish
+ * @return ascii string
  */
 Utils.stringFromArray = function(arr) {
-  Jose.assert(arr instanceof ArrayBuffer, "stringFromArray: invalid input");
-  arr = new Uint8Array(arr);
+  arr = Utils.arrayish(arr);
   var r = '';
   for (var i = 0; i < arr.length; i++) {
     r += String.fromCharCode(arr[i]);
   }
+
   return r;
+};
+
+/**
+ * Converts an array of ascii bytes into a string.
+ *
+ * @param arr  ArrayBuffer
+ * @return ascii string
+ */
+Utils.utf8StringFromArray = function(arr) {
+  Jose.assert(arr instanceof ArrayBuffer, "utf8StringFromArray: invalid input");
+
+  // javascript represents strings as utf-16. Jose imposes the use of
+  // utf-8, so we need to convert from one representation to the other.
+  var r = Utils.stringFromArray(arr);
+  return decodeURIComponent(escape(r));
 };
 
 /**
@@ -1056,12 +1085,7 @@ Utils.Base64Url.encode = function(str) {
  * @return string
  */
 Utils.Base64Url.encodeArray = function(arr) {
-  arr = Utils.arrayish(arr);
-  var r = "";
-  for (var i = 0; i < arr.length; i++) {
-    r += String.fromCharCode(arr[i]);
-  }
-  return Utils.Base64Url.encode(r);
+  return Utils.Base64Url.encode(Utils.stringFromArray(arr));
 };
 
 /**
@@ -1144,7 +1168,7 @@ JoseJWE.Encrypter.prototype.addHeader = function(k, v) {
 /**
  * Performs encryption.
  *
- * @param plain_text  String
+ * @param plain_text  utf-8 string
  * @return Promise<String>
  */
 JoseJWE.Encrypter.prototype.encrypt = function(plain_text) {
@@ -1170,7 +1194,7 @@ JoseJWE.Encrypter.prototype.encrypt = function(plain_text) {
 
     // Create the AAD
     var aad = Utils.arrayFromString(jwe_protected_header);
-    plain_text = Utils.arrayFromString(plain_text);
+    plain_text = Utils.arrayFromUtf8String(plain_text);
 
     return this.cryptographer.encrypt(iv, aad, cek_promise, plain_text).then(function(r) {
       r.header = jwe_protected_header;
@@ -1300,7 +1324,7 @@ JoseJWE.Decrypter.prototype.decrypt = function(cipher_text) {
     Utils.Base64Url.decodeArray(parts[3]),
     Utils.Base64Url.decodeArray(parts[4]));
 
-  return plain_text_promise.then(Utils.stringFromArray);
+  return plain_text_promise.then(Utils.utf8StringFromArray);
 };
 
 /*-
@@ -1414,7 +1438,7 @@ JoseJWS.Signer.prototype.addSignature = function(jws, aad, header) {
 /**
  * Computes signature.
  *
- * @param payload JWS Object or String to be signed
+ * @param payload JWS Object or utf-8 string to be signed
  * @param aad     Object protected header
  * @param header  Object unprotected header
  * @return Promise<JWS>
@@ -1449,7 +1473,7 @@ JoseJWS.Signer.prototype.sign = function(payload, aad, header) {
     }
 
     if (Utils.isString(message)) {
-      toBeSigned = Utils.arrayFromString(message);
+      toBeSigned = Utils.arrayFromUtf8String(message);
     } else {
       try {
         toBeSigned = Utils.arrayish(message);
