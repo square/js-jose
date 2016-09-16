@@ -1,6 +1,6 @@
 {
   "name": "jose-jwe-jws",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Library to encrypt and decrypt data in JSON Web Encryption (JWE) format and to sign data in JSON Web Signature (JWS) format. Leverages Browser's native web crypto API.",
   "keywords": [
     "crypto",
