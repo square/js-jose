@@ -23,7 +23,7 @@
             plain_text = "The true sign of intelligence is not knowledge but imagination.",
             sign_text_promise;
           cryptographer.setContentSignAlgorithm("RS256");
-          var ads_promise = signer.addSigner(rsa_key);
+          var ads_promise = signer.addSigner(rsa_key, "A.2.1");
 
             assert.willEqual(ads_promise.then(function () {
                 return signer.sign(plain_text, null, {}).then(function (signature) {
@@ -44,7 +44,7 @@
             assert.willEqual(ads_promise.then(function () {
                 return signer.sign(plain_text, null, {}).then(function (signature) {
                     var verifier = new JoseJWS.Verifier(cryptographer, signature);
-                    return verifier.addRecipient(rsa_key).then(function() {
+                    return verifier.addRecipient(rsa_key, "A.2.1").then(function() {
                         return verifier.verify().then(function(result) {
                             return result.filter(function(value) {
                                 return !value.verified;
@@ -54,6 +54,17 @@
 
                 });
             }), true, "JWS message has been correctly verified");
+
+          assert.willEqual(ads_promise.then(function () {
+            return signer.sign(plain_text, null, {}).then(function (signature) {
+              var verifier = new JoseJWS.Verifier(cryptographer, signature);
+              return verifier.addRecipient(rsa_key, "A.2.1").then(function () {
+                return verifier.verify().then(function (result) {
+                  return result[0].verified && result[0].payload === plain_text;
+                });
+              });
+            });
+          }), true, "JWS message payload matched expected plaintext");
 
         });
 
