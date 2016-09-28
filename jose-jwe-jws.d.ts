@@ -6,6 +6,7 @@ export interface EncryptionResult {
 export interface VerificationResult {
     kid: string;
     verified: boolean;
+    payload?: string;
 }
 
 export interface WebCryptographer {
