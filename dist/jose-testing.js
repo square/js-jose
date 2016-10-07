@@ -39,8 +39,13 @@ var JoseJWS = {};
  * Set crypto provider to use (window.crypto, node-webcrypto-ossl, node-webcrypto-pkcs11 etc.).
  */
 exports.setCrypto = function (cp) {
-  crypto = cp;
+  Jose.crypto = cp;
 };
+
+/**
+ * Default to the global "crypto" variable
+ */
+exports.setCrypto(crypto);
 
 /**
  * Use Node versions of atob, btoa functions outside the browser
@@ -96,17 +101,17 @@ Jose.caniuse = function() {
   r = r && (typeof Promise.all == "function");
 
   // Crypto (http://www.w3.org/TR/WebCryptoAPI/)
-  r = r && (typeof crypto == "object");
-  r = r && (typeof crypto.subtle == "object");
-  r = r && (typeof crypto.getRandomValues == "function");
-  r = r && (typeof crypto.subtle.importKey == "function");
-  r = r && (typeof crypto.subtle.generateKey == "function");
-  r = r && (typeof crypto.subtle.exportKey == "function");
-  r = r && (typeof crypto.subtle.wrapKey == "function");
-  r = r && (typeof crypto.subtle.unwrapKey == "function");
-  r = r && (typeof crypto.subtle.encrypt == "function");
-  r = r && (typeof crypto.subtle.decrypt == "function");
-  r = r && (typeof crypto.subtle.sign == "function");
+  r = r && (typeof Jose.crypto == "object");
+  r = r && (typeof Jose.crypto.subtle == "object");
+  r = r && (typeof Jose.crypto.getRandomValues == "function");
+  r = r && (typeof Jose.crypto.subtle.importKey == "function");
+  r = r && (typeof Jose.crypto.subtle.generateKey == "function");
+  r = r && (typeof Jose.crypto.subtle.exportKey == "function");
+  r = r && (typeof Jose.crypto.subtle.wrapKey == "function");
+  r = r && (typeof Jose.crypto.subtle.unwrapKey == "function");
+  r = r && (typeof Jose.crypto.subtle.encrypt == "function");
+  r = r && (typeof Jose.crypto.subtle.decrypt == "function");
+  r = r && (typeof Jose.crypto.subtle.sign == "function");
 
   // ArrayBuffer (http://people.mozilla.org/~jorendorff/es6-draft.html#sec-arraybuffer-constructor)
   r = r && (typeof ArrayBuffer == "function");
@@ -216,7 +221,7 @@ WebCryptographer.prototype.getContentSignAlgorithm = function() {
  */
 WebCryptographer.prototype.createIV = function() {
   var iv = new Uint8Array(new Array(this.content_encryption.iv_bytes));
-  return crypto.getRandomValues(iv);
+  return Jose.crypto.getRandomValues(iv);
 };
 
 /**
@@ -227,11 +232,11 @@ WebCryptographer.prototype.createIV = function() {
  */
 WebCryptographer.prototype.createCek = function() {
   var hack = getCekWorkaround(this.content_encryption);
-  return crypto.subtle.generateKey(hack.id, true, hack.enc_op);
+  return Jose.crypto.subtle.generateKey(hack.id, true, hack.enc_op);
 };
 
 WebCryptographer.prototype.wrapCek = function(cek, key) {
-  return crypto.subtle.wrapKey("raw", cek, key, this.key_encryption.id);
+  return Jose.crypto.subtle.wrapKey("raw", cek, key, this.key_encryption.id);
 };
 
 WebCryptographer.prototype.unwrapCek = function(cek, key) {
@@ -239,7 +244,7 @@ WebCryptographer.prototype.unwrapCek = function(cek, key) {
   var extractable = (this.content_encryption.specific_cek_bytes > 0);
   var key_encryption = this.key_encryption.id;
 
-  return crypto.subtle.unwrapKey("raw", cek, key, key_encryption, hack.id, extractable, hack.dec_op);
+  return Jose.crypto.subtle.unwrapKey("raw", cek, key, key_encryption, hack.id, extractable, hack.dec_op);
 };
 
 /**
@@ -294,7 +299,7 @@ WebCryptographer.prototype.encrypt = function(iv, aad, cek_promise, plain_text) 
     };
 
     return cek_promise.then(function(cek) {
-      return crypto.subtle.encrypt(enc, cek, plain_text).then(function(cipher_text) {
+      return Jose.crypto.subtle.encrypt(enc, cek, plain_text).then(function(cipher_text) {
         var offset = cipher_text.byteLength - tag_bytes;
         return {
           cipher: cipher_text.slice(0, offset),
@@ -313,7 +318,7 @@ WebCryptographer.prototype.encrypt = function(iv, aad, cek_promise, plain_text) 
         name: config.id.name,
         iv: iv
       };
-      return crypto.subtle.encrypt(enc, enc_key, plain_text);
+      return Jose.crypto.subtle.encrypt(enc, enc_key, plain_text);
     });
 
     // compute MAC
@@ -358,8 +363,8 @@ WebCryptographer.prototype.decrypt = function(cek_promise, aad, iv, cipher_text,
     Jose.assert(arr2 instanceof Uint8Array, "compare: invalid input");
 
     return mac_key_promise.then(function(mac_key) {
-      var hash1 = crypto.subtle.sign(config.auth.id, mac_key, arr1);
-      var hash2 = crypto.subtle.sign(config.auth.id, mac_key, arr2);
+      var hash1 = Jose.crypto.subtle.sign(config.auth.id, mac_key, arr1);
+      var hash2 = Jose.crypto.subtle.sign(config.auth.id, mac_key, arr2);
       return Promise.all([hash1, hash2]).then(function(all) {
         var hash1 = new Uint8Array(all[0]);
         var hash2 = new Uint8Array(all[1]);
@@ -391,7 +396,7 @@ WebCryptographer.prototype.decrypt = function(cek_promise, aad, iv, cipher_text,
 
     return cek_promise.then(function(cek) {
       var buf = Utils.arrayBufferConcat(cipher_text, tag);
-      return crypto.subtle.decrypt(dec, cek, buf);
+      return Jose.crypto.subtle.decrypt(dec, cek, buf);
     });
   } else {
     var keys = splitKey(config, cek_promise, ["decrypt"]);
@@ -415,7 +420,7 @@ WebCryptographer.prototype.decrypt = function(cek_promise, aad, iv, cipher_text,
           name: config.id.name,
           iv: iv
         };
-        return crypto.subtle.decrypt(dec, enc_key, cipher_text);
+        return Jose.crypto.subtle.decrypt(dec, enc_key, cipher_text);
       }).catch(function(err) {
         return Promise.reject(Error("decryptCiphertext: MAC failed."));
       });
@@ -440,7 +445,7 @@ WebCryptographer.prototype.sign = function(aad, payload, key_promise) {
 
   // Encrypt the plain text
   return key_promise.then(function(key) {
-    return crypto.subtle.sign(config.id, key, Utils.arrayFromString(Utils.Base64Url.encode(JSON.stringify(aad)) + '.' + Utils.Base64Url.encodeArray(payload)));
+    return Jose.crypto.subtle.sign(config.id, key, Utils.arrayFromString(Utils.Base64Url.encode(JSON.stringify(aad)) + '.' + Utils.Base64Url.encodeArray(payload)));
   });
 };
 
@@ -459,7 +464,7 @@ WebCryptographer.prototype.verify = function(aad, payload, signature, key_promis
 
   return key_promise.then(function(key) {
     config = getSignConfig(getJwaNameForSignKey(key));
-    return crypto.subtle.verify(config.id, key, signature, Utils.arrayFromString(aad + "." + payload)).then(function(res) {
+    return Jose.crypto.subtle.verify(config.id, key, signature, Utils.arrayFromString(aad + "." + payload)).then(function(res) {
       return {kid: key_id, verified: res};
     });
   });
@@ -484,21 +489,21 @@ Jose.WebCryptographer.keyId = function(rsa_key) {
 var splitKey = function(config, cek_promise, purpose) {
   // We need to split the CEK key into a MAC and ENC keys
   var cek_bytes_promise = cek_promise.then(function(cek) {
-    return crypto.subtle.exportKey("raw", cek);
+    return Jose.crypto.subtle.exportKey("raw", cek);
   });
   var mac_key_promise = cek_bytes_promise.then(function(cek_bytes) {
     if (cek_bytes.byteLength * 8 != config.id.length + config.auth.key_bytes * 8) {
       return Promise.reject(Error("encryptPlainText: incorrect cek length"));
     }
     var bytes = cek_bytes.slice(0, config.auth.key_bytes);
-    return crypto.subtle.importKey("raw", bytes, config.auth.id, false, ["sign"]);
+    return Jose.crypto.subtle.importKey("raw", bytes, config.auth.id, false, ["sign"]);
   });
   var enc_key_promise = cek_bytes_promise.then(function(cek_bytes) {
     if (cek_bytes.byteLength * 8 != config.id.length + config.auth.key_bytes * 8) {
       return Promise.reject(Error("encryptPlainText: incorrect cek length"));
     }
     var bytes = cek_bytes.slice(config.auth.key_bytes);
-    return crypto.subtle.importKey("raw", bytes, config.id, false, purpose);
+    return Jose.crypto.subtle.importKey("raw", bytes, config.id, false, purpose);
   });
   return [mac_key_promise, enc_key_promise];
 };
@@ -604,7 +609,7 @@ var truncatedMac = function(config, mac_key_promise, aad, iv, cipher_text) {
     var al_full = new Uint8Array(8);
     al_full.set(al, 4);
     var buf = Utils.arrayBufferConcat(aad, iv, cipher_text, al_full);
-    return crypto.subtle.sign(config.auth.id, mac_key, buf).then(function(bytes) {
+    return Jose.crypto.subtle.sign(config.auth.id, mac_key, buf).then(function(bytes) {
       return bytes.slice(0, config.auth.truncated_bytes);
     });
   });
@@ -808,7 +813,7 @@ Jose.Utils.importRsaPublicKey = function(rsa_key, alg) {
     jwk = Utils.convertRsaKey(rk, ["n", "e"]);
     jwk.ext = true;
   }
-  return crypto.subtle.importKey("jwk", jwk, config.id, false, [usage.publicKey]);
+  return Jose.crypto.subtle.importKey("jwk", jwk, config.id, false, [usage.publicKey]);
 };
 
 /**
@@ -848,7 +853,7 @@ Jose.Utils.importRsaPrivateKey = function(rsa_key, alg) {
     jwk = Utils.convertRsaKey(rk, ["n", "e", "d", "p", "q", "dp", "dq", "qi"]);
     jwk.ext = true;
   }
-  return crypto.subtle.importKey("jwk", jwk, config.id, false, [usage.privateKey]);
+  return Jose.crypto.subtle.importKey("jwk", jwk, config.id, false, [usage.privateKey]);
 };
 
 // Private functions
@@ -1112,7 +1117,7 @@ Utils.sha256 = function(str) {
   // Browser docs indicate the first parameter to crypto.subtle.digest to be a
   // DOMString. This was initially implemented as an object and continues to be
   // supported, so we favor the older form for backwards compatibility.
-  return crypto.subtle.digest({name: "SHA-256"}, Utils.arrayFromString(str)).then(function(hash) {
+  return Jose.crypto.subtle.digest({name: "SHA-256"}, Utils.arrayFromString(str)).then(function(hash) {
     return Utils.Base64Url.encodeArray(hash);
   });
 };
@@ -1120,7 +1125,9 @@ Utils.sha256 = function(str) {
 Utils.isCryptoKey = function(rsa_key) {
   // Some browsers don't expose the CryptoKey as an object, so we need to check
   // the constructor's name.
-  return rsa_key.constructor.name == 'CryptoKey';
+  if (rsa_key.constructor.name == 'CryptoKey') {
+    return true;
+  }
 };
 
 /*-
