@@ -1125,6 +1125,14 @@ Utils.isCryptoKey = function(rsa_key) {
   if (rsa_key.constructor.name == 'CryptoKey') {
     return true;
   }
+
+  // In the presence of minifiers, relying on class names can be problematic,
+  // so let's also allow objects that have an 'algorithm' property.
+  if (rsa_key.hasOwnProperty('algorithm')) {
+    return true;
+  }
+
+  return false;
 };
 
 /*-
