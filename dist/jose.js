@@ -1501,7 +1501,7 @@ JoseJWS.Signer.prototype.sign = function(payload, aad, header) {
         if (message instanceof JWS) {
           toBeSigned = Utils.arrayFromString(Utils.Base64Url.decode(message.payload));
         } else if (message instanceof Object) {
-          toBeSigned = Utils.arrayFromString(JSON.stringify(message));
+          toBeSigned = Utils.arrayFromUtf8String(JSON.stringify(message));
         } else {
           throw new Error("cannot sign this message");
         }
