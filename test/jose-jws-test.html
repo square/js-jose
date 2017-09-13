@@ -7,7 +7,7 @@
     <script src="qunit-promises.js"></script>
     <script src="../dist/jose-testing.js"></script>
     <script>
-        test("signature using RSASSA-PKCS1-v1_5 with SHA-256 (keys from appendix-A.2.1)", function(assert) {
+        QUnit.test("signature using RSASSA-PKCS1-v1_5 with SHA-256 (keys from appendix-A.2.1)", function(assert) {
           var rsa_key = {
             "n": "A1:F8:16:0A:E2:E3:C9:B4:65:CE:8D:2D:65:62:63:36:2B:92:7D:BE:29:E1:F0:24:77:FC:16:25:CC:90:A1:36:E3:8B:D9:34:97:C5:B6:EA:63:DD:77:11:E6:7C:74:29:F9:56:B0:FB:8A:8F:08:9A:DC:4B:69:89:3C:C1:33:3F:53:ED:D0:19:B8:77:84:25:2F:EC:91:4F:E4:85:77:69:59:4B:EA:42:80:D3:2C:0F:55:BF:62:94:4F:13:03:96:BC:6E:9B:DF:6E:BD:D2:BD:A3:67:8E:EC:A0:C6:68:F7:01:B3:8D:BF:FB:38:C8:34:2C:E2:FE:6D:27:FA:DE:4A:5A:48:74:97:9D:D4:B9:CF:9A:DE:C4:C7:5B:05:85:2C:2C:0F:5E:F8:A5:C1:75:03:92:F9:44:E8:ED:64:C1:10:C6:B6:47:60:9A:A4:78:3A:EB:9C:6C:9A:D7:55:31:30:50:63:8B:83:66:5C:6F:6F:7A:82:A3:96:70:2A:1F:64:1B:82:D3:EB:F2:39:22:19:49:1F:B6:86:87:2C:57:16:F5:0A:F8:35:8D:9A:8B:9D:17:C3:40:72:8F:7F:87:D8:9A:18:D8:FC:AB:67:AD:84:59:0C:2E:CF:75:93:39:36:3C:07:03:4D:6F:60:6F:9E:21:E0:54:56:CA:E5:E9:A1",
             "e": 65537,
@@ -28,16 +28,16 @@
             assert.willEqual(ads_promise.then(function () {
                 return signer.sign(plain_text, null, {}).then(function (signature) {
                     var b64uxp = /^[a-z0-9_-]+$/i;
-                    return b64uxp.test(signature.protected) &&
-                            b64uxp.test(signature.payload) &&
-                            b64uxp.test(signature.signature);
+                    return b64uxp.QUnit.test(signature.protected) &&
+                            b64uxp.QUnit.test(signature.payload) &&
+                            b64uxp.QUnit.test(signature.signature);
                 });
             }), true, "got right JSON serialization format");
 
             assert.willEqual(ads_promise.then(function () {
                 return signer.sign(plain_text, null, {}).then(function (signature) {
                     var xp = /([a-z0-9_-]+\.){2}[a-z0-9_-]+/i;
-                    return xp.test(signature.CompactSerialize());
+                    return xp.QUnit.test(signature.CompactSerialize());
                 });
             }), true, "got correct compact serialization format");
 
@@ -68,7 +68,7 @@
 
         });
 
-        test("keyfinder", function(assert) {
+        QUnit.test("keyfinder", function(assert) {
             var prvjwk = {
                 "alg": "RS256",
                 "d": "l0-Bq8hePldybBsBUon7eGgwD53XfzZNXKB9yq6V6DyOxpAP2KpASdCcTYlDWJb_tqdWSjqxDuWox0l6S3l-f6xjWu5Du1u0DATjzgtdGyrNw-yX0SZlVq_Nbotw0-0GT1VpyUmvNvCS_gy9tONDv4PIrfMe0fwaRoMFmVo40o18At6y4DMxWkH63wUTtXYFlGLH9dNd1yq4odIoqWYpA_aE0pxz1aGpqJzY0_-mXfB8oH-uAY6a474kAJV2PE25_mLxFRmT0qB-0qcpjoTn1SVQfMRaeWvh4YzU-o30mCKWmDgU5Obc0fK9buMoM3uQKFUkRNsCOg1o1_cjx6epsQ",
