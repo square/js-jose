@@ -116,7 +116,7 @@ interface ISigner {
 interface IVerifier {
     new(cryptographer: IWebCryptographer, msg: string,
         keyfinder?: (kid: string) => PromiseLike<CryptoKey>): IVerifier;
-    addRecipient(pk: CryptoKey | string | JWKRSA, kid?: string, alg?: JoseAlgorithm): PromiseLike<string>;
+    addRecipient(pk: CryptoKey | string | JWKRSA, kid?: string, alg?: SignAlgorithm): PromiseLike<string>;
     verify(): PromiseLike<IVerificationResult[]>;
 }
 
