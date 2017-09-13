@@ -28,16 +28,16 @@
             assert.willEqual(ads_promise.then(function () {
                 return signer.sign(plain_text, null, {}).then(function (signature) {
                     var b64uxp = /^[a-z0-9_-]+$/i;
-                    return b64uxp.QUnit.test(signature.protected) &&
-                            b64uxp.QUnit.test(signature.payload) &&
-                            b64uxp.QUnit.test(signature.signature);
+                    return b64uxp.test(signature.protected) &&
+                            b64uxp.test(signature.payload) &&
+                            b64uxp.test(signature.signature);
                 });
             }), true, "got right JSON serialization format");
 
             assert.willEqual(ads_promise.then(function () {
                 return signer.sign(plain_text, null, {}).then(function (signature) {
                     var xp = /([a-z0-9_-]+\.){2}[a-z0-9_-]+/i;
-                    return xp.QUnit.test(signature.CompactSerialize());
+                    return xp.test(signature.CompactSerialize());
                 });
             }), true, "got correct compact serialization format");
 
