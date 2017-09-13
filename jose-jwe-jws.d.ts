@@ -146,7 +146,7 @@ declare const Jose: IJose;
 declare const JoseJWE: IJoseJWE;
 declare const JoseJWS: IJoseJWS;
 
-declare module "jose-jwe" {
+declare module "jose-jwe-jws" {
     export function setCrypto(cryptoProvider: Crypto): void;
     export const Jose: IJose;
     export const JoseJWE: IJoseJWE;
