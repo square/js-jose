@@ -45,7 +45,9 @@ exports.setCrypto = function (cp) {
 /**
  * Default to the global "crypto" variable
  */
-exports.setCrypto(crypto);
+if (typeof crypto !== 'undefined') {
+  exports.setCrypto(crypto);
+}
 
 /**
  * Use Node versions of atob, btoa functions outside the browser
