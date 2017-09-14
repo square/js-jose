@@ -35,6 +35,5 @@
   },
   "typings": "jose-jwe-jws.d.ts",
   "main": "dist/jose-commonjs.js",
-  "dependencies": {
-  }
+  "dependencies": {}
 }

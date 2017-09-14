@@ -47,7 +47,7 @@ exports.setCrypto = function (cp) {
 /**
  * Default to the global "crypto" variable
  */
-if (typeof crypto !== 'undefined') {
+if (typeof(crypto) !== 'undefined') {
   exports.setCrypto(crypto);
 }
 

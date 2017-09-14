@@ -1,5 +1,5 @@
-// Type definitions for jose-jwe
-// Project: jose-jwe
+// Type definitions for jose-jwe-jws
+// Project: jose-jwe-jws
 // Definitions by: [~YOUR NAME~] <[~A URL FOR YOU~]>
 
 interface IEncryptionResult {
