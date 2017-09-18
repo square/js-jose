@@ -8,7 +8,7 @@
     <script src="../dist/jose-testing.js"></script>
 
     <script>
-    test("encryption using RSAES OAEP and AES GCM (keys & IV from appendix-A.1)", function(assert) {
+    QUnit.test("encryption using RSAES OAEP and AES GCM (keys & IV from appendix-A.1)", function(assert) {
       var cryptographer = new Jose.WebCryptographer();
       cryptographer.createIV = function() {
         return new Uint8Array([227, 197, 117, 252, 2, 219, 233, 68, 180, 225, 77, 219]);
@@ -91,7 +91,7 @@
     });
 
     // We can't test appendix-A.2 because Chrome dropped support for RSAES-PKCS1-V1_5.
-    test("encryption using AES Key Wrap and AES_128_CBC_HMAC_SHA_256 (keys & IV from appendix-A.3)", function(assert) {
+    QUnit.test("encryption using AES Key Wrap and AES_128_CBC_HMAC_SHA_256 (keys & IV from appendix-A.3)", function(assert) {
       var cryptographer = new Jose.WebCryptographer();
       cryptographer.setKeyEncryptionAlgorithm("A128KW");
       cryptographer.setContentEncryptionAlgorithm("A128CBC-HS256");
@@ -149,7 +149,7 @@
       assert.wontEqual(mac_failure, "Error: decryptCiphertext: MAC failed.", "invalid tag did not cause failure");
     });
 
-    test("key import", function(assert) {
+    QUnit.test("key import", function(assert) {
       var cryptographer = new Jose.WebCryptographer();
       cryptographer.setContentEncryptionAlgorithm("A128CBC-HS256");
 
@@ -178,7 +178,7 @@
       assert.willEqual(decrypted_plain_text_promise, plain_text, "got expected decrypted plain text");
     });
 
-    test("extra headers", function(assert) {
+    QUnit.test("extra headers", function(assert) {
       var cryptographer = new Jose.WebCryptographer();
       cryptographer.setKeyEncryptionAlgorithm("A128KW");
       var shared_key = {"kty":"oct", "k":"GawgguFyGrWKav7AX4VKUg"};
@@ -196,7 +196,7 @@
       assert.willEqual(decrypted_plain_text_promise.then(function(_){return decrypter.getHeaders()['cty']}), "text/plain", "got expected header");
     });
 
-    test("RSA-OAEP-256 with A256CBC-HS512", function(assert) {
+    QUnit.test("RSA-OAEP-256 with A256CBC-HS512", function(assert) {
       var cryptographer = new Jose.WebCryptographer();
       cryptographer.setKeyEncryptionAlgorithm("RSA-OAEP-256");
       cryptographer.setContentEncryptionAlgorithm("A256CBC-HS512");
@@ -217,7 +217,7 @@
       assert.willEqual(decrypted_plain_text_promise, plain_text, "got expected decrypted plain text");
     });
 
-    test("A256KW with A128GCM", function(assert) {
+    QUnit.test("A256KW with A128GCM", function(assert) {
       var cryptographer = new Jose.WebCryptographer();
       cryptographer.setKeyEncryptionAlgorithm("A256KW");
       cryptographer.setContentEncryptionAlgorithm("A128GCM");
@@ -236,7 +236,7 @@
       assert.willEqual(decrypted_plain_text_promise, plain_text, "got expected decrypted plain text");
     });
 
-    test("direct A256GCM", function(assert) {
+    QUnit.test("direct A256GCM", function(assert) {
       var cryptographer = new Jose.WebCryptographer();
       cryptographer.setKeyEncryptionAlgorithm("dir");
 
@@ -258,7 +258,7 @@
       assert.willEqual(roundtrip, plaintext, "got expected decrypted plain text");
     });
 
-    test("unicode encryption using RSAES OAEP and AES GCM (keys & IV from appendix-A.1)", function(assert) {
+    QUnit.test("unicode encryption using RSAES OAEP and AES GCM (keys & IV from appendix-A.1)", function(assert) {
       var cryptographer = new Jose.WebCryptographer();
       cryptographer.createIV = function () {
         return new Uint8Array([227, 197, 117, 252, 2, 219, 233, 68, 180, 225, 77, 219]);
@@ -312,7 +312,7 @@
       assert.willEqual(decrypted_plain_text_promise, plain_text, "Error: got expected decrypted plain text");
     });
 
-    test("unicode direct A256GCM", function(assert) {
+    QUnit.test("unicode direct A256GCM", function(assert) {
       var cryptographer = new Jose.WebCryptographer();
       cryptographer.setKeyEncryptionAlgorithm("dir");
 
@@ -334,12 +334,12 @@
       assert.willEqual(roundtrip, plaintext, "got expected decrypted plain text");
     });
 
-    test("setting invalid algorithm", function(assert) {
+    QUnit.test("setting invalid algorithm", function(assert) {
       var cryptographer = new Jose.WebCryptographer();
       assert.throws(function(){cryptographer.setKeyEncryptionAlgorithm("blah")}, "got exception when setting invalid algorithm");
     });
 
-    test("importing public key", function(assert) {
+    QUnit.test("importing public key", function(assert) {
       var rsa_key = {
         "e": 65537
       };
@@ -359,7 +359,7 @@
       assert.throws(function(){Jose.Utils.importRsaPublicKey(rsa_key, "RSA-OAEP")}, "got exception when importing invalid key");
     });
 
-    test("various decryption failures", function(assert) {
+    QUnit.test("various decryption failures", function(assert) {
       var cryptographer = new Jose.WebCryptographer();
       cryptographer.setKeyEncryptionAlgorithm("A128KW");
 
@@ -412,7 +412,7 @@
       assert.wontEqual(encrypter2.encrypt(plain_text), "Error: invalid IV length", "fails to encrypt when we don't have the right IV length");
     });
 
-    test("caniuse", function(assert) {
+    QUnit.test("caniuse", function(assert) {
       assert.equal(Jose.caniuse(), true);
     });
     </script>
