@@ -12,7 +12,7 @@ The library can be used to implement RSA-based public/private cryptography as
 well as shared key encryption.
 
 Both JWE and JWS are encapsulation formats which makes it easy to share
-ciphertext and signatures between different platforms: data encrypred or signed
+ciphertext and signatures between different platforms: data encrypted or signed
 in a browser can be verified or decrypted in Go, Java, etc.
 
 The library uses compact representation. There is therefore no support for
