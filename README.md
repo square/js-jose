@@ -97,12 +97,12 @@ Example signature
 
     var signer = new JoseJWS.Signer(cryptographer);
     signer.addSigner(rsa_key).then(function() {
-        signer.sign(plaintext.textContent, null, {}).then(function(message) {
+        signer.sign("hello world", null, {}).then(function(message) {
             console.log(message);
             var verifier = new JoseJWS.Verifier(cryptographer, message);
             verifier.addRecipient(rsa_key).then(function() {
                 verifier.verify().then(function(verified) {
-                    console.log(verified: ' + verified);
+                    console.log("verified: ", verified);
                 }).catch(function(err) {
                     console.error(err);
                 });
