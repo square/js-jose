@@ -76,7 +76,12 @@
         QUnit.push(false, actual, expected, 'promise resolved (but should have been rejected)');
         QUnit.start();
       }, function (actual) {
-        QUnit.push(actual == expected, actual, expected, message);
+        if (typeof expected === 'function') {
+          QUnit.push(expected(actual), actual, expected, message);
+        }
+        else {
+          QUnit.push(actual == expected, actual, expected, message);
+        }
         QUnit.start();
       });
     }
