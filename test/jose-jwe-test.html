@@ -87,7 +87,7 @@
         cipher_text.push("WFBoMYUZodetZdvTiFvSkQ");
         return decrypter.decrypt(cipher_text.join('.'));
       });
-      assert.wontEqual(mac_failure, "OperationError: ", "invalid tag did not cause failure");
+      assert.wontEqual(mac_failure, (actual) => {return actual.name === "OperationError"}, "invalid tag did not cause failure");
     });
 
     // We can't test appendix-A.2 because Chrome dropped support for RSAES-PKCS1-V1_5.
