@@ -837,7 +837,7 @@ Jose.Utils.importRsaPrivateKey = function(rsa_key, alg) {
       rsa_key.alg = alg;
     }
     jwk = Utils.convertRsaKey(rsa_key, ["n", "e", "d", "p", "q", "dp", "dq", "qi"]);
-    config = getCryptoConfig("RSA-OAEP");
+    config = getCryptoConfig(alg);
   } else {
     var rk = {};
     for (var name in rsa_key) {
