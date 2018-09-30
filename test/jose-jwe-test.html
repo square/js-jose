@@ -3,17 +3,18 @@
   <head>
     <meta charset="utf-8">
     <title>Jose JWE Test</title>
-
+    <link rel="stylesheet" href="../node_modules/qunitjs/qunit/qunit.css">
+    <script src="../node_modules/qunitjs/qunit/qunit.js"></script>
     <script src="qunit-promises.js"></script>
-    <script src="../dist/jose-testing.js"></script>
+    <script src="../dist/jose.js"></script>
 
     <script>
     QUnit.test("encryption using RSAES OAEP and AES GCM (keys & IV from appendix-A.1)", function(assert) {
       var cryptographer = new Jose.WebCryptographer();
-      cryptographer.createIV = function() {
+      cryptographer.createIV = () => {
         return new Uint8Array([227, 197, 117, 252, 2, 219, 233, 68, 180, 225, 77, 219]);
       };
-      cryptographer.createCek = function() {
+      cryptographer.createCek = () => {
         var cek = new Uint8Array([177, 161, 244, 128, 84, 143, 225, 115, 63, 180, 3, 255, 107, 154, 212, 246, 138, 7, 110, 91, 112, 46, 34, 105, 47, 130, 203, 46, 122, 234, 64, 252]);
         return crypto.subtle.importKey("raw", cek, {name: "AES-GCM"}, true, ["encrypt"]);
       };
@@ -51,7 +52,7 @@
         };
       var public_rsa_key = Jose.Utils.importRsaPublicKey(rsa_key, "RSA-OAEP");
       var plain_text = "The true sign of intelligence is not knowledge but imagination.";
-      var encrypter = new JoseJWE.Encrypter(cryptographer, public_rsa_key);
+      var encrypter = new Jose.JoseJWE.Encrypter(cryptographer, public_rsa_key);
       var cipher_text_promise = encrypter.encrypt(plain_text);
 
       assert.willEqual(cipher_text_promise.then(function(result){return result.split('.').length}),
@@ -74,7 +75,7 @@
         "got expected tag");
 
       var private_rsa_key = Jose.Utils.importRsaPrivateKey(rsa_key, "RSA-OAEP");
-      var decrypter = new JoseJWE.Decrypter(cryptographer, private_rsa_key);
+      var decrypter = new Jose.JoseJWE.Decrypter(cryptographer, private_rsa_key);
       var decrypted_plain_text_promise = cipher_text_promise.then(function(cipher_text){
         return decrypter.decrypt(cipher_text);
       });
@@ -107,7 +108,7 @@
       shared_key = crypto.subtle.importKey("jwk", shared_key, {name: "AES-KW"}, true, ["wrapKey", "unwrapKey"]);
 
       var plain_text = "Live long and prosper.";
-      var encrypter = new JoseJWE.Encrypter(cryptographer, shared_key);
+      var encrypter = new Jose.JoseJWE.Encrypter(cryptographer, shared_key);
       var cipher_text_promise = encrypter.encrypt(plain_text);
 
       assert.willEqual(cipher_text_promise.then(function(result){return result.split('.').length}),
@@ -133,7 +134,7 @@
         "U0m_YmjN04DJvceFICbCVQ",
         "got expected tag");
 
-      var decrypter = new JoseJWE.Decrypter(cryptographer, shared_key);
+      var decrypter = new Jose.JoseJWE.Decrypter(cryptographer, shared_key);
       var decrypted_plain_text_promise = cipher_text_promise.then(function(cipher_text){
         return decrypter.decrypt(cipher_text);
       });
@@ -167,12 +168,12 @@
 
       var public_rsa_key = Jose.Utils.importRsaPublicKey(rsa_key, "RSA-OAEP");
       var plain_text = "Look deep into nature, and then you will understand everything better. --Albert Einstein";
-      var encrypter = new JoseJWE.Encrypter(cryptographer, public_rsa_key);
+      var encrypter = new Jose.JoseJWE.Encrypter(cryptographer, public_rsa_key);
       var cipher_text_promise = encrypter.encrypt(plain_text);
 
       var private_rsa_key = Jose.Utils.importRsaPrivateKey(rsa_key, "RSA-OAEP");
       var decrypted_plain_text_promise = cipher_text_promise.then(function(cipher_text){
-        var decrypter = new JoseJWE.Decrypter(cryptographer, private_rsa_key);
+        var decrypter = new Jose.JoseJWE.Decrypter(cryptographer, private_rsa_key);
         return decrypter.decrypt(cipher_text);
       });
       assert.willEqual(decrypted_plain_text_promise, plain_text, "got expected decrypted plain text");
@@ -185,11 +186,11 @@
       shared_key = crypto.subtle.importKey("jwk", shared_key, cryptographer.key_encryption.id, true, ["wrapKey", "unwrapKey"]);
       var plain_text = "I only went out for a walk and finally concluded to stay out till sundown, for going out, I found, was really going in. --John Muir";
 
-      var encrypter = new JoseJWE.Encrypter(cryptographer, shared_key);
+      var encrypter = new Jose.JoseJWE.Encrypter(cryptographer, shared_key);
       encrypter.addHeader("cty", "text/plain");
       var cipher_text_promise = encrypter.encrypt(plain_text);
 
-      var decrypter = new JoseJWE.Decrypter(cryptographer, shared_key);
+      var decrypter = new Jose.JoseJWE.Decrypter(cryptographer, shared_key);
       var decrypted_plain_text_promise = cipher_text_promise.then(function(cipher_text){
         return decrypter.decrypt(cipher_text);
       });
@@ -208,9 +209,9 @@
       var plain_text = "Always remember that you are absolutely unique. Just like everyone else. --Margaret Mead";
 
       var decrypted_plain_text_promise = key_promise.then(function(key) {
-        var encrypter = new JoseJWE.Encrypter(cryptographer, Promise.resolve(key.publicKey));
+        var encrypter = new Jose.JoseJWE.Encrypter(cryptographer, Promise.resolve(key.publicKey));
         return encrypter.encrypt(plain_text).then(function(cipher_text) {
-          var decrypter = new JoseJWE.Decrypter(cryptographer, Promise.resolve(key.privateKey));
+          var decrypter = new Jose.JoseJWE.Decrypter(cryptographer, Promise.resolve(key.privateKey));
           return decrypter.decrypt(cipher_text);
         });
       });
@@ -226,11 +227,11 @@
       shared_key = crypto.subtle.importKey("jwk", shared_key, cryptographer.key_encryption.id, true, ["wrapKey", "unwrapKey"]);
 
       var plain_text = "All generalizations are false, including this one.  --Mark Twain";
-      var encrypter = new JoseJWE.Encrypter(cryptographer, shared_key);
+      var encrypter = new Jose.JoseJWE.Encrypter(cryptographer, shared_key);
       var cipher_text_promise = encrypter.encrypt(plain_text);
 
       var decrypted_plain_text_promise = cipher_text_promise.then(function(cipher_text){
-        var decrypter = new JoseJWE.Decrypter(cryptographer, shared_key);
+        var decrypter = new Jose.JoseJWE.Decrypter(cryptographer, shared_key);
         return decrypter.decrypt(cipher_text)
       });
       assert.willEqual(decrypted_plain_text_promise, plain_text, "got expected decrypted plain text");
@@ -247,11 +248,11 @@
       var roundtrip = crypto.subtle.importKey("jwk", shared_jwk, {name: "AES-GCM"}, true, ["encrypt", "decrypt"])
         .then(function(key) {
           shared_key = key;
-          var encrypter = new JoseJWE.Encrypter(cryptographer, shared_key);
+          var encrypter = new Jose.JoseJWE.Encrypter(cryptographer, shared_key);
           return encrypter.encrypt(plaintext);
         })
         .then(function(ciphertext) {
-          var decrypter = new JoseJWE.Decrypter(cryptographer, shared_key);
+          var decrypter = new Jose.JoseJWE.Decrypter(cryptographer, shared_key);
           return decrypter.decrypt(ciphertext);
         });
 
@@ -301,11 +302,11 @@
       };
       var public_rsa_key = Jose.Utils.importRsaPublicKey(rsa_key, "RSA-OAEP");
       var plain_text = "古池や・蛙飛びこむ・水の音 --松尾芭蕉";
-      var encrypter = new JoseJWE.Encrypter(cryptographer, public_rsa_key);
+      var encrypter = new Jose.JoseJWE.Encrypter(cryptographer, public_rsa_key);
       var cipher_text_promise = encrypter.encrypt(plain_text);
 
       var private_rsa_key = Jose.Utils.importRsaPrivateKey(rsa_key, "RSA-OAEP");
-      var decrypter = new JoseJWE.Decrypter(cryptographer, private_rsa_key);
+      var decrypter = new Jose.JoseJWE.Decrypter(cryptographer, private_rsa_key);
       var decrypted_plain_text_promise = cipher_text_promise.then(function (cipher_text) {
         return decrypter.decrypt(cipher_text);
       });
@@ -323,11 +324,11 @@
       var roundtrip = crypto.subtle.importKey("jwk", shared_jwk, {name: "AES-GCM"}, true, ["encrypt", "decrypt"])
         .then(function(key) {
           shared_key = key;
-          var encrypter = new JoseJWE.Encrypter(cryptographer, shared_key);
+          var encrypter = new Jose.JoseJWE.Encrypter(cryptographer, shared_key);
           return encrypter.encrypt(plaintext);
         })
         .then(function(ciphertext) {
-          var decrypter = new JoseJWE.Decrypter(cryptographer, shared_key);
+          var decrypter = new Jose.JoseJWE.Decrypter(cryptographer, shared_key);
           return decrypter.decrypt(ciphertext);
         });
 
@@ -367,10 +368,10 @@
       shared_key = crypto.subtle.importKey("jwk", shared_key, {name: "AES-KW"}, true, ["wrapKey", "unwrapKey"]);
 
       var plain_text = "A yawn is a silent scream for coffee. --unknown";
-      var encrypter = new JoseJWE.Encrypter(cryptographer, shared_key);
+      var encrypter = new Jose.JoseJWE.Encrypter(cryptographer, shared_key);
       var cipher_text_promise = encrypter.encrypt(plain_text);
 
-      var decrypter = new JoseJWE.Decrypter(cryptographer, shared_key);
+      var decrypter = new Jose.JoseJWE.Decrypter(cryptographer, shared_key);
       var decrypt_truncated_input_promise = cipher_text_promise.then(function(cipher_text){
         cipher_text = cipher_text.split('.').slice(1).join('.');
         return decrypter.decrypt(cipher_text);
@@ -408,7 +409,7 @@
       var cryptographer2 = new Jose.WebCryptographer();
       cryptographer2.setKeyEncryptionAlgorithm("A128KW");
       cryptographer2.createIV = function() { return new Uint8Array(new Array(11)); };
-      var encrypter2 = new JoseJWE.Encrypter(cryptographer2, shared_key);
+      var encrypter2 = new Jose.JoseJWE.Encrypter(cryptographer2, shared_key);
       assert.wontEqual(encrypter2.encrypt(plain_text), "Error: invalid IV length", "fails to encrypt when we don't have the right IV length");
     });
 
