@@ -1,1791 +1,231 @@
-(function(exports, crypto, Promise, Error, Uint8Array){
+var Jose =
+/******/ (function(modules) { // webpackBootstrap
+/******/ 	// The module cache
+/******/ 	var installedModules = {};
+/******/
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/
+/******/ 		// Check if module is in cache
+/******/ 		if(installedModules[moduleId]) {
+/******/ 			return installedModules[moduleId].exports;
+/******/ 		}
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = installedModules[moduleId] = {
+/******/ 			i: moduleId,
+/******/ 			l: false,
+/******/ 			exports: {}
+/******/ 		};
+/******/
+/******/ 		// Execute the module function
+/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+/******/
+/******/ 		// Flag the module as loaded
+/******/ 		module.l = true;
+/******/
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/
+/******/
+/******/ 	// expose the modules object (__webpack_modules__)
+/******/ 	__webpack_require__.m = modules;
+/******/
+/******/ 	// expose the module cache
+/******/ 	__webpack_require__.c = installedModules;
+/******/
+/******/ 	// define getter function for harmony exports
+/******/ 	__webpack_require__.d = function(exports, name, getter) {
+/******/ 		if(!__webpack_require__.o(exports, name)) {
+/******/ 			Object.defineProperty(exports, name, { enumerable: true, get: getter });
+/******/ 		}
+/******/ 	};
+/******/
+/******/ 	// define __esModule on exports
+/******/ 	__webpack_require__.r = function(exports) {
+/******/ 		if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+/******/ 			Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+/******/ 		}
+/******/ 		Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 	};
+/******/
+/******/ 	// create a fake namespace object
+/******/ 	// mode & 1: value is a module id, require it
+/******/ 	// mode & 2: merge all properties of value into the ns
+/******/ 	// mode & 4: return value when already ns object
+/******/ 	// mode & 8|1: behave like require
+/******/ 	__webpack_require__.t = function(value, mode) {
+/******/ 		if(mode & 1) value = __webpack_require__(value);
+/******/ 		if(mode & 8) return value;
+/******/ 		if((mode & 4) && typeof value === 'object' && value && value.__esModule) return value;
+/******/ 		var ns = Object.create(null);
+/******/ 		__webpack_require__.r(ns);
+/******/ 		Object.defineProperty(ns, 'default', { enumerable: true, value: value });
+/******/ 		if(mode & 2 && typeof value != 'string') for(var key in value) __webpack_require__.d(ns, key, function(key) { return value[key]; }.bind(null, key));
+/******/ 		return ns;
+/******/ 	};
+/******/
+/******/ 	// getDefaultExport function for compatibility with non-harmony modules
+/******/ 	__webpack_require__.n = function(module) {
+/******/ 		var getter = module && module.__esModule ?
+/******/ 			function getDefault() { return module['default']; } :
+/******/ 			function getModuleExports() { return module; };
+/******/ 		__webpack_require__.d(getter, 'a', getter);
+/******/ 		return getter;
+/******/ 	};
+/******/
+/******/ 	// Object.prototype.hasOwnProperty.call
+/******/ 	__webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
+/******/
+/******/ 	// __webpack_public_path__
+/******/ 	__webpack_require__.p = "";
+/******/
+/******/
+/******/ 	// Load entry module and return exports
+/******/ 	return __webpack_require__(__webpack_require__.s = "./lib/jose-core.js");
+/******/ })
+/************************************************************************/
+/******/ ({
+
+/***/ "./lib/jose-core.js":
+/*!**************************!*\
+  !*** ./lib/jose-core.js ***!
+  \**************************/
+/*! exports provided: crypto, Utils, WebCryptographer, JoseJWE, JoseJWS, setCrypto, caniuse */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
 "use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* WEBPACK VAR INJECTION */(function(Buffer, global) {/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"crypto\", function() { return crypto; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"Utils\", function() { return Utils; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"JoseJWE\", function() { return JoseJWE; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"JoseJWS\", function() { return JoseJWS; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"setCrypto\", function() { return setCrypto; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"caniuse\", function() { return caniuse; });\n/* harmony import */ var _jose_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./jose-utils */ \"./lib/jose-utils.js\");\n/* harmony import */ var _jose_jwe_encrypt__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./jose-jwe-encrypt */ \"./lib/jose-jwe-encrypt.js\");\n/* harmony import */ var _jose_jwe_decrypt__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./jose-jwe-decrypt */ \"./lib/jose-jwe-decrypt.js\");\n/* harmony import */ var _jose_jws_sign__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./jose-jws-sign */ \"./lib/jose-jws-sign.js\");\n/* harmony import */ var _jose_jws_verify__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./jose-jws-verify */ \"./lib/jose-jws-verify.js\");\n/* harmony import */ var _jose_jwe_webcryptographer__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./jose-jwe-webcryptographer */ \"./lib/jose-jwe-webcryptographer.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"WebCryptographer\", function() { return _jose_jwe_webcryptographer__WEBPACK_IMPORTED_MODULE_5__[\"WebCryptographer\"]; });\n\n/*-\n * Copyright 2014 Square Inc.\n *\n * Licensed under the Apache License, Version 2.0 (the \"License\");\n * you may not use this file except in compliance with the License.\n * You may obtain a copy of the License at\n *\n *     http://www.apache.org/licenses/LICENSE-2.0\n *\n * Unless required by applicable law or agreed to in writing, software\n * distributed under the License is distributed on an \"AS IS\" BASIS,\n * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n * See the License for the specific language governing permissions and\n * limitations under the License.\n */\n \n\n\n\n\n\nvar crypto;\n/**\n * Javascript Object Signing and Encryption library.\n *\n * @author Alok Menghrajani <alok@squareup.com>\n */\n\nvar Utils = _jose_utils__WEBPACK_IMPORTED_MODULE_0__;\n\n\n\n/**\n * Initializes a JoseJWE object.\n */\nvar JoseJWE = {\n  Encrypter: _jose_jwe_encrypt__WEBPACK_IMPORTED_MODULE_1__[\"Encrypter\"],\n  Decrypter: _jose_jwe_decrypt__WEBPACK_IMPORTED_MODULE_2__[\"Decrypter\"]\n};\n\n/**\n * Initializes a JoseJWS object.\n */\nvar JoseJWS = {\n  Signer: _jose_jws_sign__WEBPACK_IMPORTED_MODULE_3__[\"Signer\"],\n  Verifier: _jose_jws_verify__WEBPACK_IMPORTED_MODULE_4__[\"Verifier\"]\n};\n\n/**\n * Set crypto provider to use (window.crypto, node-webcrypto-ossl, node-webcrypto-pkcs11 etc.).\n */\nvar setCrypto = function (cp) {\n  crypto = cp;\n};\n\n/**\n * Default to the global \"crypto\" variable\n */\nif (typeof(window.crypto) !== 'undefined') {\n  setCrypto(window.crypto);\n  if(!crypto.subtle){ crypto.subtle = crypto.webkitSubtle; }\n}\n\n/**\n * Use Node versions of atob, btoa functions outside the browser\n */\nif (typeof atob !== \"function\") {\n  atob = (str) => {\n    return new Buffer(str, 'base64').toString('binary');\n  };\n}\n\nif (typeof btoa !== \"function\") {\n  btoa = (str) => {\n    var buffer;\n    if (str instanceof Buffer) {\n      buffer = str;\n    } else {\n      buffer = new Buffer(str.toString(), 'binary');\n    }\n    return buffer.toString('base64');\n  };\n}\n\n/**\n * Checks if we have all the required APIs.\n *\n * It might make sense to take a Cryptographer and delegate some of the checks\n * to the cryptographer. I however wanted to keep things simple, so I put all\n * the checks here for now.\n *\n * This list is generated manually and needs to be kept up-to-date.\n *\n * Casual testing shows that:\n * - things work in Chrome 40.0.2214.115\n * - things work in Firefox 35.0.1\n * - Safari 7.1.3 doesn't support JWK keys.\n * - Internet Explorer doesn't support Promises.\n *\n * Note: We don't check if the browser supports specific crypto operations.\n *       I.e. it's possible for this function to return true, but encryption or\n *       decryption to subsequently fail because the browser does not support a\n *       given encryption, decryption, key wrapping, key unwrapping or hmac\n *       operation.\n *\n * @return bool\n */\nconst caniuse = () => {\n  var r = true;\n\n  // Promises/A+ (https://promisesaplus.com/)\n  r = r && (typeof Promise == \"function\");\n  r = r && (typeof Promise.reject == \"function\");\n  r = r && (typeof Promise.prototype.then == \"function\");\n  r = r && (typeof Promise.all == \"function\");\n\n  const globalObject = window ? window : global;\n\n  // Crypto (http://www.w3.org/TR/WebCryptoAPI/)\n  r = r && (typeof globalObject.crypto == \"object\");\n  r = r && (typeof globalObject.crypto.subtle == \"object\");\n  r = r && (typeof globalObject.crypto.getRandomValues == \"function\");\n  r = r && (typeof globalObject.crypto.subtle.importKey == \"function\");\n  r = r && (typeof globalObject.crypto.subtle.generateKey == \"function\");\n  r = r && (typeof globalObject.crypto.subtle.exportKey == \"function\");\n  r = r && (typeof globalObject.crypto.subtle.wrapKey == \"function\");\n  r = r && (typeof globalObject.crypto.subtle.unwrapKey == \"function\");\n  r = r && (typeof globalObject.crypto.subtle.encrypt == \"function\");\n  r = r && (typeof globalObject.crypto.subtle.decrypt == \"function\");\n  r = r && (typeof globalObject.crypto.subtle.sign == \"function\");\n\n  // ArrayBuffer (http://people.mozilla.org/~jorendorff/es6-draft.html#sec-arraybuffer-constructor)\n  r = r && (typeof ArrayBuffer == \"function\");\n  r = r && (typeof Uint8Array == \"function\" || typeof Uint8Array == \"object\"); // Safari uses \"object\"\n  r = r && (typeof Uint32Array == \"function\" || typeof Uint32Array == \"object\"); // Safari uses \"object\"\n  // skipping Uint32Array.prototype.buffer because https://people.mozilla.org/~jorendorff/es6-draft.html#sec-properties-of-the-%typedarrayprototype%-object\n\n  // JSON (http://www.ecma-international.org/ecma-262/5.1/#sec-15.12.3)\n  r = r && (typeof JSON == \"object\");\n  r = r && (typeof JSON.parse == \"function\");\n  r = r && (typeof JSON.stringify == \"function\");\n\n  // Base64 (http://www.w3.org/TR/html5/webappapis.html#dom-windowbase64-atob)\n  r = r && (typeof atob == \"function\");\n  r = r && (typeof btoa == \"function\");\n\n  // skipping Array functions (map, join, push, length, etc.)\n  // skipping String functions (split, charCodeAt, fromCharCode, replace, etc.)\n  // skipping regexp.test and parseInt\n\n  return r;\n};\n\n/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../node_modules/buffer/index.js */ \"./node_modules/buffer/index.js\").Buffer, __webpack_require__(/*! ./../node_modules/webpack/buildin/global.js */ \"./node_modules/webpack/buildin/global.js\")))\n\n//# sourceURL=webpack://Jose/./lib/jose-core.js?");
 
-// supporting Safari and its vendor prefix
-if(!crypto.subtle) crypto.subtle = crypto.webkitSubtle;
-/*-
- * Copyright 2014 Square Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-var Jose = {};
-
-/**
- * Javascript Object Signing and Encryption library.
- *
- * @author Alok Menghrajani <alok@squareup.com>
- */
-
-/**
- * Initializes a JoseJWE object.
- */
-var JoseJWE = {};
-
-/**
- * Initializes a JoseJWS object.
- */
-var JoseJWS = {};
-
-/**
- * Set crypto provider to use (window.crypto, node-webcrypto-ossl, node-webcrypto-pkcs11 etc.).
- */
-exports.setCrypto = function (cp) {
-  Jose.crypto = cp;
-};
-
-/**
- * Default to the global "crypto" variable
- */
-if (typeof(crypto) !== 'undefined') {
-  exports.setCrypto(crypto);
-}
-
-/**
- * Use Node versions of atob, btoa functions outside the browser
- */
-if (typeof atob !== "function") {
-  atob = function (str) {
-    return new Buffer(str, 'base64').toString('binary');
-  };
-}
-
-if (typeof btoa !== "function") {
-  btoa = function (str) {
-    var buffer;
-    if (str instanceof Buffer) {
-      buffer = str;
-    } else {
-      buffer = new Buffer(str.toString(), 'binary');
-    }
-    return buffer.toString('base64');
-  };
-}
-
-/**
- * Checks if we have all the required APIs.
- *
- * It might make sense to take a Cryptographer and delegate some of the checks
- * to the cryptographer. I however wanted to keep things simple, so I put all
- * the checks here for now.
- *
- * This list is generated manually and needs to be kept up-to-date.
- *
- * Casual testing shows that:
- * - things work in Chrome 40.0.2214.115
- * - things work in Firefox 35.0.1
- * - Safari 7.1.3 doesn't support JWK keys.
- * - Internet Explorer doesn't support Promises.
- *
- * Note: We don't check if the browser supports specific crypto operations.
- *       I.e. it's possible for this function to return true, but encryption or
- *       decryption to subsequently fail because the browser does not support a
- *       given encryption, decryption, key wrapping, key unwrapping or hmac
- *       operation.
- *
- * @return bool
- */
-Jose.caniuse = function() {
-  var r = true;
-
-  // Promises/A+ (https://promisesaplus.com/)
-  r = r && (typeof Promise == "function");
-  r = r && (typeof Promise.reject == "function");
-  r = r && (typeof Promise.prototype.then == "function");
-  r = r && (typeof Promise.all == "function");
-
-  // Crypto (http://www.w3.org/TR/WebCryptoAPI/)
-  r = r && (typeof Jose.crypto == "object");
-  r = r && (typeof Jose.crypto.subtle == "object");
-  r = r && (typeof Jose.crypto.getRandomValues == "function");
-  r = r && (typeof Jose.crypto.subtle.importKey == "function");
-  r = r && (typeof Jose.crypto.subtle.generateKey == "function");
-  r = r && (typeof Jose.crypto.subtle.exportKey == "function");
-  r = r && (typeof Jose.crypto.subtle.wrapKey == "function");
-  r = r && (typeof Jose.crypto.subtle.unwrapKey == "function");
-  r = r && (typeof Jose.crypto.subtle.encrypt == "function");
-  r = r && (typeof Jose.crypto.subtle.decrypt == "function");
-  r = r && (typeof Jose.crypto.subtle.sign == "function");
-
-  // ArrayBuffer (http://people.mozilla.org/~jorendorff/es6-draft.html#sec-arraybuffer-constructor)
-  r = r && (typeof ArrayBuffer == "function");
-  r = r && (typeof Uint8Array == "function" || typeof Uint8Array == "object"); // Safari uses "object"
-  r = r && (typeof Uint32Array == "function" || typeof Uint32Array == "object"); // Safari uses "object"
-  // skipping Uint32Array.prototype.buffer because https://people.mozilla.org/~jorendorff/es6-draft.html#sec-properties-of-the-%typedarrayprototype%-object
-
-  // JSON (http://www.ecma-international.org/ecma-262/5.1/#sec-15.12.3)
-  r = r && (typeof JSON == "object");
-  r = r && (typeof JSON.parse == "function");
-  r = r && (typeof JSON.stringify == "function");
-
-  // Base64 (http://www.w3.org/TR/html5/webappapis.html#dom-windowbase64-atob)
-  r = r && (typeof atob == "function");
-  r = r && (typeof btoa == "function");
-
-  // skipping Array functions (map, join, push, length, etc.)
-  // skipping String functions (split, charCodeAt, fromCharCode, replace, etc.)
-  // skipping regexp.test and parseInt
-
-  return r;
-};
-
-/**
- * Feel free to override this function.
- */
-Jose.assert = function(expr, msg) {
-  if (!expr) {
-    throw new Error(msg);
-  }
-};
-
-exports.Jose = Jose;
-exports.JoseJWE = JoseJWE;
-exports.JoseJWS = JoseJWS;
-/*-
- * Copyright 2014 Square Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * The WebCryptographer uses http://www.w3.org/TR/WebCryptoAPI/ to perform
- * various crypto operations. In theory, this should help build the library with
- * different underlying crypto APIs. I'm however unclear if we'll run into code
- * duplication or callback vs Promise based API issues.
- */
-var WebCryptographer = function() {
-  this.setKeyEncryptionAlgorithm("RSA-OAEP");
-  this.setContentEncryptionAlgorithm("A256GCM");
-  this.setContentSignAlgorithm("RS256");
-};
-
-Jose.WebCryptographer = WebCryptographer;
-
-/**
- * Overrides the default key encryption algorithm
- * @param alg  string
- */
-WebCryptographer.prototype.setKeyEncryptionAlgorithm = function(alg) {
-  this.key_encryption = getCryptoConfig(alg);
-};
-
-WebCryptographer.prototype.getKeyEncryptionAlgorithm = function() {
-  return this.key_encryption.jwe_name;
-};
-
-/**
- * Overrides the default content encryption algorithm
- * @param alg  string
- */
-WebCryptographer.prototype.setContentEncryptionAlgorithm = function(alg) {
-  this.content_encryption = getCryptoConfig(alg);
-};
-
-WebCryptographer.prototype.getContentEncryptionAlgorithm = function() {
-  return this.content_encryption.jwe_name;
-};
-
-/**
- * Overrides the default content sign algorithm
- * @param alg  string
- */
-WebCryptographer.prototype.setContentSignAlgorithm = function(alg) {
-  this.content_sign = getSignConfig(alg);
-};
-
-WebCryptographer.prototype.getContentSignAlgorithm = function() {
-  return this.content_sign.jwa_name;
-};
-
-/**
- * Generates an IV.
- * This function mainly exists so that it can be mocked for testing purpose.
- *
- * @return Uint8Array with random bytes
- */
-WebCryptographer.prototype.createIV = function() {
-  var iv = new Uint8Array(new Array(this.content_encryption.iv_bytes));
-  return Jose.crypto.getRandomValues(iv);
-};
-
-/**
- * Creates a random content encryption key.
- * This function mainly exists so that it can be mocked for testing purpose.
- *
- * @return Promise<CryptoKey>
- */
-WebCryptographer.prototype.createCek = function() {
-  var hack = getCekWorkaround(this.content_encryption);
-  return Jose.crypto.subtle.generateKey(hack.id, true, hack.enc_op);
-};
-
-WebCryptographer.prototype.wrapCek = function(cek, key) {
-  return Jose.crypto.subtle.wrapKey("raw", cek, key, this.key_encryption.id);
-};
-
-WebCryptographer.prototype.unwrapCek = function(cek, key) {
-  var hack = getCekWorkaround(this.content_encryption);
-  var extractable = (this.content_encryption.specific_cek_bytes > 0);
-  var key_encryption = this.key_encryption.id;
-
-  return Jose.crypto.subtle.unwrapKey("raw", cek, key, key_encryption, hack.id, extractable, hack.dec_op);
-};
-
-/**
- * Returns algorithm and operation needed to create a CEK.
- *
- * In some cases, e.g. A128CBC-HS256, the CEK gets split into two keys. The Web
- * Crypto API does not allow us to generate an arbitrary number of bytes and
- * then create a CryptoKey without any associated algorithm. We therefore piggy
- * back on AES-CBS and HMAC which allows the creation of CEKs of size 16, 32, 64
- * and 128 bytes.
- */
-var getCekWorkaround = function(alg) {
-  var len = alg.specific_cek_bytes;
-  if (len) {
-    if (len == 16) {
-      return {id: {name: "AES-CBC", length: 128}, enc_op: ["encrypt"], dec_op: ["decrypt"]};
-    } else if (len == 32) {
-      return {id: {name: "AES-CBC", length: 256}, enc_op: ["encrypt"], dec_op: ["decrypt"]};
-    } else if (len == 64) {
-      return {id: {name: "HMAC", hash: {name: "SHA-256"}}, enc_op: ["sign"], dec_op: ["verify"]};
-    } else if (len == 128) {
-      return {id: {name: "HMAC", hash: {name: "SHA-384"}}, enc_op: ["sign"], dec_op: ["verify"]};
-    } else {
-      Jose.assert(false, "getCekWorkaround: invalid len");
-    }
-  }
-  return {id: alg.id, enc_op: ["encrypt"], dec_op: ["decrypt"]};
-};
-
-/**
- * Encrypts plain_text with cek.
- *
- * @param iv          Uint8Array
- * @param aad         Uint8Array
- * @param cek_promise Promise<CryptoKey>
- * @param plain_text  Uint8Array
- * @return Promise<json>
- */
-WebCryptographer.prototype.encrypt = function(iv, aad, cek_promise, plain_text) {
-  var config = this.content_encryption;
-  if (iv.length != config.iv_bytes) {
-    return Promise.reject(Error("invalid IV length"));
-  }
-  if (config.auth.aead) {
-    var tag_bytes = config.auth.tag_bytes;
-
-    var enc = {
-      name: config.id.name,
-      iv: iv,
-      additionalData: aad,
-      tagLength: tag_bytes * 8
-    };
-
-    return cek_promise.then(function(cek) {
-      return Jose.crypto.subtle.encrypt(enc, cek, plain_text).then(function(cipher_text) {
-        var offset = cipher_text.byteLength - tag_bytes;
-        return {
-          cipher: cipher_text.slice(0, offset),
-          tag: cipher_text.slice(offset)
-        };
-      });
-    });
-  } else {
-    var keys = splitKey(config, cek_promise, ["encrypt"]);
-    var mac_key_promise = keys[0];
-    var enc_key_promise = keys[1];
-
-    // Encrypt the plain text
-    var cipher_text_promise = enc_key_promise.then(function(enc_key) {
-      var enc = {
-        name: config.id.name,
-        iv: iv
-      };
-      return Jose.crypto.subtle.encrypt(enc, enc_key, plain_text);
-    });
-
-    // compute MAC
-    var mac_promise = cipher_text_promise.then(function(cipher_text) {
-      return truncatedMac(
-        config,
-        mac_key_promise,
-        aad,
-        iv,
-        cipher_text);
-    });
-
-    return Promise.all([cipher_text_promise, mac_promise]).then(function(all) {
-      var cipher_text = all[0];
-      var mac = all[1];
-      return {
-        cipher: cipher_text,
-        tag: mac
-      };
-    });
-  }
-};
-
-/**
- * Decrypts cipher_text with cek. Validates the tag.
- *
- * @param cek_promise    Promise<CryptoKey>
- * @param aad protected header
- * @param iv IV
- * @param cipher_text text to be decrypted
- * @param tag to be verified
- * @return Promise<string>
- */
-WebCryptographer.prototype.decrypt = function(cek_promise, aad, iv, cipher_text, tag) {
-  /**
-   * Compares two Uint8Arrays in constant time.
-   *
-   * @return Promise<void>
-   */
-  var compare = function(config, mac_key_promise, arr1, arr2) {
-    Jose.assert(arr1 instanceof Uint8Array, "compare: invalid input");
-    Jose.assert(arr2 instanceof Uint8Array, "compare: invalid input");
-
-    return mac_key_promise.then(function(mac_key) {
-      var hash1 = Jose.crypto.subtle.sign(config.auth.id, mac_key, arr1);
-      var hash2 = Jose.crypto.subtle.sign(config.auth.id, mac_key, arr2);
-      return Promise.all([hash1, hash2]).then(function(all) {
-        var hash1 = new Uint8Array(all[0]);
-        var hash2 = new Uint8Array(all[1]);
-        if (hash1.length != hash2.length) {
-          throw new Error("compare failed");
-        }
-        for (var i = 0; i < hash1.length; i++) {
-          if (hash1[i] != hash2[i]) {
-            throw new Error("compare failed");
-          }
-        }
-        return Promise.resolve(null);
-      });
-    });
-  };
-
-  if (iv.length != this.content_encryption.iv_bytes) {
-    return Promise.reject(Error("decryptCiphertext: invalid IV"));
-  }
-
-  var config = this.content_encryption;
-  if (config.auth.aead) {
-    var dec = {
-      name: config.id.name,
-      iv: iv,
-      additionalData: aad,
-      tagLength: config.auth.tag_bytes * 8
-    };
-
-    return cek_promise.then(function(cek) {
-      var buf = Utils.arrayBufferConcat(cipher_text, tag);
-      return Jose.crypto.subtle.decrypt(dec, cek, buf);
-    });
-  } else {
-    var keys = splitKey(config, cek_promise, ["decrypt"]);
-    var mac_key_promise = keys[0];
-    var enc_key_promise = keys[1];
-
-    // Validate the MAC
-    var mac_promise = truncatedMac(
-      config,
-      mac_key_promise,
-      aad,
-      iv,
-      cipher_text);
-
-    return Promise.all([enc_key_promise, mac_promise]).then(function(all) {
-      var enc_key = all[0];
-      var mac = all[1];
-
-      return compare(config, mac_key_promise, new Uint8Array(mac), tag).then(function() {
-        var dec = {
-          name: config.id.name,
-          iv: iv
-        };
-        return Jose.crypto.subtle.decrypt(dec, enc_key, cipher_text);
-      }).catch(function(err) {
-        return Promise.reject(Error("decryptCiphertext: MAC failed."));
-      });
-    });
-  }
-};
-
-/**
- * Signs plain_text.
- *
- * @param aad         json
- * @param payload     String or json
- * @param key_promise Promise<CryptoKey>
- * @return Promise<ArrayBuffer>
- */
-WebCryptographer.prototype.sign = function(aad, payload, key_promise) {
-  var config = this.content_sign;
-
-  if (aad.alg) {
-    config = getSignConfig(aad.alg);
-  }
-
-  // Encrypt the plain text
-  return key_promise.then(function(key) {
-    return Jose.crypto.subtle.sign(config.id, key, Utils.arrayFromString(Utils.Base64Url.encode(JSON.stringify(aad)) + '.' + Utils.Base64Url.encodeArray(payload)));
-  });
-};
-
-/**
- * Verify JWS.
- *
- * @param payload     Base64Url encoded payload
- * @param aad         String Base64Url encoded JSON representation of the protected JWS header
- * @param signature   Uint8Array containing the signature
- * @param key_promise Promise<CryptoKey>
- * @param key_id      value of the kid JoseHeader, it'll be passed as part of the result to the returned promise
- * @return Promise<json>
- */
-WebCryptographer.prototype.verify = function(aad, payload, signature, key_promise, key_id) {
-  var config = this.content_sign;
-
-  return key_promise.then(function(key) {
-    config = getSignConfig(getJwaNameForSignKey(key));
-    return Jose.crypto.subtle.verify(config.id, key, signature, Utils.arrayFromString(aad + "." + payload)).then(function(res) {
-      return {kid: key_id, verified: res};
-    });
-  });
-};
-
-Jose.WebCryptographer.keyId = function(rsa_key) {
-  return Utils.sha256(rsa_key.n + "+" + rsa_key.d);
-};
-
-/**
- * Splits a CEK into two pieces: a MAC key and an ENC key.
- *
- * This code is structured around the fact that the crypto API does not provide
- * a way to validate truncated MACs. The MAC key is therefore always imported to
- * sign data.
- *
- * @param config (used for key lengths & algorithms)
- * @param cek_promise Promise<CryptoKey>  CEK key to split
- * @param purpose Array<String> usages of the imported key
- * @return [Promise<mac key>, Promise<enc key>]
- */
-var splitKey = function(config, cek_promise, purpose) {
-  // We need to split the CEK key into a MAC and ENC keys
-  var cek_bytes_promise = cek_promise.then(function(cek) {
-    return Jose.crypto.subtle.exportKey("raw", cek);
-  });
-  var mac_key_promise = cek_bytes_promise.then(function(cek_bytes) {
-    if (cek_bytes.byteLength * 8 != config.id.length + config.auth.key_bytes * 8) {
-      return Promise.reject(Error("encryptPlainText: incorrect cek length"));
-    }
-    var bytes = cek_bytes.slice(0, config.auth.key_bytes);
-    return Jose.crypto.subtle.importKey("raw", bytes, config.auth.id, false, ["sign"]);
-  });
-  var enc_key_promise = cek_bytes_promise.then(function(cek_bytes) {
-    if (cek_bytes.byteLength * 8 != config.id.length + config.auth.key_bytes * 8) {
-      return Promise.reject(Error("encryptPlainText: incorrect cek length"));
-    }
-    var bytes = cek_bytes.slice(config.auth.key_bytes);
-    return Jose.crypto.subtle.importKey("raw", bytes, config.id, false, purpose);
-  });
-  return [mac_key_promise, enc_key_promise];
-};
-
-/**
- * Converts the Jose web algorithms into data which is
- * useful for the Web Crypto API.
- *
- * length = in bits
- * bytes = in bytes
- */
-var getCryptoConfig = function(alg) {
-  switch (alg) {
-    // Key encryption
-    case "RSA-OAEP":
-      return {
-        jwe_name: "RSA-OAEP",
-        id: {name: "RSA-OAEP", hash: {name: "SHA-1"}}
-      };
-    case "RSA-OAEP-256":
-      return {
-        jwe_name: "RSA-OAEP-256",
-        id: {name: "RSA-OAEP", hash: {name: "SHA-256"}}
-      };
-    case "A128KW":
-      return {
-        jwe_name: "A128KW",
-        id: {name: "AES-KW", length: 128}
-      };
-    case "A256KW":
-      return {
-        jwe_name: "A256KW",
-        id: {name: "AES-KW", length: 256}
-      };
-    case "dir":
-      return {
-        jwe_name: "dir"
-      };
-
-    // Content encryption
-    case "A128CBC-HS256":
-      return {
-        jwe_name: "A128CBC-HS256",
-        id: {name: "AES-CBC", length: 128},
-        iv_bytes: 16,
-        specific_cek_bytes: 32,
-        auth: {
-          key_bytes: 16,
-          id: {name: "HMAC", hash: {name: "SHA-256"}},
-          truncated_bytes: 16
-        }
-      };
-    case "A256CBC-HS512":
-      return {
-        jwe_name: "A256CBC-HS512",
-        id: {name: "AES-CBC", length: 256},
-        iv_bytes: 16,
-        specific_cek_bytes: 64,
-        auth: {
-          key_bytes: 32,
-          id: {name: "HMAC", hash: {name: "SHA-512"}},
-          truncated_bytes: 32
-        }
-      };
-    case "A128GCM":
-      return {
-        jwe_name: "A128GCM",
-        id: {name: "AES-GCM", length: 128},
-        iv_bytes: 12,
-        auth: {
-          aead: true,
-          tag_bytes: 16
-        }
-      };
-    case "A256GCM":
-      return {
-        jwe_name: "A256GCM",
-        id: {name: "AES-GCM", length: 256},
-        iv_bytes: 12,
-        auth: {
-          aead: true,
-          tag_bytes: 16
-        }
-      };
-    default:
-      throw Error("unsupported algorithm: " + alg);
-  }
-};
-
-/**
- * Computes a truncated MAC.
- *
- * @param config              configuration
- * @param mac_key_promise     Promise<CryptoKey>  mac key
- * @param aad                 Uint8Array
- * @param iv                  Uint8Array
- * @param cipher_text         Uint8Array
- * @return Promise<buffer>    truncated MAC
- */
-var truncatedMac = function(config, mac_key_promise, aad, iv, cipher_text) {
-  return mac_key_promise.then(function(mac_key) {
-    var al = new Uint8Array(Utils.arrayFromInt32(aad.length * 8));
-    var al_full = new Uint8Array(8);
-    al_full.set(al, 4);
-    var buf = Utils.arrayBufferConcat(aad, iv, cipher_text, al_full);
-    return Jose.crypto.subtle.sign(config.auth.id, mac_key, buf).then(function(bytes) {
-      return bytes.slice(0, config.auth.truncated_bytes);
-    });
-  });
-};
-
-/**
- * Converts the Jose web algorithms into data which is
- * useful for the Web Crypto API.
- */
-var getSignConfig = function(alg) {
-
-  switch (alg) {
-    case "RS256":
-      return {
-        jwa_name: "RS256",
-        id: {name: "RSASSA-PKCS1-v1_5", hash: {name: "SHA-256"}}
-      };
-    case "RS384":
-      return {
-        jwa_name: "RS384",
-        id: {name: "RSASSA-PKCS1-v1_5", hash: {name: "SHA-384"}}
-      };
-    case "RS512":
-      return {
-        jwa_name: "RS512",
-        id: {name: "RSASSA-PKCS1-v1_5", hash: {name: "SHA-512"}}
-      };
-    case "PS256":
-      return {
-        jwa_name: "PS256",
-        id: {name: "RSA-PSS", hash: {name: "SHA-256"}, saltLength: 20}
-      };
-    case "PS384":
-      return {
-        jwa_name: "PS384",
-        id: {name: "RSA-PSS", hash: {name: "SHA-384"}, saltLength: 20}
-      };
-    case "PS512":
-      return {
-        jwa_name: "PS512",
-        id: {name: "RSA-PSS", hash: {name: "SHA-512"}, saltLength: 20}
-      };
-    case "HS256":
-      return {
-        jwa_name: "HS256",
-        id: {name: "HMAC", hash: {name: "SHA-256"}}
-      };
-    case "HS384":
-      return {
-        jwa_name: "HS384",
-        id: {name: "HMAC", hash: {name: "SHA-384"}}
-      };
-    case "HS512":
-      return {
-        jwa_name: "HS512",
-        id: {name: "HMAC", hash: {name: "SHA-512"}}
-      };
-    case "ES256":
-      return {
-        jwa_name: "ES256",
-        id: {name: "ECDSA", hash: {name: "SHA-256"}}
-      };
-    case "ES384":
-      return {
-        jwa_name: "ES384",
-        id: {name: "ECDSA", hash: {name: "SHA-384"}}
-      };
-    case "ES512":
-      return {
-        jwa_name: "ES512",
-        id: {name: "ECDSA", hash: {name: "SHA-512"}}
-      };
-    default:
-      throw Error("unsupported algorithm: " + alg);
-  }
-};
-
-/**
- * Returns JWA name for a given CryptoKey
- * @param key CryptoKey
- */
-var getJwaNameForSignKey = function(key) {
-
-  var rv = "",
-    sign_algo = key.algorithm.name,
-    hash_algo = key.algorithm.hash.name;
-
-  if(sign_algo == "RSASSA-PKCS1-v1_5") {
-    rv = "R";
-  } else if(sign_algo == "RSA-PSS") {
-    rv = "P";
-  } else {
-    throw new Error("unsupported sign/verify algorithm " + sign_algo);
-  }
-
-  if(hash_algo.indexOf("SHA-") === 0) {
-    rv += "S";
-  } else {
-    throw new Error("unsupported hash algorithm " + sign_algo);
-  }
-
-  rv += hash_algo.substring(4);
-
-  return rv;
-};
-
-/**
- * Derives key usage from algorithm's name
- *
- * @param alg String algorithm name
- * @returns {*}
- */
-var getKeyUsageByAlg = function(alg) {
-
-  switch (alg) {
-    // signature
-    case "RS256":
-    case "RS384":
-    case "RS512":
-    case "PS256":
-    case "PS384":
-    case "PS512":
-    case "HS256":
-    case "HS384":
-    case "HS512":
-    case "ES256":
-    case "ES384":
-    case "ES512":
-      return {
-        publicKey: "verify",
-        privateKey: "sign"
-      };
-    // key encryption
-    case "RSA-OAEP":
-    case "RSA-OAEP-256":
-    case "A128KW":
-    case "A256KW":
-      return {
-        publicKey: "wrapKey",
-        privateKey: "unwrapKey"
-      };
-    default:
-      throw Error("unsupported algorithm: " + alg);
-  }
-};
-
-/*-
- * Copyright 2014 Square Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-Jose.Utils = {};
-var Utils = {};
-
-/**
- * Converts the output from `openssl x509 -text` or `openssl rsa -text` into a
- * CryptoKey which can then be used with RSA-OAEP. Also accepts (and validates)
- * JWK keys.
- *
- * TODO: this code probably belongs in the webcryptographer.
- *
- * @param rsa_key  public RSA key in json format. Parameters can be base64
- *                 encoded, strings or number (for 'e').
- * @param alg      String, name of the algorithm
- * @return Promise<CryptoKey>
- */
-Jose.Utils.importRsaPublicKey = function(rsa_key, alg) {
-  var jwk;
-  var config;
-  var usage = getKeyUsageByAlg(alg);
-
-  if (usage.publicKey == "wrapKey") {
-    if (!rsa_key.alg) {
-      rsa_key.alg = alg;
-    }
-    jwk = Utils.convertRsaKey(rsa_key, ["n", "e"]);
-    config = getCryptoConfig(alg);
-  } else {
-    var rk = {};
-    for (var name in rsa_key) {
-      if (rsa_key.hasOwnProperty(name)) {
-        rk[name] = rsa_key[name];
-      }
-    }
-
-    if (!rk.alg && alg) {
-      rk.alg = alg;
-    }
-    config = getSignConfig(rk.alg);
-    jwk = Utils.convertRsaKey(rk, ["n", "e"]);
-    jwk.ext = true;
-  }
-  return Jose.crypto.subtle.importKey("jwk", jwk, config.id, false, [usage.publicKey]);
-};
-
-/**
- * Converts the output from `openssl x509 -text` or `openssl rsa -text` into a
- * CryptoKey which can then be used with RSA-OAEP and RSA. Also accepts (and validates)
- * JWK keys.
- *
- * TODO: this code probably belongs in the webcryptographer.
- *
- * @param rsa_key  private RSA key in json format. Parameters can be base64
- *                 encoded, strings or number (for 'e').
- * @param alg      String, name of the algorithm
- * @return Promise<CryptoKey>
- */
-Jose.Utils.importRsaPrivateKey = function(rsa_key, alg) {
-  var jwk;
-  var config;
-  var usage = getKeyUsageByAlg(alg);
-
-  if (usage.privateKey == "unwrapKey") {
-    if (!rsa_key.alg) {
-      rsa_key.alg = alg;
-    }
-    jwk = Utils.convertRsaKey(rsa_key, ["n", "e", "d", "p", "q", "dp", "dq", "qi"]);
-    config = getCryptoConfig(alg);
-  } else {
-    var rk = {};
-    for (var name in rsa_key) {
-      if (rsa_key.hasOwnProperty(name)) {
-        rk[name] = rsa_key[name];
-      }
-    }
-    config = getSignConfig(alg);
-    if (!rk.alg && alg) {
-      rk.alg = alg;
-    }
-    jwk = Utils.convertRsaKey(rk, ["n", "e", "d", "p", "q", "dp", "dq", "qi"]);
-    jwk.ext = true;
-  }
-  return Jose.crypto.subtle.importKey("jwk", jwk, config.id, false, [usage.privateKey]);
-};
-
-// Private functions
-
-Utils.isString = function(str) {
-  return ((typeof(str) == "string") || (str instanceof String));
-};
-
-/**
- * Takes an arrayish (an array, ArrayBuffer or Uint8Array)
- * and returns an array or a Uint8Array.
- *
- * @param arr  arrayish
- * @return array or Uint8Array
- */
-Utils.arrayish = function(arr) {
-  if (arr instanceof Array) {
-    return arr;
-  }
-  if (arr instanceof Uint8Array) {
-    return arr;
-  }
-  if (arr instanceof ArrayBuffer) {
-    return new Uint8Array(arr);
-  }
-  Jose.assert(false, "arrayish: invalid input");
-};
-
-/**
- * Checks if an RSA key contains all the expected parameters. Also checks their
- * types. Converts hex encoded strings (or numbers) to base64.
- *
- * @param rsa_key     RSA key in json format. Parameters can be base64 encoded,
- *                    strings or number (for 'e').
- * @param parameters  array<string>
- * @return json
- */
-Utils.convertRsaKey = function(rsa_key, parameters) {
-  var r = {};
-  var alg;
-
-  // Check that we have all the parameters
-  var missing = [];
-  parameters.map(function(p){if (typeof(rsa_key[p]) == "undefined") { missing.push(p); }});
-
-  if (missing.length > 0) {
-    Jose.assert(false, "convertRsaKey: Was expecting " + missing.join());
-  }
-
-  // kty is either missing or is set to "RSA"
-  if (typeof(rsa_key.kty) != "undefined") {
-    Jose.assert(rsa_key.kty == "RSA", "convertRsaKey: expecting rsa_key['kty'] to be 'RSA'");
-  }
-  r.kty = "RSA";
-
-  try {
-    getSignConfig(rsa_key.alg);
-    alg = rsa_key.alg;
-  } catch (err) {
-    try {
-      getCryptoConfig(rsa_key.alg);
-      alg = rsa_key.alg;
-    } catch (er) {
-      Jose.assert(alg, "convertRsaKey: expecting rsa_key['alg'] to have a valid value");
-    }
-  }
-  r.alg = alg;
-
-  // note: we punt on checking key_ops
-
-  var intFromHex = function(e) {
-    return parseInt(e, 16);
-  };
-  for (var i = 0; i < parameters.length; i++) {
-    var p = parameters[i];
-    var v = rsa_key[p];
-    if (p == "e") {
-      if (typeof(v) == "number") {
-        v = Utils.Base64Url.encodeArray(Utils.stripLeadingZeros(Utils.arrayFromInt32(v)));
-      }
-    } else if (/^([0-9a-fA-F]{2}:)+[0-9a-fA-F]{2}$/.test(v)) {
-      var arr = v.split(":").map(intFromHex);
-      v = Utils.Base64Url.encodeArray(Utils.stripLeadingZeros(arr));
-    } else if (typeof(v) != "string") {
-      Jose.assert(false, "convertRsaKey: expecting rsa_key['" + p + "'] to be a string");
-    }
-    r[p] = v;
-  }
-
-  return r;
-};
-
-/**
- * Converts a string into an array of ascii codes.
- *
- * @param str  ascii string
- * @return Uint8Array
- */
-Utils.arrayFromString = function(str) {
-  Jose.assert(Utils.isString(str), "arrayFromString: invalid input");
-  var arr = str.split('').map(function(c) {
-    return c.charCodeAt(0);
-  });
-  return new Uint8Array(arr);
-};
-
-/**
- * Converts a string into an array of utf-8 codes.
- *
-* @param str  utf-8 string
- * @return Uint8Array
- */
-Utils.arrayFromUtf8String = function(str) {
-  Jose.assert(Utils.isString(str), "arrayFromUtf8String: invalid input");
-  // javascript represents strings as utf-16. Jose imposes the use of
-  // utf-8, so we need to convert from one representation to the other.
-  str = unescape(encodeURIComponent(str));
-  return Utils.arrayFromString(str);
-};
-
-/**
- * Converts an array of ascii bytes into a string.
- *
- * @param arr  arrayish
- * @return ascii string
- */
-Utils.stringFromArray = function(arr) {
-  arr = Utils.arrayish(arr);
-  var r = '';
-  for (var i = 0; i < arr.length; i++) {
-    r += String.fromCharCode(arr[i]);
-  }
-
-  return r;
-};
-
-/**
- * Converts an array of ascii bytes into a string.
- *
- * @param arr  ArrayBuffer
- * @return ascii string
- */
-Utils.utf8StringFromArray = function(arr) {
-  Jose.assert(arr instanceof ArrayBuffer, "utf8StringFromArray: invalid input");
-
-  // javascript represents strings as utf-16. Jose imposes the use of
-  // utf-8, so we need to convert from one representation to the other.
-  var r = Utils.stringFromArray(arr);
-  return decodeURIComponent(escape(r));
-};
-
-/**
- * Strips leading zero in an array.
- *
- * @param arr  arrayish
- * @return array
- */
-Utils.stripLeadingZeros = function(arr) {
-  if (arr instanceof ArrayBuffer) {
-    arr = new Uint8Array(arr);
-  }
-  var is_leading_zero = true;
-  var r = [];
-  for (var i = 0; i < arr.length; i++) {
-    if (is_leading_zero && arr[i] === 0) {
-      continue;
-    }
-    is_leading_zero = false;
-    r.push(arr[i]);
-  }
-  return r;
-};
-
-/**
- * Converts a number into an array of 4 bytes (big endian).
- *
- * @param i  number
- * @return ArrayBuffer
- */
-Utils.arrayFromInt32 = function(i) {
-  Jose.assert(typeof(i) == "number", "arrayFromInt32: invalid input");
-  Jose.assert(i == i | 0, "arrayFromInt32: out of range");
-
-  var buf = new Uint8Array(new Uint32Array([i]).buffer);
-  var r = new Uint8Array(4);
-  for (var j = 0; j < 4; j++) {
-    r[j] = buf[3 - j];
-  }
-  return r.buffer;
-};
-
-/**
- * Concatenates arrayishes.
- *
- * @param arguments two or more arrayishes
- * @return Uint8Array
- */
-Utils.arrayBufferConcat = function(/* ... */) {
-  // Compute total size
-  var args = [];
-  var total = 0;
-  for (var i = 0; i < arguments.length; i++) {
-    args.push(Utils.arrayish(arguments[i]));
-    total += args[i].length;
-  }
-  var r = new Uint8Array(total);
-  var offset = 0;
-  for (i = 0; i < arguments.length; i++) {
-    for (var j = 0; j < args[i].length; j++) {
-      r[offset++] = args[i][j];
-    }
-  }
-  Jose.assert(offset == total, "arrayBufferConcat: unexpected offset");
-  return r;
-};
-
-Utils.Base64Url = {};
-
-/**
- * Base64Url encodes a string (no trailing '=')
- *
- * @param str  string
- * @return string
- */
-Utils.Base64Url.encode = function(str) {
-  Jose.assert(Utils.isString(str), "Base64Url.encode: invalid input");
-  return btoa(str)
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_")
-    .replace(/=+$/, "");
-};
-
-/**
- * Base64Url encodes an array
- *
- * @param arr array or ArrayBuffer
- * @return string
- */
-Utils.Base64Url.encodeArray = function(arr) {
-  return Utils.Base64Url.encode(Utils.stringFromArray(arr));
-};
-
-/**
- * Base64Url decodes a string
- *
- * @param str  string
- * @return string
- */
-Utils.Base64Url.decode = function(str) {
-  Jose.assert(Utils.isString(str), "Base64Url.decode: invalid input");
-  // atob is nice and ignores missing '='
-  return atob(str.replace(/-/g, "+").replace(/_/g, "/"));
-};
-
-Utils.Base64Url.decodeArray = function(str) {
-  Jose.assert(Utils.isString(str), "Base64Url.decodeArray: invalid input");
-  return Utils.arrayFromString(Utils.Base64Url.decode(str));
-};
-
-Utils.sha256 = function(str) {
-  // Browser docs indicate the first parameter to crypto.subtle.digest to be a
-  // DOMString. This was initially implemented as an object and continues to be
-  // supported, so we favor the older form for backwards compatibility.
-  return Jose.crypto.subtle.digest({name: "SHA-256"}, Utils.arrayFromString(str)).then(function(hash) {
-    return Utils.Base64Url.encodeArray(hash);
-  });
-};
-
-Utils.isCryptoKey = function(rsa_key) {
-  // Some browsers don't expose the CryptoKey as an object, so we need to check
-  // the constructor's name.
-  if (rsa_key.constructor.name == 'CryptoKey') {
-    return true;
-  }
-
-  // In the presence of minifiers, relying on class names can be problematic,
-  // so let's also allow objects that have an 'algorithm' property.
-  if (rsa_key.hasOwnProperty('algorithm')) {
-    return true;
-  }
-
-  return false;
-};
-
-/*-
- * Copyright 2014 Square Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * Handles encryption.
- *
- * @param cryptographer  an instance of WebCryptographer (or equivalent).
- * @param key_promise    Promise<CryptoKey>, either RSA or shared key
- */
-JoseJWE.Encrypter = function(cryptographer, key_promise) {
-  this.cryptographer = cryptographer;
-  this.key_promise = key_promise;
-  this.userHeaders = {};
-};
-
-/**
- * Adds a key/value pair which will be included in the header.
- *
- * The data lives in plaintext (an attacker can read the header) but is tamper
- * proof (an attacker cannot modify the header).
- *
- * Note: some headers have semantic implications. E.g. if you set the "zip"
- * header, you are responsible for properly compressing plain_text before
- * calling encrypt().
- *
- * @param k  String
- * @param v  String
- */
-JoseJWE.Encrypter.prototype.addHeader = function(k, v) {
-  this.userHeaders[k] = v;
-};
-
-/**
- * Performs encryption.
- *
- * @param plain_text  utf-8 string
- * @return Promise<String>
- */
-JoseJWE.Encrypter.prototype.encrypt = function(plain_text) {
-  /**
-   * Encrypts plain_text with CEK.
-   *
-   * @param cek_promise  Promise<CryptoKey>
-   * @param plain_text   string
-   * @return Promise<json>
-   */
-  var encryptPlainText = function(cek_promise, plain_text) {
-    // Create header
-    var headers = {};
-    for (var i in this.userHeaders) {
-      headers[i] = this.userHeaders[i];
-    }
-    headers.alg = this.cryptographer.getKeyEncryptionAlgorithm();
-    headers.enc = this.cryptographer.getContentEncryptionAlgorithm();
-    var jwe_protected_header = Utils.Base64Url.encode(JSON.stringify(headers));
-
-    // Create the IV
-    var iv = this.cryptographer.createIV();
-
-    // Create the AAD
-    var aad = Utils.arrayFromString(jwe_protected_header);
-    plain_text = Utils.arrayFromUtf8String(plain_text);
-
-    return this.cryptographer.encrypt(iv, aad, cek_promise, plain_text).then(function(r) {
-      r.header = jwe_protected_header;
-      r.iv = iv;
-      return r;
-    });
-  };
-
-  var cek_promise, encrypted_cek;
-
-  if (this.cryptographer.getKeyEncryptionAlgorithm() == "dir") {
-    // with direct encryption, this.key_promise provides the cek
-    // and encrypted_cek is empty
-    cek_promise = Promise.resolve(this.key_promise);
-    encrypted_cek = [];
-  } else {
-    // Create a CEK key
-    cek_promise = this.cryptographer.createCek();
-
-    // Key & Cek allows us to create the encrypted_cek
-    encrypted_cek = Promise.all([this.key_promise, cek_promise]).then(function (all) {
-      var key = all[0];
-      var cek = all[1];
-      return this.cryptographer.wrapCek(cek, key);
-    }.bind(this));
-  }
-
-  // Cek allows us to encrypy the plain text
-  var enc_promise = encryptPlainText.bind(this, cek_promise, plain_text)();
-
-  // Once we have all the promises, we can base64 encode all the pieces.
-  return Promise.all([encrypted_cek, enc_promise]).then(function(all) {
-    var encrypted_cek = all[0];
-    var data = all[1];
-    return data.header + "." +
-      Utils.Base64Url.encodeArray(encrypted_cek) + "." +
-      Utils.Base64Url.encodeArray(data.iv) + "." +
-      Utils.Base64Url.encodeArray(data.cipher) + "." +
-      Utils.Base64Url.encodeArray(data.tag);
-  });
-};
-
-/*-
- * Copyright 2014 Square Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * Handles decryption.
- *
- * @param cryptographer  an instance of WebCryptographer (or equivalent). Keep
- *                       in mind that decryption mutates the cryptographer.
- * @param key_promise    Promise<CryptoKey>, either RSA or shared key
- */
-JoseJWE.Decrypter = function(cryptographer, key_promise) {
-  this.cryptographer = cryptographer;
-  this.key_promise = key_promise;
-  this.headers = {};
-};
-
-JoseJWE.Decrypter.prototype.getHeaders = function() {
-  return this.headers;
-};
-
-/**
- * Performs decryption.
- *
- * @param cipher_text  String
- * @return Promise<String>
- */
-JoseJWE.Decrypter.prototype.decrypt = function(cipher_text) {
-  // Split cipher_text in 5 parts
-  var parts = cipher_text.split(".");
-  if (parts.length != 5) {
-    return Promise.reject(Error("decrypt: invalid input"));
-  }
-
-  // part 1: header
-  this.headers = JSON.parse(Utils.Base64Url.decode(parts[0]));
-  if (!this.headers.alg) {
-    return Promise.reject(Error("decrypt: missing alg"));
-  }
-  if (!this.headers.enc) {
-    return Promise.reject(Error("decrypt: missing enc"));
-  }
-  this.cryptographer.setKeyEncryptionAlgorithm(this.headers.alg);
-  this.cryptographer.setContentEncryptionAlgorithm(this.headers.enc);
-
-  if (this.headers.crit) {
-    // We don't support the crit header
-    return Promise.reject(Error("decrypt: crit is not supported"));
-  }
-
-  var cek_promise;
-
-  if (this.headers.alg == "dir") {
-    // with direct mode, we already have the cek
-    cek_promise = Promise.resolve(this.key_promise);
-  } else {
-    // part 2: decrypt the CEK
-    // In some modes (e.g. RSA-PKCS1v1.5), you must take precautions to prevent
-    // chosen-ciphertext attacks as described in RFC 3218, "Preventing
-    // the Million Message Attack on Cryptographic Message Syntax". We currently
-    // only support RSA-OAEP, so we don't generate a key if unwrapping fails.
-    var encrypted_cek = Utils.Base64Url.decodeArray(parts[1]);
-    cek_promise = this.key_promise.then(function (key) {
-      return this.cryptographer.unwrapCek(encrypted_cek, key);
-    }.bind(this));
-  }
-
-  // part 3: decrypt the cipher text
-  var plain_text_promise = this.cryptographer.decrypt(
-    cek_promise,
-    Utils.arrayFromString(parts[0]),
-    Utils.Base64Url.decodeArray(parts[2]),
-    Utils.Base64Url.decodeArray(parts[3]),
-    Utils.Base64Url.decodeArray(parts[4]));
-
-  return plain_text_promise.then(Utils.utf8StringFromArray);
-};
-
-/*-
- * Copyright 2015 Peculiar Ventures
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * Handles decryption.
- *
- * @param cryptographer  an instance of WebCryptographer (or equivalent). Keep
- *                       in mind that decryption mutates the cryptographer.
- *
- * @author Patrizio Bruno <patrizio@desertconsulting.net>
- */
-JoseJWS.Signer = function(cryptographer) {
-  this.cryptographer = cryptographer;
-
-  this.key_promises = {};
-  this.waiting_kid = 0;
-  this.headers = {};
-  this.signer_aads = {};
-  this.signer_headers = {};
-};
-
-/**
- * Adds a signer to JoseJWS instance. It'll be the on of the signers of the resulting JWS.
- *
- * @param rsa_key        private RSA key in json format, Parameters can be base64
- *                       encoded, strings or number (for 'e'). Or CryptoKey
- * @param key_id         a string identifying the rsa_key. OPTIONAL
- * @param aad            Object protected header
- * @param header         Object unprotected header
- */
-JoseJWS.Signer.prototype.addSigner = function(rsa_key, key_id, aad, header) {
-  var that = this;
-  var key_promise;
-  if (Utils.isCryptoKey(rsa_key)) {
-    key_promise = new Promise(function(resolve) {
-      resolve(rsa_key);
-    });
-  } else {
-    var alg;
-    if (aad && aad.alg) {
-      alg = aad.alg;
-    } else {
-      alg = that.cryptographer.getContentSignAlgorithm();
-    }
-    key_promise = Jose.Utils.importRsaPrivateKey(rsa_key, alg, "sign");
-  }
-
-  var kid_promise;
-  if (key_id) {
-    kid_promise = new Promise(function(resolve) {
-      resolve(key_id);
-    });
-  } else if (Utils.isCryptoKey(rsa_key)) {
-    throw new Error("key_id is a mandatory argument when the key is a CryptoKey");
-  } else {
-    kid_promise = Jose.WebCryptographer.keyId(rsa_key);
-  }
-
-  that.waiting_kid++;
-
-  return kid_promise.then(function(kid) {
-    that.key_promises[kid] = key_promise;
-    that.waiting_kid--;
-    if (aad) {
-      that.signer_aads[kid] = aad;
-    }
-    if (header) {
-      that.signer_headers[kid] = header;
-    }
-    return kid;
-  });
-};
-
-/**
- * Adds a signature to a JWS object
- * @param jws JWS Object to be signed or its representation
- * @param aad     Object protected header
- * @param header  Object unprotected header
- * @return Promise<String>
- */
-JoseJWS.Signer.prototype.addSignature = function(jws, aad, header) {
-  if (Utils.isString(jws)) {
-    jws = JSON.parse(jws);
-  }
-
-  if (jws.payload && Utils.isString(jws.payload) &&
-    jws.protected && Utils.isString(jws.protected) &&
-    jws.header && jws.header instanceof Object &&
-    jws.signature && Utils.isString(jws.signature)) {
-    return this.sign(JWS.fromObject(jws), aad, header);
-  } else {
-    throw new Error("JWS is not a valid JWS object");
-  }
-};
-
-/**
- * Computes signature.
- *
- * @param payload JWS Object or utf-8 string to be signed
- * @param aad     Object protected header
- * @param header  Object unprotected header
- * @return Promise<JWS>
- */
-JoseJWS.Signer.prototype.sign = function(payload, aad, header) {
-
-  var that = this;
-  var kids = [];
-
-  if (Object.keys(that.key_promises).length === 0) {
-    throw new Error("No signers defined. At least one is required to sign the JWS.");
-  }
-
-  if (that.waiting_kid) {
-    throw new Error("still generating key IDs");
-  }
-
-  function sign (message, protectedHeader, unprotectedHeader, rsa_key_promise, kid) {
-    var toBeSigned;
-
-    if (!protectedHeader) {
-      protectedHeader = {};
-    }
-
-    if (!protectedHeader.alg) {
-      protectedHeader.alg = that.cryptographer.getContentSignAlgorithm();
-      protectedHeader.typ = "JWT";
-    }
-
-    if (!protectedHeader.kid) {
-      protectedHeader.kid = kid;
-    }
-
-    if (Utils.isString(message)) {
-      toBeSigned = Utils.arrayFromUtf8String(message);
-    } else {
-      try {
-        toBeSigned = Utils.arrayish(message);
-      } catch (e) {
-        if (message instanceof JWS) {
-          toBeSigned = Utils.arrayFromString(Utils.Base64Url.decode(message.payload));
-        } else if (message instanceof Object) {
-          toBeSigned = Utils.arrayFromUtf8String(JSON.stringify(message));
-        } else {
-          throw new Error("cannot sign this message");
-        }
-      }
-    }
-
-    return that.cryptographer.sign(protectedHeader, toBeSigned, rsa_key_promise).then(function(signature) {
-      var jws = new JWS(protectedHeader, unprotectedHeader, toBeSigned, signature);
-      if (message instanceof JWS) {
-        delete jws.payload;
-        if (!message.signatures) {
-          message.signatures = [jws];
-        } else {
-          message.signatures.push(jws);
-        }
-        return message;
-      }
-      return jws;
-    });
-  }
-
-  function doSign (pl, ph, uh, kps, kids) {
-    if (kids.length) {
-      var k_id = kids.shift();
-      var rv = sign(pl, that.signer_aads[k_id] || ph, that.signer_headers[k_id] || uh, kps[k_id], k_id);
-      if (kids.length) {
-        rv = rv.then(function(jws) {
-          return doSign(jws, null, null, kps, kids);
-        });
-      }
-      return rv;
-    }
-  }
-
-  for(var kid in that.key_promises) {
-    if (that.key_promises.hasOwnProperty(kid)) {
-      kids.push(kid);
-    }
-  }
-  return doSign(payload, aad, header, that.key_promises, kids);
-};
-
-
-/**
- * Initialize a JWS object.
- *
- * @param protectedHeader protected header (JS object)
- * @param payload Uint8Array payload to be signed
- * @param signature ArrayBuffer signature of the payload
- * @param header unprotected header (JS object)
- *
- * @constructor
- */
-var JWS = function(protectedHeader, header, payload, signature) {
-  this.header = header;
-  this.payload = Utils.Base64Url.encodeArray(payload);
-  if (signature) {
-    this.signature = Utils.Base64Url.encodeArray(signature);
-  }
-  this.protected = Utils.Base64Url.encode(JSON.stringify(protectedHeader));
-};
-
-JWS.fromObject = function(obj) {
-  var rv = new JWS(obj.protected, obj.header, obj.payload, null);
-  rv.signature = obj.signature;
-  rv.signatures = obj.signatures;
-  return rv;
-};
-
-/**
- * Serialize a JWS object using the JSON serialization format
- *
- * @returns {Object} a copy of this
- */
-JWS.prototype.JsonSerialize = function() {
-  return JSON.stringify(this);
-};
-
-/**
- * Serialize a JWS object using the Compact Serialization Format
- *
- * @returns {string} BASE64URL(UTF8(PROTECTED HEADER)).BASE64URL(PAYLOAD).BASE64URL(SIGNATURE)
- */
-JWS.prototype.CompactSerialize = function() {
-  return this.protected + '.' + this.payload + '.' + this.signature;
-};
-
-/*-
- * Copyright 2015 Peculiar Ventures
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * Handles signature verification.
- *
- * @param cryptographer  an instance of WebCryptographer (or equivalent). Keep
- *                       in mind that decryption mutates the cryptographer.
- * @param message        a JWS message
- * @param keyfinder (optional) a function returning a Promise<CryptoKey> given
- *                             a key id
- *
- * @author Patrizio Bruno <patrizio@desertconsulting.net>
- */
-JoseJWS.Verifier = function (cryptographer, message, keyfinder) {
-
-  var that = this,
-    alg,
-    jwt,
-    aad,
-    header,
-    payload,
-    signatures,
-    protectedHeader,
-    jwtRx = /^([0-9a-z_\-]+)\.([0-9a-z_\-]+)\.([0-9a-z_\-]+)$/i;
-
-  that.cryptographer = cryptographer;
-
-  alg = cryptographer.getContentSignAlgorithm();
-
-  that.cryptographer = new Jose.WebCryptographer();
-
-  if (Utils.isString(message)) {
-    if ((jwt = jwtRx.exec(message))) {
-      if (jwt.length != 4) {
-        throw new Error("wrong JWS compact serialization format");
-      }
-
-      message = {
-        protected: jwt[1],
-        payload: jwt[2],
-        signature: jwt[3]
-      };
-    } else {
-      message = JSON.parse(message);
-    }
-  } else if (typeof message != "object") {
-    throw new Error("data format not supported");
-  }
-
-  aad = message.protected;
-  header = message.header;
-  payload = message.payload;
-  signatures = message.signatures instanceof Array ? message.signatures.slice(0) : [];
-
-  signatures.forEach(function (sign) {
-    sign.aad = sign.protected;
-    sign.protected = JSON.parse(Utils.Base64Url.decode(sign.protected));
-  });
-
-  that.aad = aad;
-  protectedHeader = Utils.Base64Url.decode(aad);
-  try {
-    protectedHeader = JSON.parse(protectedHeader);
-  } catch (e) {
-  }
-
-  if (!protectedHeader && !header) {
-    throw new Error("at least one header is required");
-  }
-
-  if (!protectedHeader.alg) {
-    throw new Error("'alg' is a mandatory header");
-  }
-
-  if (protectedHeader.alg != alg) {
-    throw new Error("the alg header '" + protectedHeader.alg + "' doesn't match the requested algorithm '" + alg + "'");
-  }
-
-  if (protectedHeader && protectedHeader.typ && protectedHeader.typ != "JWT") {
-    throw new Error("typ '" + protectedHeader.typ + "' not supported");
-  }
-
-  if (message.signature) {
-    signatures.unshift({
-      aad: aad,
-      protected: protectedHeader,
-      header: header,
-      signature: message.signature
-    });
-  }
-
-  that.signatures = [];
-  for(var i = 0; i < signatures.length; i++) {
-    that.signatures[i] = JSON.parse(JSON.stringify(signatures[i]));
-    that.signatures[i].signature = Utils.arrayFromString(Utils.Base64Url.decode(signatures[i].signature));
-  }
-
-  that.payload = payload;
-
-  that.key_promises = {};
-  that.waiting_kid = 0;
-
-  if (keyfinder) {
-    that.keyfinder = keyfinder;
-  }
-};
-
-/**
- * Add supported recipients to verify multiple signatures
- *
- * @param rsa_key        public RSA key in json format. Parameters can be base64
- *                       encoded, strings or number (for 'e').
- * @param key_id         a string identifying the rsa_key. OPTIONAL
- * @param alg            String signature algorithm. OPTIONAL
- * @returns Promise<string> a Promise of a key id
- */
-JoseJWS.Verifier.prototype.addRecipient = function (rsa_key, key_id, alg) {
-
-  var that = this,
-    kid_promise,
-    key_promise = Utils.isCryptoKey(rsa_key) ? new Promise(function (resolve) {
-      resolve(rsa_key);
-    }) : Jose.Utils.importRsaPublicKey(rsa_key, alg || that.cryptographer.getContentSignAlgorithm(), "verify");
-
-  if (key_id) {
-    kid_promise = new Promise(function (resolve) {
-      resolve(key_id);
-    });
-  } else if (Utils.isCryptoKey(rsa_key)) {
-    throw new Error("key_id is a mandatory argument when the key is a CryptoKey");
-  } else {
-    console.log("it's not safe to not pass a key_id");
-    kid_promise = Jose.WebCryptographer.keyId(rsa_key);
-  }
-
-  that.waiting_kid++;
-
-  return kid_promise.then(function (kid) {
-    that.key_promises[kid] = key_promise;
-    that.waiting_kid--;
-    return kid;
-  });
-};
-
-/**
- * Verifies a JWS signature
- *
- * @returns Promise<Array> a Promise of an array of objects { kid: string, verified: bool, payload?: string }
- *
- * payload is only populated and usable if verified is true
- */
-JoseJWS.Verifier.prototype.verify = function () {
-
-  var that = this,
-    signatures = that.signatures,
-    key_promises = that.key_promises,
-    keyfinder = that.keyfinder,
-    promises = [],
-    check = !!keyfinder || Object.keys(that.key_promises).length > 0;
-
-  if (!check) {
-    throw new Error("No recipients defined. At least one is required to verify the JWS.");
-  }
-
-  if (that.waiting_kid) {
-    throw new Error("still generating key IDs");
-  }
-
-  signatures.forEach(function (sig) {
-    var kid = sig.protected.kid;
-    if (keyfinder) {
-      key_promises[kid] = keyfinder(kid);
-    }
-    promises.push(that.cryptographer.verify(sig.aad, that.payload, sig.signature, key_promises[kid], kid)
-      .then(function (vr) {
-        if (vr.verified) {
-          vr.payload = Utils.Base64Url.decode(that.payload);
-        }
-        return vr;
-      }));
-  });
-  return Promise.all(promises);
-};
-}(window, window.crypto, window.Promise, window.Error, window.Uint8Array));
+/***/ }),
+
+/***/ "./lib/jose-jwe-decrypt.js":
+/*!*********************************!*\
+  !*** ./lib/jose-jwe-decrypt.js ***!
+  \*********************************/
+/*! exports provided: Decrypter */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"Decrypter\", function() { return Decrypter; });\n/* harmony import */ var _jose_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./jose-utils */ \"./lib/jose-utils.js\");\n/*-\n * Copyright 2014 Square Inc.\n *\n * Licensed under the Apache License, Version 2.0 (the \"License\");\n * you may not use this file except in compliance with the License.\n * You may obtain a copy of the License at\n *\n *     http://www.apache.org/licenses/LICENSE-2.0\n *\n * Unless required by applicable law or agreed to in writing, software\n * distributed under the License is distributed on an \"AS IS\" BASIS,\n * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n * See the License for the specific language governing permissions and\n * limitations under the License.\n */\n\n\n\n/**\n * Handles decryption.\n *\n * @param cryptographer  an instance of WebCryptographer (or equivalent). Keep\n *                       in mind that decryption mutates the cryptographer.\n * @param key_promise    Promise<CryptoKey>, either RSA or shared key\n */\nclass Decrypter { \n  constructor(cryptographer, key_promise) {\n    this.cryptographer = cryptographer;\n    this.key_promise = key_promise;\n    this.headers = {};\n    this.base64UrlEncoder = new _jose_utils__WEBPACK_IMPORTED_MODULE_0__[\"Base64Url\"]();\n  }\n\n  getHeaders() {\n    return this.headers;\n  }\n\n  /**\n   * Performs decryption.\n   *\n   * @param cipher_text  String\n   * @return Promise<String>\n   */\n  decrypt(cipher_text) {\n    // Split cipher_text in 5 parts\n    var parts = cipher_text.split(\".\");\n    if (parts.length != 5) {\n      return Promise.reject(Error(\"decrypt: invalid input\"));\n    }\n\n    // part 1: header\n    this.headers = JSON.parse(this.base64UrlEncoder.decode(parts[0]));\n    if (!this.headers.alg) {\n      return Promise.reject(Error(\"decrypt: missing alg\"));\n    }\n    if (!this.headers.enc) {\n      return Promise.reject(Error(\"decrypt: missing enc\"));\n    }\n    this.cryptographer.setKeyEncryptionAlgorithm(this.headers.alg);\n    this.cryptographer.setContentEncryptionAlgorithm(this.headers.enc);\n\n    if (this.headers.crit) {\n      // We don't support the crit header\n      return Promise.reject(Error(\"decrypt: crit is not supported\"));\n    }\n\n    var cek_promise;\n\n    if (this.headers.alg == \"dir\") {\n      // with direct mode, we already have the cek\n      cek_promise = Promise.resolve(this.key_promise);\n    } else {\n      // part 2: decrypt the CEK\n      // In some modes (e.g. RSA-PKCS1v1.5), you must take precautions to prevent\n      // chosen-ciphertext attacks as described in RFC 3218, \"Preventing\n      // the Million Message Attack on Cryptographic Message Syntax\". We currently\n      // only support RSA-OAEP, so we don't generate a key if unwrapping fails.\n      var encrypted_cek = this.base64UrlEncoder.decodeArray(parts[1]);\n      cek_promise = this.key_promise.then(function (key) {\n        return this.cryptographer.unwrapCek(encrypted_cek, key);\n      }.bind(this));\n    }\n\n    // part 3: decrypt the cipher text\n    var plain_text_promise = this.cryptographer.decrypt(\n      cek_promise,\n      _jose_utils__WEBPACK_IMPORTED_MODULE_0__[\"arrayFromString\"](parts[0]),\n      this.base64UrlEncoder.decodeArray(parts[2]),\n      this.base64UrlEncoder.decodeArray(parts[3]),\n      this.base64UrlEncoder.decodeArray(parts[4]));\n\n    return plain_text_promise.then(_jose_utils__WEBPACK_IMPORTED_MODULE_0__[\"utf8StringFromArray\"]);\n  }\n}\n\n//# sourceURL=webpack://Jose/./lib/jose-jwe-decrypt.js?");
+
+/***/ }),
+
+/***/ "./lib/jose-jwe-encrypt.js":
+/*!*********************************!*\
+  !*** ./lib/jose-jwe-encrypt.js ***!
+  \*********************************/
+/*! exports provided: Encrypter */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"Encrypter\", function() { return Encrypter; });\n/* harmony import */ var _jose_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./jose-utils */ \"./lib/jose-utils.js\");\n/*-\n * Copyright 2014 Square Inc.\n *\n * Licensed under the Apache License, Version 2.0 (the \"License\");\n * you may not use this file except in compliance with the License.\n * You may obtain a copy of the License at\n *\n *     http://www.apache.org/licenses/LICENSE-2.0\n *\n * Unless required by applicable law or agreed to in writing, software\n * distributed under the License is distributed on an \"AS IS\" BASIS,\n * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n * See the License for the specific language governing permissions and\n * limitations under the License.\n */\n\n\n\n/**\n * Handles encryption.\n *\n * @param cryptographer  an instance of WebCryptographer (or equivalent).\n * @param key_promise    Promise<CryptoKey>, either RSA or shared key\n */\nclass Encrypter {\n  constructor(cryptographer, key_promise) {\n    this.cryptographer = cryptographer;\n    this.key_promise = key_promise;\n    this.userHeaders = {};\n  }\n\n  /**\n   * Adds a key/value pair which will be included in the header.\n   *\n   * The data lives in plaintext (an attacker can read the header) but is tamper\n   * proof (an attacker cannot modify the header).\n   *\n   * Note: some headers have semantic implications. E.g. if you set the \"zip\"\n   * header, you are responsible for properly compressing plain_text before\n   * calling encrypt().\n   *\n   * @param k  String\n   * @param v  String\n   */\n  addHeader(k, v) {\n    this.userHeaders[k] = v;\n  }\n\n  /**\n   * Performs encryption.\n   *\n   * @param plain_text  utf-8 string\n   * @return Promise<String>\n   */\n  encrypt(plain_text) {\n    /**\n     * Encrypts plain_text with CEK.\n     *\n     * @param cek_promise  Promise<CryptoKey>\n     * @param plain_text   string\n     * @return Promise<json>\n     */\n    var encryptPlainText = function(cek_promise, plain_text) {\n      // Create header\n      var headers = {};\n      for (var i in this.userHeaders) {\n        headers[i] = this.userHeaders[i];\n      }\n      headers.alg = this.cryptographer.getKeyEncryptionAlgorithm();\n      headers.enc = this.cryptographer.getContentEncryptionAlgorithm();\n      var jwe_protected_header = new _jose_utils__WEBPACK_IMPORTED_MODULE_0__[\"Base64Url\"]().encode(JSON.stringify(headers));\n\n      // Create the IV\n      var iv = this.cryptographer.createIV();\n\n      // Create the AAD\n      var aad = _jose_utils__WEBPACK_IMPORTED_MODULE_0__[\"arrayFromString\"](jwe_protected_header);\n      plain_text = _jose_utils__WEBPACK_IMPORTED_MODULE_0__[\"arrayFromUtf8String\"](plain_text);\n\n      return this.cryptographer.encrypt(iv, aad, cek_promise, plain_text).then(function(r) {\n        r.header = jwe_protected_header;\n        r.iv = iv;\n        return r;\n      });\n    };\n\n    var cek_promise, encrypted_cek;\n\n    if (this.cryptographer.getKeyEncryptionAlgorithm() == \"dir\") {\n      // with direct encryption, this.key_promise provides the cek\n      // and encrypted_cek is empty\n      cek_promise = Promise.resolve(this.key_promise);\n      encrypted_cek = [];\n    } else {\n      // Create a CEK key\n      cek_promise = this.cryptographer.createCek();\n\n      // Key & Cek allows us to create the encrypted_cek\n      encrypted_cek = Promise.all([this.key_promise, cek_promise]).then(function (all) {\n        var key = all[0];\n        var cek = all[1];\n        return this.cryptographer.wrapCek(cek, key);\n      }.bind(this));\n    }\n\n    // Cek allows us to encrypy the plain text\n    var enc_promise = encryptPlainText.bind(this, cek_promise, plain_text)();\n\n    // Once we have all the promises, we can base64 encode all the pieces.\n    return Promise.all([encrypted_cek, enc_promise]).then(function(all) {\n      var encrypted_cek = all[0];\n      var data = all[1];\n      var base64UrlEncoder = new _jose_utils__WEBPACK_IMPORTED_MODULE_0__[\"Base64Url\"]();\n      return data.header + \".\" +\n        base64UrlEncoder.encodeArray(encrypted_cek) + \".\" +\n        base64UrlEncoder.encodeArray(data.iv) + \".\" +\n        base64UrlEncoder.encodeArray(data.cipher) + \".\" +\n        base64UrlEncoder.encodeArray(data.tag);\n    });\n  }\n}\n\n\n//# sourceURL=webpack://Jose/./lib/jose-jwe-encrypt.js?");
+
+/***/ }),
+
+/***/ "./lib/jose-jwe-webcryptographer.js":
+/*!******************************************!*\
+  !*** ./lib/jose-jwe-webcryptographer.js ***!
+  \******************************************/
+/*! exports provided: WebCryptographer */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"WebCryptographer\", function() { return WebCryptographer; });\n/* harmony import */ var _jose_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./jose-utils */ \"./lib/jose-utils.js\");\n/*-\n * Copyright 2014 Square Inc.\n *\n * Licensed under the Apache License, Version 2.0 (the \"License\");\n * you may not use this file except in compliance with the License.\n * You may obtain a copy of the License at\n *\n *     http://www.apache.org/licenses/LICENSE-2.0\n *\n * Unless required by applicable law or agreed to in writing, software\n * distributed under the License is distributed on an \"AS IS\" BASIS,\n * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n * See the License for the specific language governing permissions and\n * limitations under the License.\n */\n\n\n/**\n * The WebCryptographer uses http://www.w3.org/TR/WebCryptoAPI/ to perform\n * various crypto operations. In theory, this should help build the library with\n * different underlying crypto APIs. I'm however unclear if we'll run into code\n * duplication or callback vs Promise based API issues.\n */\nclass WebCryptographer {\n  constructor() {\n    this.setKeyEncryptionAlgorithm(\"RSA-OAEP\");\n    this.setContentEncryptionAlgorithm(\"A256GCM\");\n    this.setContentSignAlgorithm(\"RS256\");\n  }\n\n  /**\n   * Overrides the default key encryption algorithm\n   * @param alg  string\n   */\n  setKeyEncryptionAlgorithm(alg) {\n    this.key_encryption = this.getCryptoConfig(alg);\n  }\n\n  getKeyEncryptionAlgorithm() {\n    return this.key_encryption.jwe_name;\n  }\n\n  /**\n   * Overrides the default content encryption algorithm\n   * @param alg  string\n   */\n   setContentEncryptionAlgorithm(alg) {\n    this.content_encryption = this.getCryptoConfig(alg);\n  }\n\n  getContentEncryptionAlgorithm() {\n    return this.content_encryption.jwe_name;\n  }\n\n  /**\n   * Overrides the default content sign algorithm\n   * @param alg  string\n   */\n   setContentSignAlgorithm(alg) {\n    this.content_sign = this.getSignConfig(alg);\n  }\n\n  getContentSignAlgorithm() {\n    return this.content_sign.jwa_name;\n  }\n\n  /**\n   * Generates an IV.\n   * This function mainly exists so that it can be mocked for testing purpose.\n   *\n   * @return Uint8Array with random bytes\n   */\n  createIV() {\n    var iv = new Uint8Array(new Array(this.content_encryption.iv_bytes));\n    return Jose.crypto.getRandomValues(iv);\n  }\n\n  /**\n   * Creates a random content encryption key.\n   * This function mainly exists so that it can be mocked for testing purpose.\n   *\n   * @return Promise<CryptoKey>\n   */\n  createCek() {\n    var hack = this.getCekWorkaround(this.content_encryption);\n    return Jose.crypto.subtle.generateKey(hack.id, true, hack.enc_op);\n  }\n\n  wrapCek(cek, key) {\n    return Jose.crypto.subtle.wrapKey(\"raw\", cek, key, this.key_encryption.id);\n  }\n\n  unwrapCek(cek, key) {\n    var hack = this.getCekWorkaround(this.content_encryption);\n    var extractable = (this.content_encryption.specific_cek_bytes > 0);\n    var key_encryption = this.key_encryption.id;\n\n    return Jose.crypto.subtle.unwrapKey(\"raw\", cek, key, key_encryption, hack.id, extractable, hack.dec_op);\n  }\n\n  /**\n   * Returns algorithm and operation needed to create a CEK.\n   *\n   * In some cases, e.g. A128CBC-HS256, the CEK gets split into two keys. The Web\n   * Crypto API does not allow us to generate an arbitrary number of bytes and\n   * then create a CryptoKey without any associated algorithm. We therefore piggy\n   * back on AES-CBS and HMAC which allows the creation of CEKs of size 16, 32, 64\n   * and 128 bytes.\n   */\n  getCekWorkaround(alg) {\n    var len = alg.specific_cek_bytes;\n    if (len) {\n      if (len == 16) {\n        return {id: {name: \"AES-CBC\", length: 128}, enc_op: [\"encrypt\"], dec_op: [\"decrypt\"]};\n      } else if (len == 32) {\n        return {id: {name: \"AES-CBC\", length: 256}, enc_op: [\"encrypt\"], dec_op: [\"decrypt\"]};\n      } else if (len == 64) {\n        return {id: {name: \"HMAC\", hash: {name: \"SHA-256\"}}, enc_op: [\"sign\"], dec_op: [\"verify\"]};\n      } else if (len == 128) {\n        return {id: {name: \"HMAC\", hash: {name: \"SHA-384\"}}, enc_op: [\"sign\"], dec_op: [\"verify\"]};\n      } else {\n        this.assert(false, \"getCekWorkaround: invalid len\");\n      }\n    }\n    return {id: alg.id, enc_op: [\"encrypt\"], dec_op: [\"decrypt\"]};\n  }\n\n  /**\n   * Encrypts plain_text with cek.\n   *\n   * @param iv          Uint8Array\n   * @param aad         Uint8Array\n   * @param cek_promise Promise<CryptoKey>\n   * @param plain_text  Uint8Array\n   * @return Promise<json>\n   */\n  encrypt(iv, aad, cek_promise, plain_text) {\n    var config = this.content_encryption;\n    if (iv.length != config.iv_bytes) {\n      return Promise.reject(Error(\"invalid IV length\"));\n    }\n    if (config.auth.aead) {\n      var tag_bytes = config.auth.tag_bytes;\n\n      var enc = {\n        name: config.id.name,\n        iv: iv,\n        additionalData: aad,\n        tagLength: tag_bytes * 8\n      };\n\n      return cek_promise.then(function(cek) {\n        return Jose.crypto.subtle.encrypt(enc, cek, plain_text).then(function(cipher_text) {\n          var offset = cipher_text.byteLength - tag_bytes;\n          return {\n            cipher: cipher_text.slice(0, offset),\n            tag: cipher_text.slice(offset)\n          };\n        });\n      });\n    } else {\n      var keys = this.splitKey(config, cek_promise, [\"encrypt\"]);\n      var mac_key_promise = keys[0];\n      var enc_key_promise = keys[1];\n\n      // Encrypt the plain text\n      var cipher_text_promise = enc_key_promise.then(function(enc_key) {\n        var enc = {\n          name: config.id.name,\n          iv: iv\n        };\n        return Jose.crypto.subtle.encrypt(enc, enc_key, plain_text);\n      });\n\n      // compute MAC\n      var mac_promise = cipher_text_promise.then((cipher_text) => {\n        return this.truncatedMac(\n          config,\n          mac_key_promise,\n          aad,\n          iv,\n          cipher_text);\n      });\n\n      return Promise.all([cipher_text_promise, mac_promise]).then(function(all) {\n        var cipher_text = all[0];\n        var mac = all[1];\n        return {\n          cipher: cipher_text,\n          tag: mac\n        };\n      });\n    }\n  }\n\n  /**\n   * Compares two Uint8Arrays in constant time.\n   *\n   * @return Promise<void>\n   */\n  compare(config, mac_key_promise, arr1, arr2){\n    this.assert(arr1 instanceof Uint8Array, \"compare: invalid input\");\n    this.assert(arr2 instanceof Uint8Array, \"compare: invalid input\");\n\n    return mac_key_promise.then(function(mac_key) {\n      var hash1 = Jose.crypto.subtle.sign(config.auth.id, mac_key, arr1);\n      var hash2 = Jose.crypto.subtle.sign(config.auth.id, mac_key, arr2);\n      return Promise.all([hash1, hash2]).then(function(all) {\n        var hash1 = new Uint8Array(all[0]);\n        var hash2 = new Uint8Array(all[1]);\n        if (hash1.length != hash2.length) {\n          throw new Error(\"compare failed\");\n        }\n        for (var i = 0; i < hash1.length; i++) {\n          if (hash1[i] != hash2[i]) {\n            throw new Error(\"compare failed\");\n          }\n        }\n        return Promise.resolve(null);\n      });\n    });\n  }\n\n  /**\n   * Decrypts cipher_text with cek. Validates the tag.\n   *\n   * @param cek_promise    Promise<CryptoKey>\n   * @param aad protected header\n   * @param iv IV\n   * @param cipher_text text to be decrypted\n   * @param tag to be verified\n   * @return Promise<string>\n   */\n  decrypt(cek_promise, aad, iv, cipher_text, tag) {\n\n    if (iv.length != this.content_encryption.iv_bytes) {\n      return Promise.reject(Error(\"decryptCiphertext: invalid IV\"));\n    }\n\n    var config = this.content_encryption;\n    if (config.auth.aead) {\n      var dec = {\n        name: config.id.name,\n        iv: iv,\n        additionalData: aad,\n        tagLength: config.auth.tag_bytes * 8\n      };\n\n      return cek_promise.then(function(cek) {\n        var buf = _jose_utils__WEBPACK_IMPORTED_MODULE_0__[\"arrayBufferConcat\"](cipher_text, tag);\n        return Jose.crypto.subtle.decrypt(dec, cek, buf);\n      });\n    } else {\n      var keys = this.splitKey(config, cek_promise, [\"decrypt\"]);\n      var mac_key_promise = keys[0];\n      var enc_key_promise = keys[1];\n\n      // Validate the MAC\n      var mac_promise = this.truncatedMac(\n        config,\n        mac_key_promise,\n        aad,\n        iv,\n        cipher_text);\n\n      return Promise.all([enc_key_promise, mac_promise]).then((all) => {\n        var enc_key = all[0];\n        var mac = all[1];\n\n        return this.compare(config, mac_key_promise, new Uint8Array(mac), tag).then(() => {\n          var dec = {\n            name: config.id.name,\n            iv: iv\n          };\n          return Jose.crypto.subtle.decrypt(dec, enc_key, cipher_text);\n        }).catch((err) => {\n          return Promise.reject(Error(\"decryptCiphertext: MAC failed.\"));\n        });\n      });\n    }\n  }\n\n  /**\n   * Signs plain_text.\n   *\n   * @param aad         json\n   * @param payload     String or json\n   * @param key_promise Promise<CryptoKey>\n   * @return Promise<ArrayBuffer>\n   */\n  sign(aad, payload, key_promise) {\n    var config = this.content_sign;\n\n    if (aad.alg) {\n      config = this.getSignConfig(aad.alg);\n    }\n\n    // Encrypt the plain text\n    return key_promise.then(function(key) {\n      var base64UrlEncoder = new _jose_utils__WEBPACK_IMPORTED_MODULE_0__[\"Base64Url\"]();\n      return Jose.crypto.subtle.sign(config.id, key, _jose_utils__WEBPACK_IMPORTED_MODULE_0__[\"arrayFromString\"]( base64UrlEncoder.encode(JSON.stringify(aad)) + '.' + base64UrlEncoder.encodeArray(payload)));\n    });\n  }\n\n  /**\n   * Verify JWS.\n   *\n   * @param payload     Base64Url encoded payload\n   * @param aad         String Base64Url encoded JSON representation of the protected JWS header\n   * @param signature   Uint8Array containing the signature\n   * @param key_promise Promise<CryptoKey>\n   * @param key_id      value of the kid JoseHeader, it'll be passed as part of the result to the returned promise\n   * @return Promise<json>\n   */\n  verify(aad, payload, signature, key_promise, key_id) {\n    var config = this.content_sign;\n\n    return key_promise.then(function(key) {\n      config = this.getSignConfig(getJwaNameForSignKey(key));\n      return Jose.crypto.subtle.verify(config.id, key, signature, _jose_utils__WEBPACK_IMPORTED_MODULE_0__[\"arrayFromString\"](aad + \".\" + payload)).then(function(res) {\n        return {kid: key_id, verified: res};\n      });\n    });\n  }\n\n  keyId(rsa_key) {\n    return _jose_utils__WEBPACK_IMPORTED_MODULE_0__[\"sha256\"](rsa_key.n + \"+\" + rsa_key.d);\n  }\n\n  /**\n   * Splits a CEK into two pieces: a MAC key and an ENC key.\n   *\n   * This code is structured around the fact that the crypto API does not provide\n   * a way to validate truncated MACs. The MAC key is therefore always imported to\n   * sign data.\n   *\n   * @param config (used for key lengths & algorithms)\n   * @param cek_promise Promise<CryptoKey>  CEK key to split\n   * @param purpose Array<String> usages of the imported key\n   * @return [Promise<mac key>, Promise<enc key>]\n   */\n  splitKey(config, cek_promise, purpose) {\n    // We need to split the CEK key into a MAC and ENC keys\n    var cek_bytes_promise = cek_promise.then(function(cek) {\n      return Jose.crypto.subtle.exportKey(\"raw\", cek);\n    });\n    var mac_key_promise = cek_bytes_promise.then(function(cek_bytes) {\n      if (cek_bytes.byteLength * 8 != config.id.length + config.auth.key_bytes * 8) {\n        return Promise.reject(Error(\"encryptPlainText: incorrect cek length\"));\n      }\n      var bytes = cek_bytes.slice(0, config.auth.key_bytes);\n      return Jose.crypto.subtle.importKey(\"raw\", bytes, config.auth.id, false, [\"sign\"]);\n    });\n    var enc_key_promise = cek_bytes_promise.then(function(cek_bytes) {\n      if (cek_bytes.byteLength * 8 != config.id.length + config.auth.key_bytes * 8) {\n        return Promise.reject(Error(\"encryptPlainText: incorrect cek length\"));\n      }\n      var bytes = cek_bytes.slice(config.auth.key_bytes);\n      return Jose.crypto.subtle.importKey(\"raw\", bytes, config.id, false, purpose);\n    });\n    return [mac_key_promise, enc_key_promise];\n  }\n\n  /**\n   * Converts the Jose web algorithms into data which is\n   * useful for the Web Crypto API.\n   *\n   * length = in bits\n   * bytes = in bytes\n   */\n  getCryptoConfig(alg) {\n    switch (alg) {\n      // Key encryption\n      case \"RSA-OAEP\":\n        return {\n          jwe_name: \"RSA-OAEP\",\n          id: {name: \"RSA-OAEP\", hash: {name: \"SHA-1\"}}\n        };\n      case \"RSA-OAEP-256\":\n        return {\n          jwe_name: \"RSA-OAEP-256\",\n          id: {name: \"RSA-OAEP\", hash: {name: \"SHA-256\"}}\n        };\n      case \"A128KW\":\n        return {\n          jwe_name: \"A128KW\",\n          id: {name: \"AES-KW\", length: 128}\n        };\n      case \"A256KW\":\n        return {\n          jwe_name: \"A256KW\",\n          id: {name: \"AES-KW\", length: 256}\n        };\n      case \"dir\":\n        return {\n          jwe_name: \"dir\"\n        };\n\n      // Content encryption\n      case \"A128CBC-HS256\":\n        return {\n          jwe_name: \"A128CBC-HS256\",\n          id: {name: \"AES-CBC\", length: 128},\n          iv_bytes: 16,\n          specific_cek_bytes: 32,\n          auth: {\n            key_bytes: 16,\n            id: {name: \"HMAC\", hash: {name: \"SHA-256\"}},\n            truncated_bytes: 16\n          }\n        };\n      case \"A256CBC-HS512\":\n        return {\n          jwe_name: \"A256CBC-HS512\",\n          id: {name: \"AES-CBC\", length: 256},\n          iv_bytes: 16,\n          specific_cek_bytes: 64,\n          auth: {\n            key_bytes: 32,\n            id: {name: \"HMAC\", hash: {name: \"SHA-512\"}},\n            truncated_bytes: 32\n          }\n        };\n      case \"A128GCM\":\n        return {\n          jwe_name: \"A128GCM\",\n          id: {name: \"AES-GCM\", length: 128},\n          iv_bytes: 12,\n          auth: {\n            aead: true,\n            tag_bytes: 16\n          }\n        };\n      case \"A256GCM\":\n        return {\n          jwe_name: \"A256GCM\",\n          id: {name: \"AES-GCM\", length: 256},\n          iv_bytes: 12,\n          auth: {\n            aead: true,\n            tag_bytes: 16\n          }\n        };\n      default:\n        throw Error(\"unsupported algorithm: \" + alg);\n    }\n  }\n\n  /**\n   * Computes a truncated MAC.\n   *\n   * @param config              configuration\n   * @param mac_key_promise     Promise<CryptoKey>  mac key\n   * @param aad                 Uint8Array\n   * @param iv                  Uint8Array\n   * @param cipher_text         Uint8Array\n   * @return Promise<buffer>    truncated MAC\n   */\n  truncatedMac(config, mac_key_promise, aad, iv, cipher_text) {\n    return mac_key_promise.then(function(mac_key) {\n      var al = new Uint8Array(_jose_utils__WEBPACK_IMPORTED_MODULE_0__[\"arrayFromInt32\"](aad.length * 8));\n      var al_full = new Uint8Array(8);\n      al_full.set(al, 4);\n      var buf = _jose_utils__WEBPACK_IMPORTED_MODULE_0__[\"arrayBufferConcat\"](aad, iv, cipher_text, al_full);\n      return Jose.crypto.subtle.sign(config.auth.id, mac_key, buf).then(function(bytes) {\n        return bytes.slice(0, config.auth.truncated_bytes);\n      });\n    });\n  }\n\n  /**\n   * Converts the Jose web algorithms into data which is\n   * useful for the Web Crypto API.\n   */\n  getSignConfig(alg) {\n\n    switch (alg) {\n      case \"RS256\":\n        return {\n          jwa_name: \"RS256\",\n          id: {name: \"RSASSA-PKCS1-v1_5\", hash: {name: \"SHA-256\"}}\n        };\n      case \"RS384\":\n        return {\n          jwa_name: \"RS384\",\n          id: {name: \"RSASSA-PKCS1-v1_5\", hash: {name: \"SHA-384\"}}\n        };\n      case \"RS512\":\n        return {\n          jwa_name: \"RS512\",\n          id: {name: \"RSASSA-PKCS1-v1_5\", hash: {name: \"SHA-512\"}}\n        };\n      case \"PS256\":\n        return {\n          jwa_name: \"PS256\",\n          id: {name: \"RSA-PSS\", hash: {name: \"SHA-256\"}, saltLength: 20}\n        };\n      case \"PS384\":\n        return {\n          jwa_name: \"PS384\",\n          id: {name: \"RSA-PSS\", hash: {name: \"SHA-384\"}, saltLength: 20}\n        };\n      case \"PS512\":\n        return {\n          jwa_name: \"PS512\",\n          id: {name: \"RSA-PSS\", hash: {name: \"SHA-512\"}, saltLength: 20}\n        };\n      case \"HS256\":\n        return {\n          jwa_name: \"HS256\",\n          id: {name: \"HMAC\", hash: {name: \"SHA-256\"}}\n        };\n      case \"HS384\":\n        return {\n          jwa_name: \"HS384\",\n          id: {name: \"HMAC\", hash: {name: \"SHA-384\"}}\n        };\n      case \"HS512\":\n        return {\n          jwa_name: \"HS512\",\n          id: {name: \"HMAC\", hash: {name: \"SHA-512\"}}\n        };\n      case \"ES256\":\n        return {\n          jwa_name: \"ES256\",\n          id: {name: \"ECDSA\", hash: {name: \"SHA-256\"}}\n        };\n      case \"ES384\":\n        return {\n          jwa_name: \"ES384\",\n          id: {name: \"ECDSA\", hash: {name: \"SHA-384\"}}\n        };\n      case \"ES512\":\n        return {\n          jwa_name: \"ES512\",\n          id: {name: \"ECDSA\", hash: {name: \"SHA-512\"}}\n        };\n      default:\n        throw Error(\"unsupported algorithm: \" + alg);\n    }\n  }\n\n  /**\n   * Returns JWA name for a given CryptoKey\n   * @param key CryptoKey\n   */\n  getJwaNameForSignKey(key) {\n    var rv = \"\",\n      sign_algo = key.algorithm.name,\n      hash_algo = key.algorithm.hash.name;\n\n    if(sign_algo == \"RSASSA-PKCS1-v1_5\") {\n      rv = \"R\";\n    } else if(sign_algo == \"RSA-PSS\") {\n      rv = \"P\";\n    } else {\n      throw new Error(\"unsupported sign/verify algorithm \" + sign_algo);\n    }\n\n    if(hash_algo.indexOf(\"SHA-\") === 0) {\n      rv += \"S\";\n    } else {\n      throw new Error(\"unsupported hash algorithm \" + sign_algo);\n    }\n\n    rv += hash_algo.substring(4);\n\n    return rv;\n  }\n\n  /**\n   * Derives key usage from algorithm's name\n   *\n   * @param alg String algorithm name\n   * @returns {*}\n   */\n  getKeyUsageByAlg(alg) {\n    switch (alg) {\n      // signature\n      case \"RS256\":\n      case \"RS384\":\n      case \"RS512\":\n      case \"PS256\":\n      case \"PS384\":\n      case \"PS512\":\n      case \"HS256\":\n      case \"HS384\":\n      case \"HS512\":\n      case \"ES256\":\n      case \"ES384\":\n      case \"ES512\":\n        return {\n          publicKey: \"verify\",\n          privateKey: \"sign\"\n        };\n      // key encryption\n      case \"RSA-OAEP\":\n      case \"RSA-OAEP-256\":\n      case \"A128KW\":\n      case \"A256KW\":\n        return {\n          publicKey: \"wrapKey\",\n          privateKey: \"unwrapKey\"\n        };\n      default:\n        throw Error(\"unsupported algorithm: \" + alg);\n    }\n  }\n\n  /**\n * Feel free to override this function.\n */\n  assert(expr, msg) {\n    if (!expr) {\n      throw new Error(msg);\n    }\n  }\n}\n\n\n//# sourceURL=webpack://Jose/./lib/jose-jwe-webcryptographer.js?");
+
+/***/ }),
+
+/***/ "./lib/jose-jws-sign.js":
+/*!******************************!*\
+  !*** ./lib/jose-jws-sign.js ***!
+  \******************************/
+/*! exports provided: Signer, JWS */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"Signer\", function() { return Signer; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"JWS\", function() { return JWS; });\n/* harmony import */ var _jose_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./jose-utils */ \"./lib/jose-utils.js\");\n/*-\n * Copyright 2015 Peculiar Ventures\n *\n * Licensed under the Apache License, Version 2.0 (the \"License\");\n * you may not use this file except in compliance with the License.\n * You may obtain a copy of the License at\n *\n *     http://www.apache.org/licenses/LICENSE-2.0\n *\n * Unless required by applicable law or agreed to in writing, software\n * distributed under the License is distributed on an \"AS IS\" BASIS,\n * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n * See the License for the specific language governing permissions and\n * limitations under the License.\n */\n\n\n\n/**\n * Handles decryption.\n *\n * @param cryptographer  an instance of WebCryptographer (or equivalent). Keep\n *                       in mind that decryption mutates the cryptographer.\n *\n * @author Patrizio Bruno <patrizio@desertconsulting.net>\n */\nclass Signer {\n  constructor(cryptographer) {\n    this.cryptographer = cryptographer;\n\n    this.key_promises = {};\n    this.waiting_kid = 0;\n    this.headers = {};\n    this.signer_aads = {};\n    this.signer_headers = {};\n  }\n\n  /**\n   * Adds a signer to JoseJWS instance. It'll be the on of the signers of the resulting JWS.\n   *\n   * @param rsa_key        private RSA key in json format, Parameters can be base64\n   *                       encoded, strings or number (for 'e'). Or CryptoKey\n   * @param key_id         a string identifying the rsa_key. OPTIONAL\n   * @param aad            Object protected header\n   * @param header         Object unprotected header\n   */\n  addSigner(rsa_key, key_id, aad, header) {\n    var that = this;\n    var key_promise;\n    if (_jose_utils__WEBPACK_IMPORTED_MODULE_0__[\"isCryptoKey\"](rsa_key)) {\n      key_promise = new Promise(function(resolve) {\n        resolve(rsa_key);\n      });\n    } else {\n      var alg;\n      if (aad && aad.alg) {\n        alg = aad.alg;\n      } else {\n        alg = that.cryptographer.getContentSignAlgorithm();\n      }\n      key_promise = _jose_utils__WEBPACK_IMPORTED_MODULE_0__[\"importRsaPrivateKey\"](rsa_key, alg, \"sign\");\n    }\n\n    var kid_promise;\n    if (key_id) {\n      kid_promise = new Promise(function(resolve) {\n        resolve(key_id);\n      });\n    } else if (_jose_utils__WEBPACK_IMPORTED_MODULE_0__[\"isCryptoKey\"](rsa_key)) {\n      throw new Error(\"key_id is a mandatory argument when the key is a CryptoKey\");\n    } else {\n      kid_promise = Jose.WebCryptographer.keyId(rsa_key);\n    }\n\n    that.waiting_kid++;\n\n    return kid_promise.then(function(kid) {\n      that.key_promises[kid] = key_promise;\n      that.waiting_kid--;\n      if (aad) {\n        that.signer_aads[kid] = aad;\n      }\n      if (header) {\n        that.signer_headers[kid] = header;\n      }\n      return kid;\n    });\n  }\n\n  /**\n   * Adds a signature to a JWS object\n   * @param jws JWS Object to be signed or its representation\n   * @param aad     Object protected header\n   * @param header  Object unprotected header\n   * @return Promise<String>\n   */\n  addSignature(jws, aad, header) {\n    if (_jose_utils__WEBPACK_IMPORTED_MODULE_0__[\"isString\"](jws)) {\n      jws = JSON.parse(jws);\n    }\n\n    if (jws.payload && _jose_utils__WEBPACK_IMPORTED_MODULE_0__[\"isString\"](jws.payload) &&\n      jws.protected && _jose_utils__WEBPACK_IMPORTED_MODULE_0__[\"isString\"](jws.protected) &&\n      jws.header && jws.header instanceof Object &&\n      jws.signature && _jose_utils__WEBPACK_IMPORTED_MODULE_0__[\"isString\"](jws.signature)) {\n      return this.sign(JWS.fromObject(jws), aad, header);\n    } else {\n      throw new Error(\"JWS is not a valid JWS object\");\n    }\n  }\n\n  /**\n   * Computes signature.\n   *\n   * @param payload JWS Object or utf-8 string to be signed\n   * @param aad     Object protected header\n   * @param header  Object unprotected header\n   * @return Promise<JWS>\n   */\n  sign(payload, aad, header) {\n\n    var that = this;\n    var kids = [];\n\n    if (Object.keys(that.key_promises).length === 0) {\n      throw new Error(\"No signers defined. At least one is required to sign the JWS.\");\n    }\n\n    if (that.waiting_kid) {\n      throw new Error(\"still generating key IDs\");\n    }\n\n    function sign (message, protectedHeader, unprotectedHeader, rsa_key_promise, kid) {\n      var toBeSigned;\n\n      if (!protectedHeader) {\n        protectedHeader = {};\n      }\n\n      if (!protectedHeader.alg) {\n        protectedHeader.alg = that.cryptographer.getContentSignAlgorithm();\n        protectedHeader.typ = \"JWT\";\n      }\n\n      if (!protectedHeader.kid) {\n        protectedHeader.kid = kid;\n      }\n\n      if (_jose_utils__WEBPACK_IMPORTED_MODULE_0__[\"isString\"](message)) {\n        toBeSigned = _jose_utils__WEBPACK_IMPORTED_MODULE_0__[\"arrayFromUtf8String\"](message);\n      } else {\n        try {\n          toBeSigned = _jose_utils__WEBPACK_IMPORTED_MODULE_0__[\"arrayish\"](message);\n        } catch (e) {\n          if (message instanceof JWS) {\n            toBeSigned = _jose_utils__WEBPACK_IMPORTED_MODULE_0__[\"arrayFromString\"](_jose_utils__WEBPACK_IMPORTED_MODULE_0__[\"Base64Url\"].decode(message.payload));\n          } else if (message instanceof Object) {\n            toBeSigned = _jose_utils__WEBPACK_IMPORTED_MODULE_0__[\"arrayFromUtf8String\"](JSON.stringify(message));\n          } else {\n            throw new Error(\"cannot sign this message\");\n          }\n        }\n      }\n\n      return that.cryptographer.sign(protectedHeader, toBeSigned, rsa_key_promise).then(function(signature) {\n        var jws = new JWS(protectedHeader, unprotectedHeader, toBeSigned, signature);\n        if (message instanceof JWS) {\n          delete jws.payload;\n          if (!message.signatures) {\n            message.signatures = [jws];\n          } else {\n            message.signatures.push(jws);\n          }\n          return message;\n        }\n        return jws;\n      });\n    }\n\n    function doSign (pl, ph, uh, kps, kids) {\n      if (kids.length) {\n        var k_id = kids.shift();\n        var rv = sign(pl, that.signer_aads[k_id] || ph, that.signer_headers[k_id] || uh, kps[k_id], k_id);\n        if (kids.length) {\n          rv = rv.then(function(jws) {\n            return doSign(jws, null, null, kps, kids);\n          });\n        }\n        return rv;\n      }\n    }\n\n    for(var kid in that.key_promises) {\n      if (that.key_promises.hasOwnProperty(kid)) {\n        kids.push(kid);\n      }\n    }\n    return doSign(payload, aad, header, that.key_promises, kids);\n  }\n}\n\n/**\n * Initialize a JWS object.\n *\n * @param protectedHeader protected header (JS object)\n * @param payload Uint8Array payload to be signed\n * @param signature ArrayBuffer signature of the payload\n * @param header unprotected header (JS object)\n *\n * @constructor\n */\nclass JWS { \n  constructor(protectedHeader, header, payload, signature) {\n    this.header = header;\n    var base64UrlEncoder = new _jose_utils__WEBPACK_IMPORTED_MODULE_0__[\"Base64Url\"]();\n    this.payload = base64UrlEncoder.encodeArray(payload);\n    if (signature) {\n      this.signature = base64UrlEncoder.encodeArray(signature);\n    }\n    this.protected = base64UrlEncoder.encode(JSON.stringify(protectedHeader));\n  }\n\n  fromObject(obj) {\n    var rv = new JWS(obj.protected, obj.header, obj.payload, null);\n    rv.signature = obj.signature;\n    rv.signatures = obj.signatures;\n    return rv;\n  }\n\n  /**\n   * Serialize a JWS object using the JSON serialization format\n   *\n   * @returns {Object} a copy of this\n   */\n  JsonSerialize() {\n    return JSON.stringify(this);\n  }\n\n  /**\n   * Serialize a JWS object using the Compact Serialization Format\n   *\n   * @returns {string} BASE64URL(UTF8(PROTECTED HEADER)).BASE64URL(PAYLOAD).BASE64URL(SIGNATURE)\n   */\n  CompactSerialize() {\n    return this.protected + '.' + this.payload + '.' + this.signature;\n  }\n}\n\n//# sourceURL=webpack://Jose/./lib/jose-jws-sign.js?");
+
+/***/ }),
+
+/***/ "./lib/jose-jws-verify.js":
+/*!********************************!*\
+  !*** ./lib/jose-jws-verify.js ***!
+  \********************************/
+/*! exports provided: Verifier */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"Verifier\", function() { return Verifier; });\n/* harmony import */ var _jose_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./jose-utils */ \"./lib/jose-utils.js\");\n/*-\n * Copyright 2015 Peculiar Ventures\n *\n * Licensed under the Apache License, Version 2.0 (the \"License\");\n * you may not use this file except in compliance with the License.\n * You may obtain a copy of the License at\n *\n *     http://www.apache.org/licenses/LICENSE-2.0\n *\n * Unless required by applicable law or agreed to in writing, software\n * distributed under the License is distributed on an \"AS IS\" BASIS,\n * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n * See the License for the specific language governing permissions and\n * limitations under the License.\n */\n\n \n\n/**\n * Handles signature verification.\n *\n * @param cryptographer  an instance of WebCryptographer (or equivalent). Keep\n *                       in mind that decryption mutates the cryptographer.\n * @param message        a JWS message\n * @param keyfinder (optional) a function returning a Promise<CryptoKey> given\n *                             a key id\n *\n * @author Patrizio Bruno <patrizio@desertconsulting.net>\n */\nclass Verifier {\n    constructor(cryptographer, message, keyfinder) {\n\n    var that = this,\n      alg,\n      jwt,\n      aad,\n      header,\n      payload,\n      signatures,\n      protectedHeader,\n      jwtRx = /^([0-9a-z_\\-]+)\\.([0-9a-z_\\-]+)\\.([0-9a-z_\\-]+)$/i;\n\n    that.cryptographer = cryptographer;\n\n    alg = cryptographer.getContentSignAlgorithm();\n\n    that.cryptographer = new Jose.WebCryptographer();\n\n    if (_jose_utils__WEBPACK_IMPORTED_MODULE_0__[\"isString\"](message)) {\n      if ((jwt = jwtRx.exec(message))) {\n        if (jwt.length != 4) {\n          throw new Error(\"wrong JWS compact serialization format\");\n        }\n\n        message = {\n          protected: jwt[1],\n          payload: jwt[2],\n          signature: jwt[3]\n        };\n      } else {\n        message = JSON.parse(message);\n      }\n    } else if (typeof message != \"object\") {\n      throw new Error(\"data format not supported\");\n    }\n\n    aad = message.protected;\n    header = message.header;\n    payload = message.payload;\n    signatures = message.signatures instanceof Array ? message.signatures.slice(0) : [];\n\n    signatures.forEach(function (sign) {\n      sign.aad = sign.protected;\n      sign.protected = JSON.parse(_jose_utils__WEBPACK_IMPORTED_MODULE_0__[\"Base64Url\"].decode(sign.protected));\n    });\n\n    that.aad = aad;\n    protectedHeader = _jose_utils__WEBPACK_IMPORTED_MODULE_0__[\"Base64Url\"].decode(aad);\n    try {\n      protectedHeader = JSON.parse(protectedHeader);\n    } catch (e) {\n    }\n\n    if (!protectedHeader && !header) {\n      throw new Error(\"at least one header is required\");\n    }\n\n    if (!protectedHeader.alg) {\n      throw new Error(\"'alg' is a mandatory header\");\n    }\n\n    if (protectedHeader.alg != alg) {\n      throw new Error(\"the alg header '\" + protectedHeader.alg + \"' doesn't match the requested algorithm '\" + alg + \"'\");\n    }\n\n    if (protectedHeader && protectedHeader.typ && protectedHeader.typ != \"JWT\") {\n      throw new Error(\"typ '\" + protectedHeader.typ + \"' not supported\");\n    }\n\n    if (message.signature) {\n      signatures.unshift({\n        aad: aad,\n        protected: protectedHeader,\n        header: header,\n        signature: message.signature\n      });\n    }\n\n    that.signatures = [];\n    for(var i = 0; i < signatures.length; i++) {\n      that.signatures[i] = JSON.parse(JSON.stringify(signatures[i]));\n      that.signatures[i].signature = _jose_utils__WEBPACK_IMPORTED_MODULE_0__[\"arrayFromString\"](_jose_utils__WEBPACK_IMPORTED_MODULE_0__[\"Base64Url\"].decode(signatures[i].signature));\n    }\n\n    that.payload = payload;\n\n    that.key_promises = {};\n    that.waiting_kid = 0;\n\n    if (keyfinder) {\n      that.keyfinder = keyfinder;\n    }\n  }\n\n  /**\n   * Add supported recipients to verify multiple signatures\n   *\n   * @param rsa_key        public RSA key in json format. Parameters can be base64\n   *                       encoded, strings or number (for 'e').\n   * @param key_id         a string identifying the rsa_key. OPTIONAL\n   * @param alg            String signature algorithm. OPTIONAL\n   * @returns Promise<string> a Promise of a key id\n   */\n  addRecipient(rsa_key, key_id, alg) {\n\n    var that = this,\n      kid_promise,\n      key_promise = _jose_utils__WEBPACK_IMPORTED_MODULE_0__[\"isCryptoKey\"](rsa_key) ? new Promise(function (resolve) {\n        resolve(rsa_key);\n      }) : Jose.utils.importRsaPublicKey(rsa_key, alg || that.cryptographer.getContentSignAlgorithm(), \"verify\");\n\n    if (key_id) {\n      kid_promise = new Promise(function (resolve) {\n        resolve(key_id);\n      });\n    } else if (_jose_utils__WEBPACK_IMPORTED_MODULE_0__[\"isCryptoKey\"](rsa_key)) {\n      throw new Error(\"key_id is a mandatory argument when the key is a CryptoKey\");\n    } else {\n      console.log(\"it's not safe to not pass a key_id\");\n      kid_promise = Jose.WebCryptographer.keyId(rsa_key);\n    }\n\n    that.waiting_kid++;\n\n    return kid_promise.then(function (kid) {\n      that.key_promises[kid] = key_promise;\n      that.waiting_kid--;\n      return kid;\n    });\n  }\n\n  /**\n   * Verifies a JWS signature\n   *\n   * @returns Promise<Array> a Promise of an array of objects { kid: string, verified: bool, payload?: string }\n   *\n   * payload is only populated and usable if verified is true\n   */\n  verify() {\n\n    var that = this,\n      signatures = that.signatures,\n      key_promises = that.key_promises,\n      keyfinder = that.keyfinder,\n      promises = [],\n      check = !!keyfinder || Object.keys(that.key_promises).length > 0;\n\n    if (!check) {\n      throw new Error(\"No recipients defined. At least one is required to verify the JWS.\");\n    }\n\n    if (that.waiting_kid) {\n      throw new Error(\"still generating key IDs\");\n    }\n\n    signatures.forEach(function (sig) {\n      var kid = sig.protected.kid;\n      if (keyfinder) {\n        key_promises[kid] = keyfinder(kid);\n      }\n      promises.push(that.cryptographer.verify(sig.aad, that.payload, sig.signature, key_promises[kid], kid)\n        .then(function (vr) {\n          if (vr.verified) {\n            vr.payload = _jose_utils__WEBPACK_IMPORTED_MODULE_0__[\"Base64Url\"].decode(that.payload);\n          }\n          return vr;\n        }));\n    });\n    return Promise.all(promises);\n  }\n}\n\n\n//# sourceURL=webpack://Jose/./lib/jose-jws-verify.js?");
+
+/***/ }),
+
+/***/ "./lib/jose-utils.js":
+/*!***************************!*\
+  !*** ./lib/jose-utils.js ***!
+  \***************************/
+/*! exports provided: importRsaPublicKey, importRsaPrivateKey, isString, arrayish, convertRsaKey, arrayFromString, arrayFromUtf8String, stringFromArray, utf8StringFromArray, stripLeadingZeros, arrayFromInt32, arrayBufferConcat, Base64Url */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"importRsaPublicKey\", function() { return importRsaPublicKey; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"importRsaPrivateKey\", function() { return importRsaPrivateKey; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"isString\", function() { return isString; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"arrayish\", function() { return arrayish; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"convertRsaKey\", function() { return convertRsaKey; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"arrayFromString\", function() { return arrayFromString; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"arrayFromUtf8String\", function() { return arrayFromUtf8String; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"stringFromArray\", function() { return stringFromArray; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"utf8StringFromArray\", function() { return utf8StringFromArray; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"stripLeadingZeros\", function() { return stripLeadingZeros; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"arrayFromInt32\", function() { return arrayFromInt32; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"arrayBufferConcat\", function() { return arrayBufferConcat; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"Base64Url\", function() { return Base64Url; });\n/* harmony import */ var _jose_jwe_webcryptographer__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./jose-jwe-webcryptographer */ \"./lib/jose-jwe-webcryptographer.js\");\n/*-\n * Copyright 2014 Square Inc.\n *\n * Licensed under the Apache License, Version 2.0 (the \"License\");\n * you may not use this file except in compliance with the License.\n * You may obtain a copy of the License at\n *\n *     http://www.apache.org/licenses/LICENSE-2.0\n *\n * Unless required by applicable law or agreed to in writing, software\n * distributed under the License is distributed on an \"AS IS\" BASIS,\n * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n * See the License for the specific language governing permissions and\n * limitations under the License.\n */\n\n\nconst webCryptographer = new _jose_jwe_webcryptographer__WEBPACK_IMPORTED_MODULE_0__[\"WebCryptographer\"]();\n\n/**\n * Converts the output from `openssl x509 -text` or `openssl rsa -text` into a\n * CryptoKey which can then be used with RSA-OAEP. Also accepts (and validates)\n * JWK keys.\n *\n * TODO: this code probably belongs in the webcryptographer.\n *\n * @param rsa_key  public RSA key in json format. Parameters can be base64\n *                 encoded, strings or number (for 'e').\n * @param alg      String, name of the algorithm\n * @return Promise<CryptoKey>\n */\nconst importRsaPublicKey = (rsa_key, alg) => {\n  var jwk;\n  var config;\n  var usage = webCryptographer.getKeyUsageByAlg(alg);\n\n  if (usage.publicKey == \"wrapKey\") {\n    if (!rsa_key.alg) {\n      rsa_key.alg = alg;\n    }\n    jwk = convertRsaKey(rsa_key, [\"n\", \"e\"]);\n    config = webCryptographer.getCryptoConfig(alg);\n  } else {\n    var rk = {};\n    for (var name in rsa_key) {\n      if (rsa_key.hasOwnProperty(name)) {\n        rk[name] = rsa_key[name];\n      }\n    }\n\n    if (!rk.alg && alg) {\n      rk.alg = alg;\n    }\n    config = webCryptographer.getSignConfig(rk.alg);\n    jwk = convertRsaKey(rk, [\"n\", \"e\"]);\n    jwk.ext = true;\n  }\n  return Jose.crypto.subtle.importKey(\"jwk\", jwk, config.id, false, [usage.publicKey]);\n};\n\n/**\n * Converts the output from `openssl x509 -text` or `openssl rsa -text` into a\n * CryptoKey which can then be used with RSA-OAEP and RSA. Also accepts (and validates)\n * JWK keys.\n *\n * TODO: this code probably belongs in the webcryptographer.\n *\n * @param rsa_key  private RSA key in json format. Parameters can be base64\n *                 encoded, strings or number (for 'e').\n * @param alg      String, name of the algorithm\n * @return Promise<CryptoKey>\n */\nconst importRsaPrivateKey = (rsa_key, alg) => {\n  var jwk;\n  var config;\n  var usage = webCryptographer.getKeyUsageByAlg(alg);\n\n  if (usage.privateKey == \"unwrapKey\") {\n    if (!rsa_key.alg) {\n      rsa_key.alg = alg;\n    }\n    jwk = convertRsaKey(rsa_key, [\"n\", \"e\", \"d\", \"p\", \"q\", \"dp\", \"dq\", \"qi\"]);\n    config = webCryptographer.getCryptoConfig(alg);\n  } else {\n    var rk = {};\n    for (var name in rsa_key) {\n      if (rsa_key.hasOwnProperty(name)) {\n        rk[name] = rsa_key[name];\n      }\n    }\n    config = webCryptographer.getSignConfig(alg);\n    if (!rk.alg && alg) {\n      rk.alg = alg;\n    }\n    jwk = convertRsaKey(rk, [\"n\", \"e\", \"d\", \"p\", \"q\", \"dp\", \"dq\", \"qi\"]);\n    jwk.ext = true;\n  }\n  return Jose.crypto.subtle.importKey(\"jwk\", jwk, config.id, false, [usage.privateKey]);\n};\n\n// Private functions\n\nconst isString = (str) => {\n  return ((typeof(str) == \"string\") || (str instanceof String));\n};\n\n/**\n * Takes an arrayish (an array, ArrayBuffer or Uint8Array)\n * and returns an array or a Uint8Array.\n *\n * @param arr  arrayish\n * @return array or Uint8Array\n */\nconst arrayish = (arr) => {\n  if (arr instanceof Array) {\n    return arr;\n  }\n  if (arr instanceof Uint8Array) {\n    return arr;\n  }\n  if (arr instanceof ArrayBuffer) {\n    return new Uint8Array(arr);\n  }\n  webCryptographer.assert(false, \"arrayish: invalid input\");\n};\n\n/**\n * Checks if an RSA key contains all the expected parameters. Also checks their\n * types. Converts hex encoded strings (or numbers) to base64.\n *\n * @param rsa_key     RSA key in json format. Parameters can be base64 encoded,\n *                    strings or number (for 'e').\n * @param parameters  array<string>\n * @return json\n */\nconst convertRsaKey = (rsa_key, parameters) => {\n  var r = {};\n  var alg;\n\n  // Check that we have all the parameters\n  var missing = [];\n  parameters.map(function(p){if (typeof(rsa_key[p]) == \"undefined\") { missing.push(p); }});\n\n  if (missing.length > 0) {\n    webCryptographer.assert(false, \"convertRsaKey: Was expecting \" + missing.join());\n  }\n\n  // kty is either missing or is set to \"RSA\"\n  if (typeof(rsa_key.kty) != \"undefined\") {\n    webCryptographer.assert(rsa_key.kty == \"RSA\", \"convertRsaKey: expecting rsa_key['kty'] to be 'RSA'\");\n  }\n  r.kty = \"RSA\";\n\n  try {\n    webCryptographer.getSignConfig(rsa_key.alg);\n    alg = rsa_key.alg;\n  } catch (err) {\n    try {\n      webCryptographer.getCryptoConfig(rsa_key.alg);\n      alg = rsa_key.alg;\n    } catch (er) {\n      webCryptographer.assert(alg, \"convertRsaKey: expecting rsa_key['alg'] to have a valid value\");\n    }\n  }\n  r.alg = alg;\n\n  // note: we punt on checking key_ops\n\n  var intFromHex = (e) => {\n    return parseInt(e, 16);\n  };\n  for (var i = 0; i < parameters.length; i++) {\n    var p = parameters[i];\n    var v = rsa_key[p];\n    var base64UrlEncoder = new Base64Url();\n    if (p == \"e\") {\n      if (typeof(v) == \"number\") {\n        v = base64UrlEncoder.encodeArray(stripLeadingZeros(arrayFromInt32(v)));\n      }\n    } else if (/^([0-9a-fA-F]{2}:)+[0-9a-fA-F]{2}$/.test(v)) {\n      var arr = v.split(\":\").map(intFromHex);\n      v = base64UrlEncoder.encodeArray(stripLeadingZeros(arr));\n    } else if (typeof(v) != \"string\") {\n      webCryptographer.assert(false, \"convertRsaKey: expecting rsa_key['\" + p + \"'] to be a string\");\n    }\n    r[p] = v;\n  }\n\n  return r;\n};\n\n/**\n * Converts a string into an array of ascii codes.\n *\n * @param str  ascii string\n * @return Uint8Array\n */\nconst arrayFromString = (str) => {\n  webCryptographer.assert(isString(str), \"arrayFromString: invalid input\");\n  var arr = str.split('').map(function(c) {\n    return c.charCodeAt(0);\n  });\n  return new Uint8Array(arr);\n};\n\n/**\n * Converts a string into an array of utf-8 codes.\n *\n* @param str  utf-8 string\n * @return Uint8Array\n */\nconst arrayFromUtf8String = (str) => {\n  webCryptographer.assert(isString(str), \"arrayFromUtf8String: invalid input\");\n  // javascript represents strings as utf-16. Jose imposes the use of\n  // utf-8, so we need to convert from one representation to the other.\n  str = unescape(encodeURIComponent(str));\n  return arrayFromString(str);\n};\n\n/**\n * Converts an array of ascii bytes into a string.\n *\n * @param arr  arrayish\n * @return ascii string\n */\nconst stringFromArray = (arr) => {\n  arr = arrayish(arr);\n  var r = '';\n  for (var i = 0; i < arr.length; i++) {\n    r += String.fromCharCode(arr[i]);\n  }\n\n  return r;\n};\n\n/**\n * Converts an array of ascii bytes into a string.\n *\n * @param arr  ArrayBuffer\n * @return ascii string\n */\nconst utf8StringFromArray = (arr) => {\n  webCryptographer.assert(arr instanceof ArrayBuffer, \"utf8StringFromArray: invalid input\");\n\n  // javascript represents strings as utf-16. Jose imposes the use of\n  // utf-8, so we need to convert from one representation to the other.\n  var r = stringFromArray(arr);\n  return decodeURIComponent(escape(r));\n};\n\n/**\n * Strips leading zero in an array.\n *\n * @param arr  arrayish\n * @return array\n */\nconst stripLeadingZeros = (arr) => {\n  if (arr instanceof ArrayBuffer) {\n    arr = new Uint8Array(arr);\n  }\n  var is_leading_zero = true;\n  var r = [];\n  for (var i = 0; i < arr.length; i++) {\n    if (is_leading_zero && arr[i] === 0) {\n      continue;\n    }\n    is_leading_zero = false;\n    r.push(arr[i]);\n  }\n  return r;\n};\n\n/**\n * Converts a number into an array of 4 bytes (big endian).\n *\n * @param i  number\n * @return ArrayBuffer\n */\nconst arrayFromInt32 = (i) => {\n  webCryptographer.assert(typeof(i) == \"number\", \"arrayFromInt32: invalid input\");\n  webCryptographer.assert(i == i | 0, \"arrayFromInt32: out of range\");\n\n  var buf = new Uint8Array(new Uint32Array([i]).buffer);\n  var r = new Uint8Array(4);\n  for (var j = 0; j < 4; j++) {\n    r[j] = buf[3 - j];\n  }\n  return r.buffer;\n};\n\n/**\n * Concatenates arrayishes.\n * \n * note: cannot be a Arrow function, because Arrow functions do not expose 'arguments' object\n * and Rest parameters are not supported in Babel yet.\n *\n * @param arguments two or more arrayishes\n * @return Uint8Array\n */\nfunction arrayBufferConcat( /* ... */){\n  // Compute total size\n  var args = [];\n  var total = 0;\n  for (var i = 0; i < arguments.length; i++) {\n    args.push(arrayish(arguments[i]));\n    total += args[i].length;\n  }\n  var r = new Uint8Array(total);\n  var offset = 0;\n  for (i = 0; i < arguments.length; i++) {\n    for (var j = 0; j < args[i].length; j++) {\n      r[offset++] = args[i][j];\n    }\n  }\n  webCryptographer.assert(offset == total, \"arrayBufferConcat: unexpected offset\");\n  return r;\n}\n\nclass Base64Url {\n  /**\n   * Base64Url encodes a string (no trailing '=')\n   *\n   * @param str  string\n   * @return string\n   */\n  encode(str) {\n    webCryptographer.assert(isString(str), \"Base64Url.encode: invalid input\");\n    return btoa(str)\n      .replace(/\\+/g, \"-\")\n      .replace(/\\//g, \"_\")\n      .replace(/=+$/, \"\");\n  }\n\n  /**\n   * Base64Url encodes an array\n   *\n   * @param arr array or ArrayBuffer\n   * @return string\n   */\n  encodeArray(arr) {\n    return this.encode(stringFromArray(arr));\n  }\n\n  /**\n   * Base64Url decodes a string\n   *\n   * @param str  string\n   * @return string\n   */\n  decode(str) {\n    webCryptographer.assert(isString(str), \"Base64Url.decode: invalid input\");\n    // atob is nice and ignores missing '='\n    return atob(str.replace(/-/g, \"+\").replace(/_/g, \"/\"));\n  }\n\n  decodeArray(str) {\n    webCryptographer.assert(isString(str), \"Base64Url.decodeArray: invalid input\");\n    return arrayFromString(this.decode(str));\n  }\n\n  sha256(str) {\n    // Browser docs indicate the first parameter to crypto.subtle.digest to be a\n    // DOMString. This was initially implemented as an object and continues to be\n    // supported, so we favor the older form for backwards compatibility.\n    return Jose.crypto.subtle.digest({name: \"SHA-256\"}, arrayFromString(str)).then(function(hash) {\n      return this.encodeArray(hash);\n    });\n  }\n\n  isCryptoKey(rsa_key) {\n    // Some browsers don't expose the CryptoKey as an object, so we need to check\n    // the constructor's name.\n    if (rsa_key.constructor.name == 'CryptoKey') {\n      return true;\n    }\n\n    // In the presence of minifiers, relying on class names can be problematic,\n    // so let's also allow objects that have an 'algorithm' property.\n    if (rsa_key.hasOwnProperty('algorithm')) {\n      return true;\n    }\n\n    return false;\n  }\n}\n\n\n//# sourceURL=webpack://Jose/./lib/jose-utils.js?");
+
+/***/ }),
+
+/***/ "./node_modules/base64-js/index.js":
+/*!*****************************************!*\
+  !*** ./node_modules/base64-js/index.js ***!
+  \*****************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+eval("\n\nexports.byteLength = byteLength\nexports.toByteArray = toByteArray\nexports.fromByteArray = fromByteArray\n\nvar lookup = []\nvar revLookup = []\nvar Arr = typeof Uint8Array !== 'undefined' ? Uint8Array : Array\n\nvar code = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'\nfor (var i = 0, len = code.length; i < len; ++i) {\n  lookup[i] = code[i]\n  revLookup[code.charCodeAt(i)] = i\n}\n\n// Support decoding URL-safe base64 strings, as Node.js does.\n// See: https://en.wikipedia.org/wiki/Base64#URL_applications\nrevLookup['-'.charCodeAt(0)] = 62\nrevLookup['_'.charCodeAt(0)] = 63\n\nfunction getLens (b64) {\n  var len = b64.length\n\n  if (len % 4 > 0) {\n    throw new Error('Invalid string. Length must be a multiple of 4')\n  }\n\n  // Trim off extra bytes after placeholder bytes are found\n  // See: https://github.com/beatgammit/base64-js/issues/42\n  var validLen = b64.indexOf('=')\n  if (validLen === -1) validLen = len\n\n  var placeHoldersLen = validLen === len\n    ? 0\n    : 4 - (validLen % 4)\n\n  return [validLen, placeHoldersLen]\n}\n\n// base64 is 4/3 + up to two characters of the original data\nfunction byteLength (b64) {\n  var lens = getLens(b64)\n  var validLen = lens[0]\n  var placeHoldersLen = lens[1]\n  return ((validLen + placeHoldersLen) * 3 / 4) - placeHoldersLen\n}\n\nfunction _byteLength (b64, validLen, placeHoldersLen) {\n  return ((validLen + placeHoldersLen) * 3 / 4) - placeHoldersLen\n}\n\nfunction toByteArray (b64) {\n  var tmp\n  var lens = getLens(b64)\n  var validLen = lens[0]\n  var placeHoldersLen = lens[1]\n\n  var arr = new Arr(_byteLength(b64, validLen, placeHoldersLen))\n\n  var curByte = 0\n\n  // if there are placeholders, only get up to the last complete 4 chars\n  var len = placeHoldersLen > 0\n    ? validLen - 4\n    : validLen\n\n  for (var i = 0; i < len; i += 4) {\n    tmp =\n      (revLookup[b64.charCodeAt(i)] << 18) |\n      (revLookup[b64.charCodeAt(i + 1)] << 12) |\n      (revLookup[b64.charCodeAt(i + 2)] << 6) |\n      revLookup[b64.charCodeAt(i + 3)]\n    arr[curByte++] = (tmp >> 16) & 0xFF\n    arr[curByte++] = (tmp >> 8) & 0xFF\n    arr[curByte++] = tmp & 0xFF\n  }\n\n  if (placeHoldersLen === 2) {\n    tmp =\n      (revLookup[b64.charCodeAt(i)] << 2) |\n      (revLookup[b64.charCodeAt(i + 1)] >> 4)\n    arr[curByte++] = tmp & 0xFF\n  }\n\n  if (placeHoldersLen === 1) {\n    tmp =\n      (revLookup[b64.charCodeAt(i)] << 10) |\n      (revLookup[b64.charCodeAt(i + 1)] << 4) |\n      (revLookup[b64.charCodeAt(i + 2)] >> 2)\n    arr[curByte++] = (tmp >> 8) & 0xFF\n    arr[curByte++] = tmp & 0xFF\n  }\n\n  return arr\n}\n\nfunction tripletToBase64 (num) {\n  return lookup[num >> 18 & 0x3F] +\n    lookup[num >> 12 & 0x3F] +\n    lookup[num >> 6 & 0x3F] +\n    lookup[num & 0x3F]\n}\n\nfunction encodeChunk (uint8, start, end) {\n  var tmp\n  var output = []\n  for (var i = start; i < end; i += 3) {\n    tmp =\n      ((uint8[i] << 16) & 0xFF0000) +\n      ((uint8[i + 1] << 8) & 0xFF00) +\n      (uint8[i + 2] & 0xFF)\n    output.push(tripletToBase64(tmp))\n  }\n  return output.join('')\n}\n\nfunction fromByteArray (uint8) {\n  var tmp\n  var len = uint8.length\n  var extraBytes = len % 3 // if we have 1 byte left, pad 2 bytes\n  var parts = []\n  var maxChunkLength = 16383 // must be multiple of 3\n\n  // go through the array every three bytes, we'll deal with trailing stuff later\n  for (var i = 0, len2 = len - extraBytes; i < len2; i += maxChunkLength) {\n    parts.push(encodeChunk(\n      uint8, i, (i + maxChunkLength) > len2 ? len2 : (i + maxChunkLength)\n    ))\n  }\n\n  // pad the end with zeros, but make sure to not forget the extra bytes\n  if (extraBytes === 1) {\n    tmp = uint8[len - 1]\n    parts.push(\n      lookup[tmp >> 2] +\n      lookup[(tmp << 4) & 0x3F] +\n      '=='\n    )\n  } else if (extraBytes === 2) {\n    tmp = (uint8[len - 2] << 8) + uint8[len - 1]\n    parts.push(\n      lookup[tmp >> 10] +\n      lookup[(tmp >> 4) & 0x3F] +\n      lookup[(tmp << 2) & 0x3F] +\n      '='\n    )\n  }\n\n  return parts.join('')\n}\n\n\n//# sourceURL=webpack://Jose/./node_modules/base64-js/index.js?");
+
+/***/ }),
+
+/***/ "./node_modules/buffer/index.js":
+/*!**************************************!*\
+  !*** ./node_modules/buffer/index.js ***!
+  \**************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+eval("/* WEBPACK VAR INJECTION */(function(global) {/*!\n * The buffer module from node.js, for the browser.\n *\n * @author   Feross Aboukhadijeh <feross@feross.org> <http://feross.org>\n * @license  MIT\n */\n/* eslint-disable no-proto */\n\n\n\nvar base64 = __webpack_require__(/*! base64-js */ \"./node_modules/base64-js/index.js\")\nvar ieee754 = __webpack_require__(/*! ieee754 */ \"./node_modules/ieee754/index.js\")\nvar isArray = __webpack_require__(/*! isarray */ \"./node_modules/isarray/index.js\")\n\nexports.Buffer = Buffer\nexports.SlowBuffer = SlowBuffer\nexports.INSPECT_MAX_BYTES = 50\n\n/**\n * If `Buffer.TYPED_ARRAY_SUPPORT`:\n *   === true    Use Uint8Array implementation (fastest)\n *   === false   Use Object implementation (most compatible, even IE6)\n *\n * Browsers that support typed arrays are IE 10+, Firefox 4+, Chrome 7+, Safari 5.1+,\n * Opera 11.6+, iOS 4.2+.\n *\n * Due to various browser bugs, sometimes the Object implementation will be used even\n * when the browser supports typed arrays.\n *\n * Note:\n *\n *   - Firefox 4-29 lacks support for adding new properties to `Uint8Array` instances,\n *     See: https://bugzilla.mozilla.org/show_bug.cgi?id=695438.\n *\n *   - Chrome 9-10 is missing the `TypedArray.prototype.subarray` function.\n *\n *   - IE10 has a broken `TypedArray.prototype.subarray` function which returns arrays of\n *     incorrect length in some situations.\n\n * We detect these buggy browsers and set `Buffer.TYPED_ARRAY_SUPPORT` to `false` so they\n * get the Object implementation, which is slower but behaves correctly.\n */\nBuffer.TYPED_ARRAY_SUPPORT = global.TYPED_ARRAY_SUPPORT !== undefined\n  ? global.TYPED_ARRAY_SUPPORT\n  : typedArraySupport()\n\n/*\n * Export kMaxLength after typed array support is determined.\n */\nexports.kMaxLength = kMaxLength()\n\nfunction typedArraySupport () {\n  try {\n    var arr = new Uint8Array(1)\n    arr.__proto__ = {__proto__: Uint8Array.prototype, foo: function () { return 42 }}\n    return arr.foo() === 42 && // typed array instances can be augmented\n        typeof arr.subarray === 'function' && // chrome 9-10 lack `subarray`\n        arr.subarray(1, 1).byteLength === 0 // ie10 has broken `subarray`\n  } catch (e) {\n    return false\n  }\n}\n\nfunction kMaxLength () {\n  return Buffer.TYPED_ARRAY_SUPPORT\n    ? 0x7fffffff\n    : 0x3fffffff\n}\n\nfunction createBuffer (that, length) {\n  if (kMaxLength() < length) {\n    throw new RangeError('Invalid typed array length')\n  }\n  if (Buffer.TYPED_ARRAY_SUPPORT) {\n    // Return an augmented `Uint8Array` instance, for best performance\n    that = new Uint8Array(length)\n    that.__proto__ = Buffer.prototype\n  } else {\n    // Fallback: Return an object instance of the Buffer class\n    if (that === null) {\n      that = new Buffer(length)\n    }\n    that.length = length\n  }\n\n  return that\n}\n\n/**\n * The Buffer constructor returns instances of `Uint8Array` that have their\n * prototype changed to `Buffer.prototype`. Furthermore, `Buffer` is a subclass of\n * `Uint8Array`, so the returned instances will have all the node `Buffer` methods\n * and the `Uint8Array` methods. Square bracket notation works as expected -- it\n * returns a single octet.\n *\n * The `Uint8Array` prototype remains unmodified.\n */\n\nfunction Buffer (arg, encodingOrOffset, length) {\n  if (!Buffer.TYPED_ARRAY_SUPPORT && !(this instanceof Buffer)) {\n    return new Buffer(arg, encodingOrOffset, length)\n  }\n\n  // Common case.\n  if (typeof arg === 'number') {\n    if (typeof encodingOrOffset === 'string') {\n      throw new Error(\n        'If encoding is specified then the first argument must be a string'\n      )\n    }\n    return allocUnsafe(this, arg)\n  }\n  return from(this, arg, encodingOrOffset, length)\n}\n\nBuffer.poolSize = 8192 // not used by this implementation\n\n// TODO: Legacy, not needed anymore. Remove in next major version.\nBuffer._augment = function (arr) {\n  arr.__proto__ = Buffer.prototype\n  return arr\n}\n\nfunction from (that, value, encodingOrOffset, length) {\n  if (typeof value === 'number') {\n    throw new TypeError('\"value\" argument must not be a number')\n  }\n\n  if (typeof ArrayBuffer !== 'undefined' && value instanceof ArrayBuffer) {\n    return fromArrayBuffer(that, value, encodingOrOffset, length)\n  }\n\n  if (typeof value === 'string') {\n    return fromString(that, value, encodingOrOffset)\n  }\n\n  return fromObject(that, value)\n}\n\n/**\n * Functionally equivalent to Buffer(arg, encoding) but throws a TypeError\n * if value is a number.\n * Buffer.from(str[, encoding])\n * Buffer.from(array)\n * Buffer.from(buffer)\n * Buffer.from(arrayBuffer[, byteOffset[, length]])\n **/\nBuffer.from = function (value, encodingOrOffset, length) {\n  return from(null, value, encodingOrOffset, length)\n}\n\nif (Buffer.TYPED_ARRAY_SUPPORT) {\n  Buffer.prototype.__proto__ = Uint8Array.prototype\n  Buffer.__proto__ = Uint8Array\n  if (typeof Symbol !== 'undefined' && Symbol.species &&\n      Buffer[Symbol.species] === Buffer) {\n    // Fix subarray() in ES2016. See: https://github.com/feross/buffer/pull/97\n    Object.defineProperty(Buffer, Symbol.species, {\n      value: null,\n      configurable: true\n    })\n  }\n}\n\nfunction assertSize (size) {\n  if (typeof size !== 'number') {\n    throw new TypeError('\"size\" argument must be a number')\n  } else if (size < 0) {\n    throw new RangeError('\"size\" argument must not be negative')\n  }\n}\n\nfunction alloc (that, size, fill, encoding) {\n  assertSize(size)\n  if (size <= 0) {\n    return createBuffer(that, size)\n  }\n  if (fill !== undefined) {\n    // Only pay attention to encoding if it's a string. This\n    // prevents accidentally sending in a number that would\n    // be interpretted as a start offset.\n    return typeof encoding === 'string'\n      ? createBuffer(that, size).fill(fill, encoding)\n      : createBuffer(that, size).fill(fill)\n  }\n  return createBuffer(that, size)\n}\n\n/**\n * Creates a new filled Buffer instance.\n * alloc(size[, fill[, encoding]])\n **/\nBuffer.alloc = function (size, fill, encoding) {\n  return alloc(null, size, fill, encoding)\n}\n\nfunction allocUnsafe (that, size) {\n  assertSize(size)\n  that = createBuffer(that, size < 0 ? 0 : checked(size) | 0)\n  if (!Buffer.TYPED_ARRAY_SUPPORT) {\n    for (var i = 0; i < size; ++i) {\n      that[i] = 0\n    }\n  }\n  return that\n}\n\n/**\n * Equivalent to Buffer(num), by default creates a non-zero-filled Buffer instance.\n * */\nBuffer.allocUnsafe = function (size) {\n  return allocUnsafe(null, size)\n}\n/**\n * Equivalent to SlowBuffer(num), by default creates a non-zero-filled Buffer instance.\n */\nBuffer.allocUnsafeSlow = function (size) {\n  return allocUnsafe(null, size)\n}\n\nfunction fromString (that, string, encoding) {\n  if (typeof encoding !== 'string' || encoding === '') {\n    encoding = 'utf8'\n  }\n\n  if (!Buffer.isEncoding(encoding)) {\n    throw new TypeError('\"encoding\" must be a valid string encoding')\n  }\n\n  var length = byteLength(string, encoding) | 0\n  that = createBuffer(that, length)\n\n  var actual = that.write(string, encoding)\n\n  if (actual !== length) {\n    // Writing a hex string, for example, that contains invalid characters will\n    // cause everything after the first invalid character to be ignored. (e.g.\n    // 'abxxcd' will be treated as 'ab')\n    that = that.slice(0, actual)\n  }\n\n  return that\n}\n\nfunction fromArrayLike (that, array) {\n  var length = array.length < 0 ? 0 : checked(array.length) | 0\n  that = createBuffer(that, length)\n  for (var i = 0; i < length; i += 1) {\n    that[i] = array[i] & 255\n  }\n  return that\n}\n\nfunction fromArrayBuffer (that, array, byteOffset, length) {\n  array.byteLength // this throws if `array` is not a valid ArrayBuffer\n\n  if (byteOffset < 0 || array.byteLength < byteOffset) {\n    throw new RangeError('\\'offset\\' is out of bounds')\n  }\n\n  if (array.byteLength < byteOffset + (length || 0)) {\n    throw new RangeError('\\'length\\' is out of bounds')\n  }\n\n  if (byteOffset === undefined && length === undefined) {\n    array = new Uint8Array(array)\n  } else if (length === undefined) {\n    array = new Uint8Array(array, byteOffset)\n  } else {\n    array = new Uint8Array(array, byteOffset, length)\n  }\n\n  if (Buffer.TYPED_ARRAY_SUPPORT) {\n    // Return an augmented `Uint8Array` instance, for best performance\n    that = array\n    that.__proto__ = Buffer.prototype\n  } else {\n    // Fallback: Return an object instance of the Buffer class\n    that = fromArrayLike(that, array)\n  }\n  return that\n}\n\nfunction fromObject (that, obj) {\n  if (Buffer.isBuffer(obj)) {\n    var len = checked(obj.length) | 0\n    that = createBuffer(that, len)\n\n    if (that.length === 0) {\n      return that\n    }\n\n    obj.copy(that, 0, 0, len)\n    return that\n  }\n\n  if (obj) {\n    if ((typeof ArrayBuffer !== 'undefined' &&\n        obj.buffer instanceof ArrayBuffer) || 'length' in obj) {\n      if (typeof obj.length !== 'number' || isnan(obj.length)) {\n        return createBuffer(that, 0)\n      }\n      return fromArrayLike(that, obj)\n    }\n\n    if (obj.type === 'Buffer' && isArray(obj.data)) {\n      return fromArrayLike(that, obj.data)\n    }\n  }\n\n  throw new TypeError('First argument must be a string, Buffer, ArrayBuffer, Array, or array-like object.')\n}\n\nfunction checked (length) {\n  // Note: cannot use `length < kMaxLength()` here because that fails when\n  // length is NaN (which is otherwise coerced to zero.)\n  if (length >= kMaxLength()) {\n    throw new RangeError('Attempt to allocate Buffer larger than maximum ' +\n                         'size: 0x' + kMaxLength().toString(16) + ' bytes')\n  }\n  return length | 0\n}\n\nfunction SlowBuffer (length) {\n  if (+length != length) { // eslint-disable-line eqeqeq\n    length = 0\n  }\n  return Buffer.alloc(+length)\n}\n\nBuffer.isBuffer = function isBuffer (b) {\n  return !!(b != null && b._isBuffer)\n}\n\nBuffer.compare = function compare (a, b) {\n  if (!Buffer.isBuffer(a) || !Buffer.isBuffer(b)) {\n    throw new TypeError('Arguments must be Buffers')\n  }\n\n  if (a === b) return 0\n\n  var x = a.length\n  var y = b.length\n\n  for (var i = 0, len = Math.min(x, y); i < len; ++i) {\n    if (a[i] !== b[i]) {\n      x = a[i]\n      y = b[i]\n      break\n    }\n  }\n\n  if (x < y) return -1\n  if (y < x) return 1\n  return 0\n}\n\nBuffer.isEncoding = function isEncoding (encoding) {\n  switch (String(encoding).toLowerCase()) {\n    case 'hex':\n    case 'utf8':\n    case 'utf-8':\n    case 'ascii':\n    case 'latin1':\n    case 'binary':\n    case 'base64':\n    case 'ucs2':\n    case 'ucs-2':\n    case 'utf16le':\n    case 'utf-16le':\n      return true\n    default:\n      return false\n  }\n}\n\nBuffer.concat = function concat (list, length) {\n  if (!isArray(list)) {\n    throw new TypeError('\"list\" argument must be an Array of Buffers')\n  }\n\n  if (list.length === 0) {\n    return Buffer.alloc(0)\n  }\n\n  var i\n  if (length === undefined) {\n    length = 0\n    for (i = 0; i < list.length; ++i) {\n      length += list[i].length\n    }\n  }\n\n  var buffer = Buffer.allocUnsafe(length)\n  var pos = 0\n  for (i = 0; i < list.length; ++i) {\n    var buf = list[i]\n    if (!Buffer.isBuffer(buf)) {\n      throw new TypeError('\"list\" argument must be an Array of Buffers')\n    }\n    buf.copy(buffer, pos)\n    pos += buf.length\n  }\n  return buffer\n}\n\nfunction byteLength (string, encoding) {\n  if (Buffer.isBuffer(string)) {\n    return string.length\n  }\n  if (typeof ArrayBuffer !== 'undefined' && typeof ArrayBuffer.isView === 'function' &&\n      (ArrayBuffer.isView(string) || string instanceof ArrayBuffer)) {\n    return string.byteLength\n  }\n  if (typeof string !== 'string') {\n    string = '' + string\n  }\n\n  var len = string.length\n  if (len === 0) return 0\n\n  // Use a for loop to avoid recursion\n  var loweredCase = false\n  for (;;) {\n    switch (encoding) {\n      case 'ascii':\n      case 'latin1':\n      case 'binary':\n        return len\n      case 'utf8':\n      case 'utf-8':\n      case undefined:\n        return utf8ToBytes(string).length\n      case 'ucs2':\n      case 'ucs-2':\n      case 'utf16le':\n      case 'utf-16le':\n        return len * 2\n      case 'hex':\n        return len >>> 1\n      case 'base64':\n        return base64ToBytes(string).length\n      default:\n        if (loweredCase) return utf8ToBytes(string).length // assume utf8\n        encoding = ('' + encoding).toLowerCase()\n        loweredCase = true\n    }\n  }\n}\nBuffer.byteLength = byteLength\n\nfunction slowToString (encoding, start, end) {\n  var loweredCase = false\n\n  // No need to verify that \"this.length <= MAX_UINT32\" since it's a read-only\n  // property of a typed array.\n\n  // This behaves neither like String nor Uint8Array in that we set start/end\n  // to their upper/lower bounds if the value passed is out of range.\n  // undefined is handled specially as per ECMA-262 6th Edition,\n  // Section 13.3.3.7 Runtime Semantics: KeyedBindingInitialization.\n  if (start === undefined || start < 0) {\n    start = 0\n  }\n  // Return early if start > this.length. Done here to prevent potential uint32\n  // coercion fail below.\n  if (start > this.length) {\n    return ''\n  }\n\n  if (end === undefined || end > this.length) {\n    end = this.length\n  }\n\n  if (end <= 0) {\n    return ''\n  }\n\n  // Force coersion to uint32. This will also coerce falsey/NaN values to 0.\n  end >>>= 0\n  start >>>= 0\n\n  if (end <= start) {\n    return ''\n  }\n\n  if (!encoding) encoding = 'utf8'\n\n  while (true) {\n    switch (encoding) {\n      case 'hex':\n        return hexSlice(this, start, end)\n\n      case 'utf8':\n      case 'utf-8':\n        return utf8Slice(this, start, end)\n\n      case 'ascii':\n        return asciiSlice(this, start, end)\n\n      case 'latin1':\n      case 'binary':\n        return latin1Slice(this, start, end)\n\n      case 'base64':\n        return base64Slice(this, start, end)\n\n      case 'ucs2':\n      case 'ucs-2':\n      case 'utf16le':\n      case 'utf-16le':\n        return utf16leSlice(this, start, end)\n\n      default:\n        if (loweredCase) throw new TypeError('Unknown encoding: ' + encoding)\n        encoding = (encoding + '').toLowerCase()\n        loweredCase = true\n    }\n  }\n}\n\n// The property is used by `Buffer.isBuffer` and `is-buffer` (in Safari 5-7) to detect\n// Buffer instances.\nBuffer.prototype._isBuffer = true\n\nfunction swap (b, n, m) {\n  var i = b[n]\n  b[n] = b[m]\n  b[m] = i\n}\n\nBuffer.prototype.swap16 = function swap16 () {\n  var len = this.length\n  if (len % 2 !== 0) {\n    throw new RangeError('Buffer size must be a multiple of 16-bits')\n  }\n  for (var i = 0; i < len; i += 2) {\n    swap(this, i, i + 1)\n  }\n  return this\n}\n\nBuffer.prototype.swap32 = function swap32 () {\n  var len = this.length\n  if (len % 4 !== 0) {\n    throw new RangeError('Buffer size must be a multiple of 32-bits')\n  }\n  for (var i = 0; i < len; i += 4) {\n    swap(this, i, i + 3)\n    swap(this, i + 1, i + 2)\n  }\n  return this\n}\n\nBuffer.prototype.swap64 = function swap64 () {\n  var len = this.length\n  if (len % 8 !== 0) {\n    throw new RangeError('Buffer size must be a multiple of 64-bits')\n  }\n  for (var i = 0; i < len; i += 8) {\n    swap(this, i, i + 7)\n    swap(this, i + 1, i + 6)\n    swap(this, i + 2, i + 5)\n    swap(this, i + 3, i + 4)\n  }\n  return this\n}\n\nBuffer.prototype.toString = function toString () {\n  var length = this.length | 0\n  if (length === 0) return ''\n  if (arguments.length === 0) return utf8Slice(this, 0, length)\n  return slowToString.apply(this, arguments)\n}\n\nBuffer.prototype.equals = function equals (b) {\n  if (!Buffer.isBuffer(b)) throw new TypeError('Argument must be a Buffer')\n  if (this === b) return true\n  return Buffer.compare(this, b) === 0\n}\n\nBuffer.prototype.inspect = function inspect () {\n  var str = ''\n  var max = exports.INSPECT_MAX_BYTES\n  if (this.length > 0) {\n    str = this.toString('hex', 0, max).match(/.{2}/g).join(' ')\n    if (this.length > max) str += ' ... '\n  }\n  return '<Buffer ' + str + '>'\n}\n\nBuffer.prototype.compare = function compare (target, start, end, thisStart, thisEnd) {\n  if (!Buffer.isBuffer(target)) {\n    throw new TypeError('Argument must be a Buffer')\n  }\n\n  if (start === undefined) {\n    start = 0\n  }\n  if (end === undefined) {\n    end = target ? target.length : 0\n  }\n  if (thisStart === undefined) {\n    thisStart = 0\n  }\n  if (thisEnd === undefined) {\n    thisEnd = this.length\n  }\n\n  if (start < 0 || end > target.length || thisStart < 0 || thisEnd > this.length) {\n    throw new RangeError('out of range index')\n  }\n\n  if (thisStart >= thisEnd && start >= end) {\n    return 0\n  }\n  if (thisStart >= thisEnd) {\n    return -1\n  }\n  if (start >= end) {\n    return 1\n  }\n\n  start >>>= 0\n  end >>>= 0\n  thisStart >>>= 0\n  thisEnd >>>= 0\n\n  if (this === target) return 0\n\n  var x = thisEnd - thisStart\n  var y = end - start\n  var len = Math.min(x, y)\n\n  var thisCopy = this.slice(thisStart, thisEnd)\n  var targetCopy = target.slice(start, end)\n\n  for (var i = 0; i < len; ++i) {\n    if (thisCopy[i] !== targetCopy[i]) {\n      x = thisCopy[i]\n      y = targetCopy[i]\n      break\n    }\n  }\n\n  if (x < y) return -1\n  if (y < x) return 1\n  return 0\n}\n\n// Finds either the first index of `val` in `buffer` at offset >= `byteOffset`,\n// OR the last index of `val` in `buffer` at offset <= `byteOffset`.\n//\n// Arguments:\n// - buffer - a Buffer to search\n// - val - a string, Buffer, or number\n// - byteOffset - an index into `buffer`; will be clamped to an int32\n// - encoding - an optional encoding, relevant is val is a string\n// - dir - true for indexOf, false for lastIndexOf\nfunction bidirectionalIndexOf (buffer, val, byteOffset, encoding, dir) {\n  // Empty buffer means no match\n  if (buffer.length === 0) return -1\n\n  // Normalize byteOffset\n  if (typeof byteOffset === 'string') {\n    encoding = byteOffset\n    byteOffset = 0\n  } else if (byteOffset > 0x7fffffff) {\n    byteOffset = 0x7fffffff\n  } else if (byteOffset < -0x80000000) {\n    byteOffset = -0x80000000\n  }\n  byteOffset = +byteOffset  // Coerce to Number.\n  if (isNaN(byteOffset)) {\n    // byteOffset: it it's undefined, null, NaN, \"foo\", etc, search whole buffer\n    byteOffset = dir ? 0 : (buffer.length - 1)\n  }\n\n  // Normalize byteOffset: negative offsets start from the end of the buffer\n  if (byteOffset < 0) byteOffset = buffer.length + byteOffset\n  if (byteOffset >= buffer.length) {\n    if (dir) return -1\n    else byteOffset = buffer.length - 1\n  } else if (byteOffset < 0) {\n    if (dir) byteOffset = 0\n    else return -1\n  }\n\n  // Normalize val\n  if (typeof val === 'string') {\n    val = Buffer.from(val, encoding)\n  }\n\n  // Finally, search either indexOf (if dir is true) or lastIndexOf\n  if (Buffer.isBuffer(val)) {\n    // Special case: looking for empty string/buffer always fails\n    if (val.length === 0) {\n      return -1\n    }\n    return arrayIndexOf(buffer, val, byteOffset, encoding, dir)\n  } else if (typeof val === 'number') {\n    val = val & 0xFF // Search for a byte value [0-255]\n    if (Buffer.TYPED_ARRAY_SUPPORT &&\n        typeof Uint8Array.prototype.indexOf === 'function') {\n      if (dir) {\n        return Uint8Array.prototype.indexOf.call(buffer, val, byteOffset)\n      } else {\n        return Uint8Array.prototype.lastIndexOf.call(buffer, val, byteOffset)\n      }\n    }\n    return arrayIndexOf(buffer, [ val ], byteOffset, encoding, dir)\n  }\n\n  throw new TypeError('val must be string, number or Buffer')\n}\n\nfunction arrayIndexOf (arr, val, byteOffset, encoding, dir) {\n  var indexSize = 1\n  var arrLength = arr.length\n  var valLength = val.length\n\n  if (encoding !== undefined) {\n    encoding = String(encoding).toLowerCase()\n    if (encoding === 'ucs2' || encoding === 'ucs-2' ||\n        encoding === 'utf16le' || encoding === 'utf-16le') {\n      if (arr.length < 2 || val.length < 2) {\n        return -1\n      }\n      indexSize = 2\n      arrLength /= 2\n      valLength /= 2\n      byteOffset /= 2\n    }\n  }\n\n  function read (buf, i) {\n    if (indexSize === 1) {\n      return buf[i]\n    } else {\n      return buf.readUInt16BE(i * indexSize)\n    }\n  }\n\n  var i\n  if (dir) {\n    var foundIndex = -1\n    for (i = byteOffset; i < arrLength; i++) {\n      if (read(arr, i) === read(val, foundIndex === -1 ? 0 : i - foundIndex)) {\n        if (foundIndex === -1) foundIndex = i\n        if (i - foundIndex + 1 === valLength) return foundIndex * indexSize\n      } else {\n        if (foundIndex !== -1) i -= i - foundIndex\n        foundIndex = -1\n      }\n    }\n  } else {\n    if (byteOffset + valLength > arrLength) byteOffset = arrLength - valLength\n    for (i = byteOffset; i >= 0; i--) {\n      var found = true\n      for (var j = 0; j < valLength; j++) {\n        if (read(arr, i + j) !== read(val, j)) {\n          found = false\n          break\n        }\n      }\n      if (found) return i\n    }\n  }\n\n  return -1\n}\n\nBuffer.prototype.includes = function includes (val, byteOffset, encoding) {\n  return this.indexOf(val, byteOffset, encoding) !== -1\n}\n\nBuffer.prototype.indexOf = function indexOf (val, byteOffset, encoding) {\n  return bidirectionalIndexOf(this, val, byteOffset, encoding, true)\n}\n\nBuffer.prototype.lastIndexOf = function lastIndexOf (val, byteOffset, encoding) {\n  return bidirectionalIndexOf(this, val, byteOffset, encoding, false)\n}\n\nfunction hexWrite (buf, string, offset, length) {\n  offset = Number(offset) || 0\n  var remaining = buf.length - offset\n  if (!length) {\n    length = remaining\n  } else {\n    length = Number(length)\n    if (length > remaining) {\n      length = remaining\n    }\n  }\n\n  // must be an even number of digits\n  var strLen = string.length\n  if (strLen % 2 !== 0) throw new TypeError('Invalid hex string')\n\n  if (length > strLen / 2) {\n    length = strLen / 2\n  }\n  for (var i = 0; i < length; ++i) {\n    var parsed = parseInt(string.substr(i * 2, 2), 16)\n    if (isNaN(parsed)) return i\n    buf[offset + i] = parsed\n  }\n  return i\n}\n\nfunction utf8Write (buf, string, offset, length) {\n  return blitBuffer(utf8ToBytes(string, buf.length - offset), buf, offset, length)\n}\n\nfunction asciiWrite (buf, string, offset, length) {\n  return blitBuffer(asciiToBytes(string), buf, offset, length)\n}\n\nfunction latin1Write (buf, string, offset, length) {\n  return asciiWrite(buf, string, offset, length)\n}\n\nfunction base64Write (buf, string, offset, length) {\n  return blitBuffer(base64ToBytes(string), buf, offset, length)\n}\n\nfunction ucs2Write (buf, string, offset, length) {\n  return blitBuffer(utf16leToBytes(string, buf.length - offset), buf, offset, length)\n}\n\nBuffer.prototype.write = function write (string, offset, length, encoding) {\n  // Buffer#write(string)\n  if (offset === undefined) {\n    encoding = 'utf8'\n    length = this.length\n    offset = 0\n  // Buffer#write(string, encoding)\n  } else if (length === undefined && typeof offset === 'string') {\n    encoding = offset\n    length = this.length\n    offset = 0\n  // Buffer#write(string, offset[, length][, encoding])\n  } else if (isFinite(offset)) {\n    offset = offset | 0\n    if (isFinite(length)) {\n      length = length | 0\n      if (encoding === undefined) encoding = 'utf8'\n    } else {\n      encoding = length\n      length = undefined\n    }\n  // legacy write(string, encoding, offset, length) - remove in v0.13\n  } else {\n    throw new Error(\n      'Buffer.write(string, encoding, offset[, length]) is no longer supported'\n    )\n  }\n\n  var remaining = this.length - offset\n  if (length === undefined || length > remaining) length = remaining\n\n  if ((string.length > 0 && (length < 0 || offset < 0)) || offset > this.length) {\n    throw new RangeError('Attempt to write outside buffer bounds')\n  }\n\n  if (!encoding) encoding = 'utf8'\n\n  var loweredCase = false\n  for (;;) {\n    switch (encoding) {\n      case 'hex':\n        return hexWrite(this, string, offset, length)\n\n      case 'utf8':\n      case 'utf-8':\n        return utf8Write(this, string, offset, length)\n\n      case 'ascii':\n        return asciiWrite(this, string, offset, length)\n\n      case 'latin1':\n      case 'binary':\n        return latin1Write(this, string, offset, length)\n\n      case 'base64':\n        // Warning: maxLength not taken into account in base64Write\n        return base64Write(this, string, offset, length)\n\n      case 'ucs2':\n      case 'ucs-2':\n      case 'utf16le':\n      case 'utf-16le':\n        return ucs2Write(this, string, offset, length)\n\n      default:\n        if (loweredCase) throw new TypeError('Unknown encoding: ' + encoding)\n        encoding = ('' + encoding).toLowerCase()\n        loweredCase = true\n    }\n  }\n}\n\nBuffer.prototype.toJSON = function toJSON () {\n  return {\n    type: 'Buffer',\n    data: Array.prototype.slice.call(this._arr || this, 0)\n  }\n}\n\nfunction base64Slice (buf, start, end) {\n  if (start === 0 && end === buf.length) {\n    return base64.fromByteArray(buf)\n  } else {\n    return base64.fromByteArray(buf.slice(start, end))\n  }\n}\n\nfunction utf8Slice (buf, start, end) {\n  end = Math.min(buf.length, end)\n  var res = []\n\n  var i = start\n  while (i < end) {\n    var firstByte = buf[i]\n    var codePoint = null\n    var bytesPerSequence = (firstByte > 0xEF) ? 4\n      : (firstByte > 0xDF) ? 3\n      : (firstByte > 0xBF) ? 2\n      : 1\n\n    if (i + bytesPerSequence <= end) {\n      var secondByte, thirdByte, fourthByte, tempCodePoint\n\n      switch (bytesPerSequence) {\n        case 1:\n          if (firstByte < 0x80) {\n            codePoint = firstByte\n          }\n          break\n        case 2:\n          secondByte = buf[i + 1]\n          if ((secondByte & 0xC0) === 0x80) {\n            tempCodePoint = (firstByte & 0x1F) << 0x6 | (secondByte & 0x3F)\n            if (tempCodePoint > 0x7F) {\n              codePoint = tempCodePoint\n            }\n          }\n          break\n        case 3:\n          secondByte = buf[i + 1]\n          thirdByte = buf[i + 2]\n          if ((secondByte & 0xC0) === 0x80 && (thirdByte & 0xC0) === 0x80) {\n            tempCodePoint = (firstByte & 0xF) << 0xC | (secondByte & 0x3F) << 0x6 | (thirdByte & 0x3F)\n            if (tempCodePoint > 0x7FF && (tempCodePoint < 0xD800 || tempCodePoint > 0xDFFF)) {\n              codePoint = tempCodePoint\n            }\n          }\n          break\n        case 4:\n          secondByte = buf[i + 1]\n          thirdByte = buf[i + 2]\n          fourthByte = buf[i + 3]\n          if ((secondByte & 0xC0) === 0x80 && (thirdByte & 0xC0) === 0x80 && (fourthByte & 0xC0) === 0x80) {\n            tempCodePoint = (firstByte & 0xF) << 0x12 | (secondByte & 0x3F) << 0xC | (thirdByte & 0x3F) << 0x6 | (fourthByte & 0x3F)\n            if (tempCodePoint > 0xFFFF && tempCodePoint < 0x110000) {\n              codePoint = tempCodePoint\n            }\n          }\n      }\n    }\n\n    if (codePoint === null) {\n      // we did not generate a valid codePoint so insert a\n      // replacement char (U+FFFD) and advance only 1 byte\n      codePoint = 0xFFFD\n      bytesPerSequence = 1\n    } else if (codePoint > 0xFFFF) {\n      // encode to utf16 (surrogate pair dance)\n      codePoint -= 0x10000\n      res.push(codePoint >>> 10 & 0x3FF | 0xD800)\n      codePoint = 0xDC00 | codePoint & 0x3FF\n    }\n\n    res.push(codePoint)\n    i += bytesPerSequence\n  }\n\n  return decodeCodePointsArray(res)\n}\n\n// Based on http://stackoverflow.com/a/22747272/680742, the browser with\n// the lowest limit is Chrome, with 0x10000 args.\n// We go 1 magnitude less, for safety\nvar MAX_ARGUMENTS_LENGTH = 0x1000\n\nfunction decodeCodePointsArray (codePoints) {\n  var len = codePoints.length\n  if (len <= MAX_ARGUMENTS_LENGTH) {\n    return String.fromCharCode.apply(String, codePoints) // avoid extra slice()\n  }\n\n  // Decode in chunks to avoid \"call stack size exceeded\".\n  var res = ''\n  var i = 0\n  while (i < len) {\n    res += String.fromCharCode.apply(\n      String,\n      codePoints.slice(i, i += MAX_ARGUMENTS_LENGTH)\n    )\n  }\n  return res\n}\n\nfunction asciiSlice (buf, start, end) {\n  var ret = ''\n  end = Math.min(buf.length, end)\n\n  for (var i = start; i < end; ++i) {\n    ret += String.fromCharCode(buf[i] & 0x7F)\n  }\n  return ret\n}\n\nfunction latin1Slice (buf, start, end) {\n  var ret = ''\n  end = Math.min(buf.length, end)\n\n  for (var i = start; i < end; ++i) {\n    ret += String.fromCharCode(buf[i])\n  }\n  return ret\n}\n\nfunction hexSlice (buf, start, end) {\n  var len = buf.length\n\n  if (!start || start < 0) start = 0\n  if (!end || end < 0 || end > len) end = len\n\n  var out = ''\n  for (var i = start; i < end; ++i) {\n    out += toHex(buf[i])\n  }\n  return out\n}\n\nfunction utf16leSlice (buf, start, end) {\n  var bytes = buf.slice(start, end)\n  var res = ''\n  for (var i = 0; i < bytes.length; i += 2) {\n    res += String.fromCharCode(bytes[i] + bytes[i + 1] * 256)\n  }\n  return res\n}\n\nBuffer.prototype.slice = function slice (start, end) {\n  var len = this.length\n  start = ~~start\n  end = end === undefined ? len : ~~end\n\n  if (start < 0) {\n    start += len\n    if (start < 0) start = 0\n  } else if (start > len) {\n    start = len\n  }\n\n  if (end < 0) {\n    end += len\n    if (end < 0) end = 0\n  } else if (end > len) {\n    end = len\n  }\n\n  if (end < start) end = start\n\n  var newBuf\n  if (Buffer.TYPED_ARRAY_SUPPORT) {\n    newBuf = this.subarray(start, end)\n    newBuf.__proto__ = Buffer.prototype\n  } else {\n    var sliceLen = end - start\n    newBuf = new Buffer(sliceLen, undefined)\n    for (var i = 0; i < sliceLen; ++i) {\n      newBuf[i] = this[i + start]\n    }\n  }\n\n  return newBuf\n}\n\n/*\n * Need to make sure that buffer isn't trying to write out of bounds.\n */\nfunction checkOffset (offset, ext, length) {\n  if ((offset % 1) !== 0 || offset < 0) throw new RangeError('offset is not uint')\n  if (offset + ext > length) throw new RangeError('Trying to access beyond buffer length')\n}\n\nBuffer.prototype.readUIntLE = function readUIntLE (offset, byteLength, noAssert) {\n  offset = offset | 0\n  byteLength = byteLength | 0\n  if (!noAssert) checkOffset(offset, byteLength, this.length)\n\n  var val = this[offset]\n  var mul = 1\n  var i = 0\n  while (++i < byteLength && (mul *= 0x100)) {\n    val += this[offset + i] * mul\n  }\n\n  return val\n}\n\nBuffer.prototype.readUIntBE = function readUIntBE (offset, byteLength, noAssert) {\n  offset = offset | 0\n  byteLength = byteLength | 0\n  if (!noAssert) {\n    checkOffset(offset, byteLength, this.length)\n  }\n\n  var val = this[offset + --byteLength]\n  var mul = 1\n  while (byteLength > 0 && (mul *= 0x100)) {\n    val += this[offset + --byteLength] * mul\n  }\n\n  return val\n}\n\nBuffer.prototype.readUInt8 = function readUInt8 (offset, noAssert) {\n  if (!noAssert) checkOffset(offset, 1, this.length)\n  return this[offset]\n}\n\nBuffer.prototype.readUInt16LE = function readUInt16LE (offset, noAssert) {\n  if (!noAssert) checkOffset(offset, 2, this.length)\n  return this[offset] | (this[offset + 1] << 8)\n}\n\nBuffer.prototype.readUInt16BE = function readUInt16BE (offset, noAssert) {\n  if (!noAssert) checkOffset(offset, 2, this.length)\n  return (this[offset] << 8) | this[offset + 1]\n}\n\nBuffer.prototype.readUInt32LE = function readUInt32LE (offset, noAssert) {\n  if (!noAssert) checkOffset(offset, 4, this.length)\n\n  return ((this[offset]) |\n      (this[offset + 1] << 8) |\n      (this[offset + 2] << 16)) +\n      (this[offset + 3] * 0x1000000)\n}\n\nBuffer.prototype.readUInt32BE = function readUInt32BE (offset, noAssert) {\n  if (!noAssert) checkOffset(offset, 4, this.length)\n\n  return (this[offset] * 0x1000000) +\n    ((this[offset + 1] << 16) |\n    (this[offset + 2] << 8) |\n    this[offset + 3])\n}\n\nBuffer.prototype.readIntLE = function readIntLE (offset, byteLength, noAssert) {\n  offset = offset | 0\n  byteLength = byteLength | 0\n  if (!noAssert) checkOffset(offset, byteLength, this.length)\n\n  var val = this[offset]\n  var mul = 1\n  var i = 0\n  while (++i < byteLength && (mul *= 0x100)) {\n    val += this[offset + i] * mul\n  }\n  mul *= 0x80\n\n  if (val >= mul) val -= Math.pow(2, 8 * byteLength)\n\n  return val\n}\n\nBuffer.prototype.readIntBE = function readIntBE (offset, byteLength, noAssert) {\n  offset = offset | 0\n  byteLength = byteLength | 0\n  if (!noAssert) checkOffset(offset, byteLength, this.length)\n\n  var i = byteLength\n  var mul = 1\n  var val = this[offset + --i]\n  while (i > 0 && (mul *= 0x100)) {\n    val += this[offset + --i] * mul\n  }\n  mul *= 0x80\n\n  if (val >= mul) val -= Math.pow(2, 8 * byteLength)\n\n  return val\n}\n\nBuffer.prototype.readInt8 = function readInt8 (offset, noAssert) {\n  if (!noAssert) checkOffset(offset, 1, this.length)\n  if (!(this[offset] & 0x80)) return (this[offset])\n  return ((0xff - this[offset] + 1) * -1)\n}\n\nBuffer.prototype.readInt16LE = function readInt16LE (offset, noAssert) {\n  if (!noAssert) checkOffset(offset, 2, this.length)\n  var val = this[offset] | (this[offset + 1] << 8)\n  return (val & 0x8000) ? val | 0xFFFF0000 : val\n}\n\nBuffer.prototype.readInt16BE = function readInt16BE (offset, noAssert) {\n  if (!noAssert) checkOffset(offset, 2, this.length)\n  var val = this[offset + 1] | (this[offset] << 8)\n  return (val & 0x8000) ? val | 0xFFFF0000 : val\n}\n\nBuffer.prototype.readInt32LE = function readInt32LE (offset, noAssert) {\n  if (!noAssert) checkOffset(offset, 4, this.length)\n\n  return (this[offset]) |\n    (this[offset + 1] << 8) |\n    (this[offset + 2] << 16) |\n    (this[offset + 3] << 24)\n}\n\nBuffer.prototype.readInt32BE = function readInt32BE (offset, noAssert) {\n  if (!noAssert) checkOffset(offset, 4, this.length)\n\n  return (this[offset] << 24) |\n    (this[offset + 1] << 16) |\n    (this[offset + 2] << 8) |\n    (this[offset + 3])\n}\n\nBuffer.prototype.readFloatLE = function readFloatLE (offset, noAssert) {\n  if (!noAssert) checkOffset(offset, 4, this.length)\n  return ieee754.read(this, offset, true, 23, 4)\n}\n\nBuffer.prototype.readFloatBE = function readFloatBE (offset, noAssert) {\n  if (!noAssert) checkOffset(offset, 4, this.length)\n  return ieee754.read(this, offset, false, 23, 4)\n}\n\nBuffer.prototype.readDoubleLE = function readDoubleLE (offset, noAssert) {\n  if (!noAssert) checkOffset(offset, 8, this.length)\n  return ieee754.read(this, offset, true, 52, 8)\n}\n\nBuffer.prototype.readDoubleBE = function readDoubleBE (offset, noAssert) {\n  if (!noAssert) checkOffset(offset, 8, this.length)\n  return ieee754.read(this, offset, false, 52, 8)\n}\n\nfunction checkInt (buf, value, offset, ext, max, min) {\n  if (!Buffer.isBuffer(buf)) throw new TypeError('\"buffer\" argument must be a Buffer instance')\n  if (value > max || value < min) throw new RangeError('\"value\" argument is out of bounds')\n  if (offset + ext > buf.length) throw new RangeError('Index out of range')\n}\n\nBuffer.prototype.writeUIntLE = function writeUIntLE (value, offset, byteLength, noAssert) {\n  value = +value\n  offset = offset | 0\n  byteLength = byteLength | 0\n  if (!noAssert) {\n    var maxBytes = Math.pow(2, 8 * byteLength) - 1\n    checkInt(this, value, offset, byteLength, maxBytes, 0)\n  }\n\n  var mul = 1\n  var i = 0\n  this[offset] = value & 0xFF\n  while (++i < byteLength && (mul *= 0x100)) {\n    this[offset + i] = (value / mul) & 0xFF\n  }\n\n  return offset + byteLength\n}\n\nBuffer.prototype.writeUIntBE = function writeUIntBE (value, offset, byteLength, noAssert) {\n  value = +value\n  offset = offset | 0\n  byteLength = byteLength | 0\n  if (!noAssert) {\n    var maxBytes = Math.pow(2, 8 * byteLength) - 1\n    checkInt(this, value, offset, byteLength, maxBytes, 0)\n  }\n\n  var i = byteLength - 1\n  var mul = 1\n  this[offset + i] = value & 0xFF\n  while (--i >= 0 && (mul *= 0x100)) {\n    this[offset + i] = (value / mul) & 0xFF\n  }\n\n  return offset + byteLength\n}\n\nBuffer.prototype.writeUInt8 = function writeUInt8 (value, offset, noAssert) {\n  value = +value\n  offset = offset | 0\n  if (!noAssert) checkInt(this, value, offset, 1, 0xff, 0)\n  if (!Buffer.TYPED_ARRAY_SUPPORT) value = Math.floor(value)\n  this[offset] = (value & 0xff)\n  return offset + 1\n}\n\nfunction objectWriteUInt16 (buf, value, offset, littleEndian) {\n  if (value < 0) value = 0xffff + value + 1\n  for (var i = 0, j = Math.min(buf.length - offset, 2); i < j; ++i) {\n    buf[offset + i] = (value & (0xff << (8 * (littleEndian ? i : 1 - i)))) >>>\n      (littleEndian ? i : 1 - i) * 8\n  }\n}\n\nBuffer.prototype.writeUInt16LE = function writeUInt16LE (value, offset, noAssert) {\n  value = +value\n  offset = offset | 0\n  if (!noAssert) checkInt(this, value, offset, 2, 0xffff, 0)\n  if (Buffer.TYPED_ARRAY_SUPPORT) {\n    this[offset] = (value & 0xff)\n    this[offset + 1] = (value >>> 8)\n  } else {\n    objectWriteUInt16(this, value, offset, true)\n  }\n  return offset + 2\n}\n\nBuffer.prototype.writeUInt16BE = function writeUInt16BE (value, offset, noAssert) {\n  value = +value\n  offset = offset | 0\n  if (!noAssert) checkInt(this, value, offset, 2, 0xffff, 0)\n  if (Buffer.TYPED_ARRAY_SUPPORT) {\n    this[offset] = (value >>> 8)\n    this[offset + 1] = (value & 0xff)\n  } else {\n    objectWriteUInt16(this, value, offset, false)\n  }\n  return offset + 2\n}\n\nfunction objectWriteUInt32 (buf, value, offset, littleEndian) {\n  if (value < 0) value = 0xffffffff + value + 1\n  for (var i = 0, j = Math.min(buf.length - offset, 4); i < j; ++i) {\n    buf[offset + i] = (value >>> (littleEndian ? i : 3 - i) * 8) & 0xff\n  }\n}\n\nBuffer.prototype.writeUInt32LE = function writeUInt32LE (value, offset, noAssert) {\n  value = +value\n  offset = offset | 0\n  if (!noAssert) checkInt(this, value, offset, 4, 0xffffffff, 0)\n  if (Buffer.TYPED_ARRAY_SUPPORT) {\n    this[offset + 3] = (value >>> 24)\n    this[offset + 2] = (value >>> 16)\n    this[offset + 1] = (value >>> 8)\n    this[offset] = (value & 0xff)\n  } else {\n    objectWriteUInt32(this, value, offset, true)\n  }\n  return offset + 4\n}\n\nBuffer.prototype.writeUInt32BE = function writeUInt32BE (value, offset, noAssert) {\n  value = +value\n  offset = offset | 0\n  if (!noAssert) checkInt(this, value, offset, 4, 0xffffffff, 0)\n  if (Buffer.TYPED_ARRAY_SUPPORT) {\n    this[offset] = (value >>> 24)\n    this[offset + 1] = (value >>> 16)\n    this[offset + 2] = (value >>> 8)\n    this[offset + 3] = (value & 0xff)\n  } else {\n    objectWriteUInt32(this, value, offset, false)\n  }\n  return offset + 4\n}\n\nBuffer.prototype.writeIntLE = function writeIntLE (value, offset, byteLength, noAssert) {\n  value = +value\n  offset = offset | 0\n  if (!noAssert) {\n    var limit = Math.pow(2, 8 * byteLength - 1)\n\n    checkInt(this, value, offset, byteLength, limit - 1, -limit)\n  }\n\n  var i = 0\n  var mul = 1\n  var sub = 0\n  this[offset] = value & 0xFF\n  while (++i < byteLength && (mul *= 0x100)) {\n    if (value < 0 && sub === 0 && this[offset + i - 1] !== 0) {\n      sub = 1\n    }\n    this[offset + i] = ((value / mul) >> 0) - sub & 0xFF\n  }\n\n  return offset + byteLength\n}\n\nBuffer.prototype.writeIntBE = function writeIntBE (value, offset, byteLength, noAssert) {\n  value = +value\n  offset = offset | 0\n  if (!noAssert) {\n    var limit = Math.pow(2, 8 * byteLength - 1)\n\n    checkInt(this, value, offset, byteLength, limit - 1, -limit)\n  }\n\n  var i = byteLength - 1\n  var mul = 1\n  var sub = 0\n  this[offset + i] = value & 0xFF\n  while (--i >= 0 && (mul *= 0x100)) {\n    if (value < 0 && sub === 0 && this[offset + i + 1] !== 0) {\n      sub = 1\n    }\n    this[offset + i] = ((value / mul) >> 0) - sub & 0xFF\n  }\n\n  return offset + byteLength\n}\n\nBuffer.prototype.writeInt8 = function writeInt8 (value, offset, noAssert) {\n  value = +value\n  offset = offset | 0\n  if (!noAssert) checkInt(this, value, offset, 1, 0x7f, -0x80)\n  if (!Buffer.TYPED_ARRAY_SUPPORT) value = Math.floor(value)\n  if (value < 0) value = 0xff + value + 1\n  this[offset] = (value & 0xff)\n  return offset + 1\n}\n\nBuffer.prototype.writeInt16LE = function writeInt16LE (value, offset, noAssert) {\n  value = +value\n  offset = offset | 0\n  if (!noAssert) checkInt(this, value, offset, 2, 0x7fff, -0x8000)\n  if (Buffer.TYPED_ARRAY_SUPPORT) {\n    this[offset] = (value & 0xff)\n    this[offset + 1] = (value >>> 8)\n  } else {\n    objectWriteUInt16(this, value, offset, true)\n  }\n  return offset + 2\n}\n\nBuffer.prototype.writeInt16BE = function writeInt16BE (value, offset, noAssert) {\n  value = +value\n  offset = offset | 0\n  if (!noAssert) checkInt(this, value, offset, 2, 0x7fff, -0x8000)\n  if (Buffer.TYPED_ARRAY_SUPPORT) {\n    this[offset] = (value >>> 8)\n    this[offset + 1] = (value & 0xff)\n  } else {\n    objectWriteUInt16(this, value, offset, false)\n  }\n  return offset + 2\n}\n\nBuffer.prototype.writeInt32LE = function writeInt32LE (value, offset, noAssert) {\n  value = +value\n  offset = offset | 0\n  if (!noAssert) checkInt(this, value, offset, 4, 0x7fffffff, -0x80000000)\n  if (Buffer.TYPED_ARRAY_SUPPORT) {\n    this[offset] = (value & 0xff)\n    this[offset + 1] = (value >>> 8)\n    this[offset + 2] = (value >>> 16)\n    this[offset + 3] = (value >>> 24)\n  } else {\n    objectWriteUInt32(this, value, offset, true)\n  }\n  return offset + 4\n}\n\nBuffer.prototype.writeInt32BE = function writeInt32BE (value, offset, noAssert) {\n  value = +value\n  offset = offset | 0\n  if (!noAssert) checkInt(this, value, offset, 4, 0x7fffffff, -0x80000000)\n  if (value < 0) value = 0xffffffff + value + 1\n  if (Buffer.TYPED_ARRAY_SUPPORT) {\n    this[offset] = (value >>> 24)\n    this[offset + 1] = (value >>> 16)\n    this[offset + 2] = (value >>> 8)\n    this[offset + 3] = (value & 0xff)\n  } else {\n    objectWriteUInt32(this, value, offset, false)\n  }\n  return offset + 4\n}\n\nfunction checkIEEE754 (buf, value, offset, ext, max, min) {\n  if (offset + ext > buf.length) throw new RangeError('Index out of range')\n  if (offset < 0) throw new RangeError('Index out of range')\n}\n\nfunction writeFloat (buf, value, offset, littleEndian, noAssert) {\n  if (!noAssert) {\n    checkIEEE754(buf, value, offset, 4, 3.4028234663852886e+38, -3.4028234663852886e+38)\n  }\n  ieee754.write(buf, value, offset, littleEndian, 23, 4)\n  return offset + 4\n}\n\nBuffer.prototype.writeFloatLE = function writeFloatLE (value, offset, noAssert) {\n  return writeFloat(this, value, offset, true, noAssert)\n}\n\nBuffer.prototype.writeFloatBE = function writeFloatBE (value, offset, noAssert) {\n  return writeFloat(this, value, offset, false, noAssert)\n}\n\nfunction writeDouble (buf, value, offset, littleEndian, noAssert) {\n  if (!noAssert) {\n    checkIEEE754(buf, value, offset, 8, 1.7976931348623157E+308, -1.7976931348623157E+308)\n  }\n  ieee754.write(buf, value, offset, littleEndian, 52, 8)\n  return offset + 8\n}\n\nBuffer.prototype.writeDoubleLE = function writeDoubleLE (value, offset, noAssert) {\n  return writeDouble(this, value, offset, true, noAssert)\n}\n\nBuffer.prototype.writeDoubleBE = function writeDoubleBE (value, offset, noAssert) {\n  return writeDouble(this, value, offset, false, noAssert)\n}\n\n// copy(targetBuffer, targetStart=0, sourceStart=0, sourceEnd=buffer.length)\nBuffer.prototype.copy = function copy (target, targetStart, start, end) {\n  if (!start) start = 0\n  if (!end && end !== 0) end = this.length\n  if (targetStart >= target.length) targetStart = target.length\n  if (!targetStart) targetStart = 0\n  if (end > 0 && end < start) end = start\n\n  // Copy 0 bytes; we're done\n  if (end === start) return 0\n  if (target.length === 0 || this.length === 0) return 0\n\n  // Fatal error conditions\n  if (targetStart < 0) {\n    throw new RangeError('targetStart out of bounds')\n  }\n  if (start < 0 || start >= this.length) throw new RangeError('sourceStart out of bounds')\n  if (end < 0) throw new RangeError('sourceEnd out of bounds')\n\n  // Are we oob?\n  if (end > this.length) end = this.length\n  if (target.length - targetStart < end - start) {\n    end = target.length - targetStart + start\n  }\n\n  var len = end - start\n  var i\n\n  if (this === target && start < targetStart && targetStart < end) {\n    // descending copy from end\n    for (i = len - 1; i >= 0; --i) {\n      target[i + targetStart] = this[i + start]\n    }\n  } else if (len < 1000 || !Buffer.TYPED_ARRAY_SUPPORT) {\n    // ascending copy from start\n    for (i = 0; i < len; ++i) {\n      target[i + targetStart] = this[i + start]\n    }\n  } else {\n    Uint8Array.prototype.set.call(\n      target,\n      this.subarray(start, start + len),\n      targetStart\n    )\n  }\n\n  return len\n}\n\n// Usage:\n//    buffer.fill(number[, offset[, end]])\n//    buffer.fill(buffer[, offset[, end]])\n//    buffer.fill(string[, offset[, end]][, encoding])\nBuffer.prototype.fill = function fill (val, start, end, encoding) {\n  // Handle string cases:\n  if (typeof val === 'string') {\n    if (typeof start === 'string') {\n      encoding = start\n      start = 0\n      end = this.length\n    } else if (typeof end === 'string') {\n      encoding = end\n      end = this.length\n    }\n    if (val.length === 1) {\n      var code = val.charCodeAt(0)\n      if (code < 256) {\n        val = code\n      }\n    }\n    if (encoding !== undefined && typeof encoding !== 'string') {\n      throw new TypeError('encoding must be a string')\n    }\n    if (typeof encoding === 'string' && !Buffer.isEncoding(encoding)) {\n      throw new TypeError('Unknown encoding: ' + encoding)\n    }\n  } else if (typeof val === 'number') {\n    val = val & 255\n  }\n\n  // Invalid ranges are not set to a default, so can range check early.\n  if (start < 0 || this.length < start || this.length < end) {\n    throw new RangeError('Out of range index')\n  }\n\n  if (end <= start) {\n    return this\n  }\n\n  start = start >>> 0\n  end = end === undefined ? this.length : end >>> 0\n\n  if (!val) val = 0\n\n  var i\n  if (typeof val === 'number') {\n    for (i = start; i < end; ++i) {\n      this[i] = val\n    }\n  } else {\n    var bytes = Buffer.isBuffer(val)\n      ? val\n      : utf8ToBytes(new Buffer(val, encoding).toString())\n    var len = bytes.length\n    for (i = 0; i < end - start; ++i) {\n      this[i + start] = bytes[i % len]\n    }\n  }\n\n  return this\n}\n\n// HELPER FUNCTIONS\n// ================\n\nvar INVALID_BASE64_RE = /[^+\\/0-9A-Za-z-_]/g\n\nfunction base64clean (str) {\n  // Node strips out invalid characters like \\n and \\t from the string, base64-js does not\n  str = stringtrim(str).replace(INVALID_BASE64_RE, '')\n  // Node converts strings with length < 2 to ''\n  if (str.length < 2) return ''\n  // Node allows for non-padded base64 strings (missing trailing ===), base64-js does not\n  while (str.length % 4 !== 0) {\n    str = str + '='\n  }\n  return str\n}\n\nfunction stringtrim (str) {\n  if (str.trim) return str.trim()\n  return str.replace(/^\\s+|\\s+$/g, '')\n}\n\nfunction toHex (n) {\n  if (n < 16) return '0' + n.toString(16)\n  return n.toString(16)\n}\n\nfunction utf8ToBytes (string, units) {\n  units = units || Infinity\n  var codePoint\n  var length = string.length\n  var leadSurrogate = null\n  var bytes = []\n\n  for (var i = 0; i < length; ++i) {\n    codePoint = string.charCodeAt(i)\n\n    // is surrogate component\n    if (codePoint > 0xD7FF && codePoint < 0xE000) {\n      // last char was a lead\n      if (!leadSurrogate) {\n        // no lead yet\n        if (codePoint > 0xDBFF) {\n          // unexpected trail\n          if ((units -= 3) > -1) bytes.push(0xEF, 0xBF, 0xBD)\n          continue\n        } else if (i + 1 === length) {\n          // unpaired lead\n          if ((units -= 3) > -1) bytes.push(0xEF, 0xBF, 0xBD)\n          continue\n        }\n\n        // valid lead\n        leadSurrogate = codePoint\n\n        continue\n      }\n\n      // 2 leads in a row\n      if (codePoint < 0xDC00) {\n        if ((units -= 3) > -1) bytes.push(0xEF, 0xBF, 0xBD)\n        leadSurrogate = codePoint\n        continue\n      }\n\n      // valid surrogate pair\n      codePoint = (leadSurrogate - 0xD800 << 10 | codePoint - 0xDC00) + 0x10000\n    } else if (leadSurrogate) {\n      // valid bmp char, but last char was a lead\n      if ((units -= 3) > -1) bytes.push(0xEF, 0xBF, 0xBD)\n    }\n\n    leadSurrogate = null\n\n    // encode utf8\n    if (codePoint < 0x80) {\n      if ((units -= 1) < 0) break\n      bytes.push(codePoint)\n    } else if (codePoint < 0x800) {\n      if ((units -= 2) < 0) break\n      bytes.push(\n        codePoint >> 0x6 | 0xC0,\n        codePoint & 0x3F | 0x80\n      )\n    } else if (codePoint < 0x10000) {\n      if ((units -= 3) < 0) break\n      bytes.push(\n        codePoint >> 0xC | 0xE0,\n        codePoint >> 0x6 & 0x3F | 0x80,\n        codePoint & 0x3F | 0x80\n      )\n    } else if (codePoint < 0x110000) {\n      if ((units -= 4) < 0) break\n      bytes.push(\n        codePoint >> 0x12 | 0xF0,\n        codePoint >> 0xC & 0x3F | 0x80,\n        codePoint >> 0x6 & 0x3F | 0x80,\n        codePoint & 0x3F | 0x80\n      )\n    } else {\n      throw new Error('Invalid code point')\n    }\n  }\n\n  return bytes\n}\n\nfunction asciiToBytes (str) {\n  var byteArray = []\n  for (var i = 0; i < str.length; ++i) {\n    // Node's code seems to be doing this and not & 0x7F..\n    byteArray.push(str.charCodeAt(i) & 0xFF)\n  }\n  return byteArray\n}\n\nfunction utf16leToBytes (str, units) {\n  var c, hi, lo\n  var byteArray = []\n  for (var i = 0; i < str.length; ++i) {\n    if ((units -= 2) < 0) break\n\n    c = str.charCodeAt(i)\n    hi = c >> 8\n    lo = c % 256\n    byteArray.push(lo)\n    byteArray.push(hi)\n  }\n\n  return byteArray\n}\n\nfunction base64ToBytes (str) {\n  return base64.toByteArray(base64clean(str))\n}\n\nfunction blitBuffer (src, dst, offset, length) {\n  for (var i = 0; i < length; ++i) {\n    if ((i + offset >= dst.length) || (i >= src.length)) break\n    dst[i + offset] = src[i]\n  }\n  return i\n}\n\nfunction isnan (val) {\n  return val !== val // eslint-disable-line no-self-compare\n}\n\n/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../webpack/buildin/global.js */ \"./node_modules/webpack/buildin/global.js\")))\n\n//# sourceURL=webpack://Jose/./node_modules/buffer/index.js?");
+
+/***/ }),
+
+/***/ "./node_modules/ieee754/index.js":
+/*!***************************************!*\
+  !*** ./node_modules/ieee754/index.js ***!
+  \***************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+eval("exports.read = function (buffer, offset, isLE, mLen, nBytes) {\n  var e, m\n  var eLen = (nBytes * 8) - mLen - 1\n  var eMax = (1 << eLen) - 1\n  var eBias = eMax >> 1\n  var nBits = -7\n  var i = isLE ? (nBytes - 1) : 0\n  var d = isLE ? -1 : 1\n  var s = buffer[offset + i]\n\n  i += d\n\n  e = s & ((1 << (-nBits)) - 1)\n  s >>= (-nBits)\n  nBits += eLen\n  for (; nBits > 0; e = (e * 256) + buffer[offset + i], i += d, nBits -= 8) {}\n\n  m = e & ((1 << (-nBits)) - 1)\n  e >>= (-nBits)\n  nBits += mLen\n  for (; nBits > 0; m = (m * 256) + buffer[offset + i], i += d, nBits -= 8) {}\n\n  if (e === 0) {\n    e = 1 - eBias\n  } else if (e === eMax) {\n    return m ? NaN : ((s ? -1 : 1) * Infinity)\n  } else {\n    m = m + Math.pow(2, mLen)\n    e = e - eBias\n  }\n  return (s ? -1 : 1) * m * Math.pow(2, e - mLen)\n}\n\nexports.write = function (buffer, value, offset, isLE, mLen, nBytes) {\n  var e, m, c\n  var eLen = (nBytes * 8) - mLen - 1\n  var eMax = (1 << eLen) - 1\n  var eBias = eMax >> 1\n  var rt = (mLen === 23 ? Math.pow(2, -24) - Math.pow(2, -77) : 0)\n  var i = isLE ? 0 : (nBytes - 1)\n  var d = isLE ? 1 : -1\n  var s = value < 0 || (value === 0 && 1 / value < 0) ? 1 : 0\n\n  value = Math.abs(value)\n\n  if (isNaN(value) || value === Infinity) {\n    m = isNaN(value) ? 1 : 0\n    e = eMax\n  } else {\n    e = Math.floor(Math.log(value) / Math.LN2)\n    if (value * (c = Math.pow(2, -e)) < 1) {\n      e--\n      c *= 2\n    }\n    if (e + eBias >= 1) {\n      value += rt / c\n    } else {\n      value += rt * Math.pow(2, 1 - eBias)\n    }\n    if (value * c >= 2) {\n      e++\n      c /= 2\n    }\n\n    if (e + eBias >= eMax) {\n      m = 0\n      e = eMax\n    } else if (e + eBias >= 1) {\n      m = ((value * c) - 1) * Math.pow(2, mLen)\n      e = e + eBias\n    } else {\n      m = value * Math.pow(2, eBias - 1) * Math.pow(2, mLen)\n      e = 0\n    }\n  }\n\n  for (; mLen >= 8; buffer[offset + i] = m & 0xff, i += d, m /= 256, mLen -= 8) {}\n\n  e = (e << mLen) | m\n  eLen += mLen\n  for (; eLen > 0; buffer[offset + i] = e & 0xff, i += d, e /= 256, eLen -= 8) {}\n\n  buffer[offset + i - d] |= s * 128\n}\n\n\n//# sourceURL=webpack://Jose/./node_modules/ieee754/index.js?");
+
+/***/ }),
+
+/***/ "./node_modules/isarray/index.js":
+/*!***************************************!*\
+  !*** ./node_modules/isarray/index.js ***!
+  \***************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+eval("var toString = {}.toString;\n\nmodule.exports = Array.isArray || function (arr) {\n  return toString.call(arr) == '[object Array]';\n};\n\n\n//# sourceURL=webpack://Jose/./node_modules/isarray/index.js?");
+
+/***/ }),
+
+/***/ "./node_modules/webpack/buildin/global.js":
+/*!***********************************!*\
+  !*** (webpack)/buildin/global.js ***!
+  \***********************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+eval("var g;\r\n\r\n// This works in non-strict mode\r\ng = (function() {\r\n\treturn this;\r\n})();\r\n\r\ntry {\r\n\t// This works if eval is allowed (see CSP)\r\n\tg = g || Function(\"return this\")() || (1, eval)(\"this\");\r\n} catch (e) {\r\n\t// This works if the window reference is available\r\n\tif (typeof window === \"object\") g = window;\r\n}\r\n\r\n// g can still be undefined, but nothing to do about it...\r\n// We return undefined, instead of nothing here, so it's\r\n// easier to handle this case. if(!global) { ...}\r\n\r\nmodule.exports = g;\r\n\n\n//# sourceURL=webpack://Jose/(webpack)/buildin/global.js?");
+
+/***/ })
+
+/******/ });
