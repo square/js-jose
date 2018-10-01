@@ -9,6 +9,7 @@
     <script src="../dist/jose.js"></script>
 
     <script>
+    QUnit.config.autostart = false;
     QUnit.test("encryption using RSAES OAEP and AES GCM (keys & IV from appendix-A.1)", function(assert) {
       var cryptographer = new Jose.WebCryptographer();
       cryptographer.createIV = () => {

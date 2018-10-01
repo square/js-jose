@@ -1,4 +1,5 @@
 const webpackDevConfig = require('./webpack.dev');
+const webpackProdConfig = require('./webpack.prod');
 
 module.exports = function(grunt) {
 
@@ -14,6 +15,7 @@ module.exports = function(grunt) {
 
     webpack: {
       dev: webpackDevConfig,
+      prod: webpackProdConfig
     },
 
     karma: {
@@ -31,8 +33,7 @@ module.exports = function(grunt) {
           files: [
             {pattern: 'dist/jose.js', watching: false, included: false},
             {pattern: 'test/qunit-promises.js', watching: false, included: false},
-            'test/jose-jwe-test.html',
-            'test/jose-jws-test.html'
+            'test/jose-jwe-test.html'
           ],
           autoWatch: true,
           browsers: ['Chrome'],
@@ -52,8 +53,7 @@ module.exports = function(grunt) {
           files: [
             {pattern: 'dist/jose.js', watching: false, included: false},
             {pattern: 'test/qunit-promises.js', watching: false, included: false},
-            'test/jose-jwe-test.html',
-            'test/jose-jws-test.html'
+            'test/jose-jwe-test.html'
           ],
           autoWatch: true,
           browsers: ['Chrome'],

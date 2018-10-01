@@ -22,6 +22,8 @@ const path = require('path')
  *
  */
 
+const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
+
 module.exports = {
   module: {
     rules: [{
@@ -39,15 +41,16 @@ module.exports = {
   entry: './lib/jose-core',
 
   output: {
-    filename: 'jose.js',
+    filename: 'jose.min.js',
     library:'Jose',
     libraryTarget: 'var',
     path: path.resolve(__dirname, 'dist')
   },
 
-  mode: 'development',
+  mode: 'production',
 
   optimization: {
+    //minimizer: [new UglifyJSPlugin()],
     splitChunks: {
       cacheGroups: {
         vendors: {
