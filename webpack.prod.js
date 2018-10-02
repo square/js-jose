@@ -21,9 +21,6 @@ const path = require('path')
  * https://github.com/webpack-contrib/uglifyjs-webpack-plugin
  *
  */
-
-const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
-
 module.exports = {
   module: {
     rules: [{
@@ -50,7 +47,6 @@ module.exports = {
   mode: 'production',
 
   optimization: {
-    //minimizer: [new UglifyJSPlugin()],
     splitChunks: {
       cacheGroups: {
         vendors: {

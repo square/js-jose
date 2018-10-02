@@ -94,6 +94,8 @@ interface IUtils {
 
 interface IJose {
     Utils: IUtils;
+    JoseJWE: IJoseJWE;
+    JoseJWS: IJoseJWS
     caniuse(): boolean;
     WebCryptographer: IWebCryptographer;
 }
@@ -143,12 +145,10 @@ interface IJoseJWE {
 
 declare function setCrypto(cryptoProvider: Crypto): void;
 declare const Jose: IJose;
-declare const JoseJWE: IJoseJWE;
-declare const JoseJWS: IJoseJWS;
+declare var crypto: Crypto;
 
 declare module "jose-jwe-jws" {
     export function setCrypto(cryptoProvider: Crypto): void;
     export const Jose: IJose;
-    export const JoseJWE: IJoseJWE;
-    export const JoseJWS: IJoseJWS;
+    export var crypto: Crypto;
 }

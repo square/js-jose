@@ -1,6 +1,6 @@
 {
   "name": "jose-jwe-jws",
-  "version": "0.1.6",
+  "version": "1.0.0",
   "description": "Library to encrypt and decrypt data in JSON Web Encryption (JWE) format and to sign data in JSON Web Signature (JWS) format. Leverages Browser's native web crypto API.",
   "keywords": [
     "crypto",
@@ -23,10 +23,10 @@
     "@babel/core": "^7.1.2",
     "@babel/preset-env": "^7.1.0",
     "@webpack-cli/init": "^0.1.1",
+    "babel": "^6.23.0",
     "babel-core": "^6.26.3",
     "babel-loader": "^8.0.4",
     "babel-plugin-syntax-dynamic-import": "^6.18.0",
-    "babel-preset-env": "^1.7.0",
     "coveralls": "^2.13.1",
     "grunt": "~1.0.1",
     "grunt-contrib-concat": "^1.0.1",
@@ -46,8 +46,5 @@
     "webpack-cli": "^3.1.1"
   },
   "typings": "jose-jwe-jws.d.ts",
-  "main": "dist/jose-commonjs.js",
-  "dependencies": {
-    "babel": "^6.23.0"
-  }
+  "main": "dist/jose.min.js"
 }
