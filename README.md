@@ -212,6 +212,7 @@ Authors and contributors
 * Ryan Hurst
 * Sam Quigley
 * Alok Menghrajani
+* Mischa MacLeod
 
 Random other interesting resources
 ----------------------------------
