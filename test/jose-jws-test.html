@@ -3,9 +3,9 @@
   <head>
     <meta charset="utf-8">
     <title>Jose JWS Test</title>
-
+    <link rel="stylesheet" href="../node_modules/qunitjs/qunit/qunit.css">
     <script src="qunit-promises.js"></script>
-    <script src="../dist/jose-testing.js"></script>
+    <script src="../dist/jose.js"></script>
     <script>
         QUnit.test("signature using RSASSA-PKCS1-v1_5 with SHA-256 (keys from appendix-A.2.1)", function(assert) {
           var rsa_key = {

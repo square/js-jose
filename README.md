@@ -57,7 +57,7 @@ var rsa_key = Jose.Utils.importRsaPublicKey(
   },
   "RSA-OAEP"
 );
-var encrypter = new JoseJWE.Encrypter(cryptographer, rsa_key);
+var encrypter = new Jose.JoseJWE.Encrypter(cryptographer, rsa_key);
 encrypter
   .encrypt("hello world")
   .then(function(result) {
@@ -108,7 +108,7 @@ var rsa_key = {
 var cryptographer = new Jose.WebCryptographer();
 cryptographer.setContentSignAlgorithm("RS256");
 
-var signer = new JoseJWS.Signer(cryptographer);
+var signer = new Jose.JoseJWS.Signer(cryptographer);
 signer.addSigner(rsa_key).then(function() {
   signer
     .sign("hello world", null, {})
@@ -212,6 +212,7 @@ Authors and contributors
 * Ryan Hurst
 * Sam Quigley
 * Alok Menghrajani
+* Mischa MacLeod
 
 Random other interesting resources
 ----------------------------------

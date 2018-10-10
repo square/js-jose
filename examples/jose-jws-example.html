@@ -49,7 +49,7 @@
     var cryptographer = new Jose.WebCryptographer();
     cryptographer.setContentSignAlgorithm("RS256");
 
-    var signer = new JoseJWS.Signer(cryptographer);
+    var signer = new Jose.JoseJWS.Signer(cryptographer);
 
     var signers = [];
     signers.push(signer.addSigner(rsa_key));
@@ -59,7 +59,7 @@
         signer.sign(plaintext.textContent, null, {}).then(function (message) {
 
             signtext.textContent = JSON.stringify(message, null, 4);
-            var verifier = new JoseJWS.Verifier(cryptographer, message);
+            var verifier = new Jose.JoseJWS.Verifier(cryptographer, message);
             verifier.addRecipient(rsa_key).then(function () {
                 verifier.addRecipient(rsa_key2, null, "RS256").then(function () {
                     verifier.verify().then(function (verified) {

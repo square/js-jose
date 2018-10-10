@@ -1,71 +1,28 @@
+const webpackDevConfig = require('./webpack.dev');
+const webpackProdConfig = require('./webpack.prod');
+
 module.exports = function(grunt) {
 
   var config = {
     pkg: grunt.file.readJSON('package.json'),
 
     jshint: {
-      all: ['Gruntfile.js', 'lib/*.js']
-    },
-
-    concat: {
-      prod: {
-        options: {
-          banner: '(function(exports, crypto, Promise, Error, Uint8Array){\n"use strict";\n\n// supporting Safari and its vendor prefix\nif(!crypto.subtle) crypto.subtle = crypto.webkitSubtle;\n',
-          footer: "}(window, window.crypto, window.Promise, window.Error, window.Uint8Array));\n"
-        },
-        src: [
-          'lib/jose-core.js',
-          'lib/jose-jwe-webcryptographer.js',
-          'lib/jose-utils.js',
-          'lib/jose-jwe-encrypt.js',
-          'lib/jose-jwe-decrypt.js',
-          'lib/jose-jws-sign.js',
-          'lib/jose-jws-verify.js'
-        ],
-        dest: 'dist/jose.js'
-      },
-      testing: {
-        options: {
-          banner: '(function(exports, crypto, Promise, Error, Uint8Array){\n// supporting Safari and its vendor prefix\nif(!crypto.subtle) crypto.subtle = crypto.webkitSubtle;\n',
-          footer: "}(window, window.crypto, window.Promise, window.Error, window.Uint8Array));\n"
-        },
-        src: [
-          'lib/jose-core.js',
-          'lib/jose-jwe-webcryptographer.js',
-          'lib/jose-utils.js',
-          'lib/jose-jwe-encrypt.js',
-          'lib/jose-jwe-decrypt.js',
-          'lib/jose-jws-sign.js',
-          'lib/jose-jws-verify.js'
-        ],
-        dest: 'dist/jose-testing.js'
-      },
-      commonjs: {
-        src: [
-          'lib/jose-core.js',
-          'lib/jose-jwe-webcryptographer.js',
-          'lib/jose-utils.js',
-          'lib/jose-jwe-encrypt.js',
-          'lib/jose-jwe-decrypt.js',
-          'lib/jose-jws-sign.js',
-          'lib/jose-jws-verify.js'
-        ],
-        dest: 'dist/jose-commonjs.js'
+      all: ['Gruntfile.js', 'lib/*.js'],
+      options: {
+        "esversion": 6
       }
     },
 
-    uglify: {
-      dist: {
-        src: 'dist/jose.js',
-        dest: 'dist/jose.min.js'
-      }
+    webpack: {
+      dev: webpackDevConfig,
+      prod: webpackProdConfig
     },
 
     karma: {
       with_coverage: {
         options: {
           preprocessors: {
-            'dist/jose-testing.js': ['coverage']
+            'dist/jose.js': ['coverage']
           },
           reporters: ['coverage', 'progress'],
           coverageReporter: {
@@ -74,10 +31,9 @@ module.exports = function(grunt) {
           },
           frameworks: ['qunit'],
           files: [
-            {pattern: 'dist/jose-testing.js', watching: false, included: false},
+            {pattern: 'dist/jose.js', watching: false, included: false},
             {pattern: 'test/qunit-promises.js', watching: false, included: false},
-            'test/jose-jwe-test.html',
-            'test/jose-jws-test.html'
+            'test/jose-jwe-test.html'
           ],
           autoWatch: true,
           browsers: ['Chrome'],
@@ -95,10 +51,9 @@ module.exports = function(grunt) {
         options: {
           frameworks: ['qunit'],
           files: [
-            {pattern: 'dist/jose-testing.js', watching: false, included: false},
+            {pattern: 'dist/jose.js', watching: false, included: false},
             {pattern: 'test/qunit-promises.js', watching: false, included: false},
-            'test/jose-jwe-test.html',
-            'test/jose-jws-test.html'
+            'test/jose-jwe-test.html'
           ],
           autoWatch: true,
           browsers: ['Chrome'],
@@ -135,7 +90,8 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-karma');
   grunt.loadNpmTasks('grunt-karma-coveralls');
+  grunt.loadNpmTasks('grunt-webpack');
 
-  grunt.registerTask('default', ['jshint', 'concat', 'uglify', 'karma:without_coverage']);
-  grunt.registerTask('with_coverage', ['jshint', 'concat', 'uglify', 'karma:with_coverage']);
+  grunt.registerTask('default', ['jshint', 'webpack', 'karma:without_coverage']);
+  grunt.registerTask('with_coverage', ['jshint', 'webpack', 'karma:with_coverage']);
 };
