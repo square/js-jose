@@ -53,7 +53,10 @@ module.exports = function(grunt) {
           files: [
             {pattern: 'dist/jose.js', watching: false, included: false},
             {pattern: 'test/qunit-promises.js', watching: false, included: false},
-            'test/jose-jwe-test.html'
+            {pattern: 'node_modules/qunitjs/qunit/qunit.js', watching: false, included: false},
+            {pattern: 'node_modules/qunitjs/qunit/qunit.css', watching: false, included: false},
+            'test/jose-jwe-test.html',
+            'test/jose-jws-test.html'
           ],
           autoWatch: true,
           browsers: ['Chrome'],
