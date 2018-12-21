@@ -1,0 +1,10 @@
+{
+    "compilerOptions": {
+        "outDir": "./dist/",        // path to output directory
+        "strictNullChecks": true,   // enable strict null checks as a best practice
+        "allowJs": false,           // allow a partial TypeScript and JavaScript codebase
+    },
+    "include": [
+        "./src/**/*"
+    ]
+}
