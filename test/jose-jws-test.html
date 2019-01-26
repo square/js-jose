@@ -19,7 +19,7 @@
             "qi": "21:87:7B:0C:73:A1:AD:6B:F1:93:03:D0:B1:13:36:B4:E8:2B:8D:B7:2B:7E:FB:50:26:2A:5D:F8:39:5C:C7:25:6E:B8:CF:6C:40:B7:60:8D:59:36:A3:2D:BA:17:41:26:A5:27:06:2E:AD:8C:A3:05:FB:7E:17:7F:40:94:37:C9:DC:B9:71:8E:D8:20:18:BC:EF:0F:77:20:A2:C4:75:F9:DB:26:DA:0E:3C:B5:16:D0:84:EB:25:17:8E:82:8D:5C:AB:D4:9B:B3:16:1A:C0:18:1F:A7:F8:21:E8:0E:7A:D3:79:36:F9:94:30:54:AD:09:29:21:EE:2C:59:2E:43:75"
           };
           var cryptographer = new Jose.WebCryptographer(),
-            signer = new JoseJWS.Signer(cryptographer),
+            signer = new Jose.JoseJWS.Signer(cryptographer),
             plain_text = "The true sign of intelligence is not knowledge but imagination.",
             sign_text_promise;
           cryptographer.setContentSignAlgorithm("RS256");
@@ -43,7 +43,7 @@
 
             assert.willEqual(ads_promise.then(function () {
                 return signer.sign(plain_text, null, {}).then(function (signature) {
-                    var verifier = new JoseJWS.Verifier(cryptographer, signature);
+                    var verifier = new Jose.JoseJWS.Verifier(cryptographer, signature);
                     return verifier.addRecipient(rsa_key, "A.2.1").then(function() {
                         return verifier.verify().then(function(result) {
                             return result.filter(function(value) {
@@ -57,7 +57,7 @@
 
           assert.willEqual(ads_promise.then(function () {
             return signer.sign(plain_text, null, {}).then(function (signature) {
-              var verifier = new JoseJWS.Verifier(cryptographer, signature);
+              var verifier = new Jose.JoseJWS.Verifier(cryptographer, signature);
               return verifier.addRecipient(rsa_key, "A.2.1").then(function () {
                 return verifier.verify().then(function (result) {
                   return result[0].verified && result[0].payload === plain_text;
@@ -113,14 +113,14 @@
 
             cryptographer = new Jose.WebCryptographer();
             cryptographer.setContentSignAlgorithm("RS256");
-            signer = new JoseJWS.Signer(cryptographer);
+            signer = new Jose.JoseJWS.Signer(cryptographer);
 
             assert.willEqual(signer.addSigner(prvjwk, prvjwk.kid)
                     .then(function () {
                         return signer.sign(plaintext);
                     })
                     .then(function (signed) {
-                        var verifier = new JoseJWS.Verifier(cryptographer, signed, keyfinder);
+                        var verifier = new Jose.JoseJWS.Verifier(cryptographer, signed, keyfinder);
                         return verifier.verify().then(function (result) {
                             return result.filter(function (value) {
                                         return !value.verified;
@@ -131,20 +131,20 @@
 
             cryptographer = new Jose.WebCryptographer();
             cryptographer.setContentSignAlgorithm("RS256");
-            signer = new JoseJWS.Signer(cryptographer);
+            signer = new Jose.JoseJWS.Signer(cryptographer);
 
             assert.wont(signer.addSigner(prvjwk, prvjwk.kid)
                     .then(function (prvkey) {
                         cryptographer = new Jose.WebCryptographer();
                         cryptographer.setContentSignAlgorithm("RS256");
-                        signer = new JoseJWS.Signer(cryptographer);
+                        signer = new Jose.JoseJWS.Signer(cryptographer);
                         return signer.addSigner(prvkey, "unknown");
                     })
                     .then(function () {
                         return signer.sign(plaintext);
                     })
                     .then(function (signed) {
-                        var verifier = new JoseJWS.Verifier(cryptographer, signed, keyfinder);
+                        var verifier = new Jose.JoseJWS.Verifier(cryptographer, signed, keyfinder);
                         return verifier.verify().then(function (result) {
                             return result.filter(function (value) {
                                         return !value.verified;
