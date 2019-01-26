@@ -10,8 +10,8 @@ Overview
 JavaScript library to sign/verify and encrypt/decrypt data in JSON Web
 Encryption (JWE) and JSON Web Signatures (JWS) formats.
 
-The library can be used to implement RSA-based public/private cryptography as
-well as shared key encryption.
+The library can be used to implement RSA and EC based public/private
+cryptography as well as shared key encryption.
 
 Both JWE and JWS are encapsulation formats which makes it easy to share
 ciphertext and signatures between different platforms: data encrypted or signed
@@ -70,8 +70,8 @@ encrypter
   });
 ```
 
-Example signature
------------------
+Example RSA signature
+---------------------
 
 ```js
 var rsa_key = {
@@ -134,6 +134,46 @@ signer.addSigner(rsa_key).then(function() {
 });
 ```
 
+Example ECDSA signature
+-----------------------
+
+```js
+var ec_key = {
+  "kty": "EC",
+  "crv": "P-256",
+  "x": "f83OJ3D2xF1Bg8vub9tLe1gHMzV76e8Tus9uPHvRVEU",
+  "y": "x_FEzRu9m36HLN_tue659LNpXW6pCyStikYjKIWI5a0",
+  "d": "jpsQnnGQmL-YBIffH1136cspYG6-0iY7X1fCE9-E9LI"
+}
+
+var cryptographer = new Jose.WebCryptographer();
+cryptographer.setContentSignAlgorithm("ES256");
+
+var signer = new Jose.JoseJWS.Signer(cryptographer);
+signer.addSigner(ec_key).then(function() {
+  signer
+    .sign("hello world", null, {})
+    .then(function(message) {
+      console.log(message);
+      var verifier = new JoseJWS.Verifier(cryptographer, message);
+      delete ec_key.d;
+      verifier.addRecipient(ec_key).then(function() {
+        verifier
+          .verify()
+          .then(function(verified) {
+            console.log("verified: ", verified);
+          })
+          .catch(function(err) {
+            console.error(err);
+          });
+      });
+    })
+    .catch(function(err) {
+      console.error(err);
+    });
+});
+```
+
 Algorithms exposed by this library
 ----------------------------------
 Signatures:
@@ -162,6 +202,9 @@ Content signature:
 * PS256 (Windows only)
 * PS384 (Windows only)
 * PS512 (Windows only)
+* ES256
+* ES384
+* ES512
 
 Algorithms not exposed (and reason why)
 ---------------------------------------
@@ -176,7 +219,6 @@ Algorithms not exposed (and reason why)
 * ECDH-ES+A128KW (Chrome and IE currently don't support it)
 * ECDH-ES+A192KW (Chrome and IE currently don't support it)
 * ECDH-ES+A256KW (Chrome and IE currently don't support it)
-* ECDSA (could be added once Chrome supports these)
 * RSA-PSS on Linux, OSX and iOS (Chrome supports it only on Windows)
 * HS256, HS384, HS512 (message authentication support could be added in future releases, at the moment only RSA signatures are supported)
 
@@ -215,6 +257,7 @@ Authors and contributors
 * Sam Quigley
 * Alok Menghrajani
 * Mischa MacLeod
+* Lewis Marshall
 
 Random other interesting resources
 ----------------------------------
