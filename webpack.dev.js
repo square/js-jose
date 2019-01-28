@@ -20,7 +20,7 @@ module.exports = {
   output: {
     filename: 'jose.js',
     library:'Jose',
-    libraryTarget: 'var',
+    libraryTarget: 'umd',
     path: path.resolve(__dirname, 'dist')
   },
 
