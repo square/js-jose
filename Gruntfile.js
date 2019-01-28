@@ -77,6 +77,12 @@ module.exports = function(grunt) {
         force: true,
         recursive: true
       }
+    },
+
+    run: {
+      jest: {
+        cmd: 'jest'
+      }
     }
   };
 
@@ -93,7 +99,8 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-karma');
   grunt.loadNpmTasks('grunt-karma-coveralls');
   grunt.loadNpmTasks('grunt-webpack');
+  grunt.loadNpmTasks('grunt-run');
 
-  grunt.registerTask('default', ['jshint', 'webpack', 'karma:without_coverage']);
-  grunt.registerTask('with_coverage', ['jshint', 'webpack', 'karma:with_coverage']);
+  grunt.registerTask('default', ['jshint', 'webpack', 'run:jest', 'karma:without_coverage']);
+  grunt.registerTask('with_coverage', ['jshint', 'webpack', 'run:jest', 'karma:with_coverage']);
 };
