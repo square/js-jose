@@ -21,7 +21,8 @@ module.exports = {
     filename: 'jose.js',
     library:'Jose',
     libraryTarget: 'umd',
-    path: path.resolve(__dirname, 'dist')
+    path: path.resolve(__dirname, 'dist'),
+    globalObject: 'this' // a workaround for https://github.com/webpack/webpack/issues/6522
   },
 
   mode: 'development',
