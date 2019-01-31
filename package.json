@@ -49,5 +49,8 @@
     "webpack-cli": "^3.1.1"
   },
   "typings": "jose-jwe-jws.d.ts",
-  "main": "dist/jose.min.js"
+  "main": "dist/jose.js",
+  "jest": {
+    "testEnvironment": "node"
+  }
 }
