@@ -20,7 +20,7 @@ module.exports = {
   output: {
     filename: 'jose.min.js',
     library:'Jose',
-    libraryTarget: 'var',
+    libraryTarget: 'commonjs',
     path: path.resolve(__dirname, 'dist')
   },
 

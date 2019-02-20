@@ -23,7 +23,7 @@ type RsaOaepEncryptAlgorithm = "RSA-OAEP" | "RSA-OAEP-256";
 type AesKwEncryptAlgorithm = "A128KW" | "A256KW";
 type AesCbcEncryptAlgorithm = "A128CBC-HS256" | "A256CBC-HS512";
 type AesGcmEncryptAlgorithm = "A128GCM" | "A256GCM";
-type EncryptAlgorithm = RsaOaepEncryptAlgorithm | AesKwEncryptAlgorithm | AesCbcEncryptAlgorithm | AesGcmEncryptAlgorithm;
+type EncryptAlgorithm = RsaOaepEncryptAlgorithm | AesKwEncryptAlgorithm | AesCbcEncryptAlgorithm | AesGcmEncryptAlgorithm | "dir";
 
 type JoseAlgorithm = EncryptAlgorithm | SignAlgorithm;
 
