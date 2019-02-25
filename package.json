@@ -21,8 +21,8 @@
   },
   "devDependencies": {
     "@babel/core": "^7.1.2",
-    "@babel/preset-env": "^7.1.0",
-    "@webpack-cli/init": "^0.1.1",
+    "@babel/preset-env": "^7.3.1",
+    "@webpack-cli/init": "^0.1.3",
     "babel": "^6.23.0",
     "babel-core": "^6.26.3",
     "babel-loader": "^8.0.4",
@@ -47,5 +47,7 @@
     "webpack-cli": "^3.1.1"
   },
   "typings": "jose-jwe-jws.d.ts",
-  "main": "dist/jose.min.js"
+  "main": "dist/jose.node.js",
+  "browser": "dist/jose.js",
+  "dependencies": {}
 }
