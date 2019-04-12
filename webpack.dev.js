@@ -4,13 +4,12 @@ const path = require('path')
 module.exports = {
   module: {
     rules: [{
-      include: [path.resolve(__dirname, 'src')],
-      loader: 'babel-loader',
-
-      options: {
-        presets: [ "@babel/preset-env" ]
+      use: {
+        loader: 'babel-loader',
+        options: {
+          presets: ['@babel/preset-env']
+        }
       },
-
       test: /\.js$/
     }]
   },
