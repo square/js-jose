@@ -95,7 +95,177 @@ var Jose =
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* WEBPACK VAR INJECTION */(function(Buffer, global) {/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"crypto\", function() { return crypto; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"Utils\", function() { return Utils; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"JoseJWE\", function() { return JoseJWE; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"JoseJWS\", function() { return JoseJWS; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"setCrypto\", function() { return setCrypto; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"caniuse\", function() { return caniuse; });\n/* harmony import */ var _jose_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./jose-utils */ \"./lib/jose-utils.js\");\n/* harmony import */ var _jose_jwe_encrypt__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./jose-jwe-encrypt */ \"./lib/jose-jwe-encrypt.js\");\n/* harmony import */ var _jose_jwe_decrypt__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./jose-jwe-decrypt */ \"./lib/jose-jwe-decrypt.js\");\n/* harmony import */ var _jose_jws_sign__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./jose-jws-sign */ \"./lib/jose-jws-sign.js\");\n/* harmony import */ var _jose_jws_verify__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./jose-jws-verify */ \"./lib/jose-jws-verify.js\");\n/* harmony import */ var _jose_jwe_webcryptographer__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./jose-jwe-webcryptographer */ \"./lib/jose-jwe-webcryptographer.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"WebCryptographer\", function() { return _jose_jwe_webcryptographer__WEBPACK_IMPORTED_MODULE_5__[\"WebCryptographer\"]; });\n\nfunction _typeof(obj) { if (typeof Symbol === \"function\" && typeof Symbol.iterator === \"symbol\") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === \"function\" && obj.constructor === Symbol && obj !== Symbol.prototype ? \"symbol\" : typeof obj; }; } return _typeof(obj); }\n\n/*-\n * Copyright 2014 Square Inc.\n *\n * Licensed under the Apache License, Version 2.0 (the \"License\");\n * you may not use this file except in compliance with the License.\n * You may obtain a copy of the License at\n *\n *     http://www.apache.org/licenses/LICENSE-2.0\n *\n * Unless required by applicable law or agreed to in writing, software\n * distributed under the License is distributed on an \"AS IS\" BASIS,\n * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n * See the License for the specific language governing permissions and\n * limitations under the License.\n */\n\n\n\n\n\nvar crypto;\n/**\n * Javascript Object Signing and Encryption library.\n *\n * @author Alok Menghrajani <alok@squareup.com>\n */\n\nvar Utils = _jose_utils__WEBPACK_IMPORTED_MODULE_0__;\n\n/**\n * Initializes a JoseJWE object.\n */\n\nvar JoseJWE = {\n  Encrypter: _jose_jwe_encrypt__WEBPACK_IMPORTED_MODULE_1__[\"Encrypter\"],\n  Decrypter: _jose_jwe_decrypt__WEBPACK_IMPORTED_MODULE_2__[\"Decrypter\"]\n};\n/**\n * Initializes a JoseJWS object.\n */\n\nvar JoseJWS = {\n  Signer: _jose_jws_sign__WEBPACK_IMPORTED_MODULE_3__[\"Signer\"],\n  Verifier: _jose_jws_verify__WEBPACK_IMPORTED_MODULE_4__[\"Verifier\"]\n};\n/**\n * Set crypto provider to use (window.crypto, node-webcrypto-ossl, node-webcrypto-pkcs11 etc.).\n */\n\nvar setCrypto = function setCrypto(cp) {\n  crypto = cp;\n};\n/**\n * Default to the global \"crypto\" variable\n */\n\nif (typeof window.crypto !== 'undefined') {\n  setCrypto(window.crypto);\n\n  if (!crypto.subtle) {\n    crypto.subtle = crypto.webkitSubtle;\n  }\n}\n/**\n * Use Node versions of atob, btoa functions outside the browser\n */\n\n\nif (typeof atob !== \"function\") {\n  atob = function atob(str) {\n    return new Buffer(str, 'base64').toString('binary');\n  };\n}\n\nif (typeof btoa !== \"function\") {\n  btoa = function btoa(str) {\n    var buffer;\n\n    if (str instanceof Buffer) {\n      buffer = str;\n    } else {\n      buffer = new Buffer(str.toString(), 'binary');\n    }\n\n    return buffer.toString('base64');\n  };\n}\n/**\n * Checks if we have all the required APIs.\n *\n * It might make sense to take a Cryptographer and delegate some of the checks\n * to the cryptographer. I however wanted to keep things simple, so I put all\n * the checks here for now.\n *\n * This list is generated manually and needs to be kept up-to-date.\n *\n * Casual testing shows that:\n * - things work in Chrome 40.0.2214.115\n * - things work in Firefox 35.0.1\n * - Safari 7.1.3 doesn't support JWK keys.\n * - Internet Explorer doesn't support Promises.\n *\n * Note: We don't check if the browser supports specific crypto operations.\n *       I.e. it's possible for this function to return true, but encryption or\n *       decryption to subsequently fail because the browser does not support a\n *       given encryption, decryption, key wrapping, key unwrapping or hmac\n *       operation.\n *\n * @return bool\n */\n\n\nvar caniuse = function caniuse() {\n  var r = true; // Promises/A+ (https://promisesaplus.com/)\n\n  r = r && typeof Promise == \"function\";\n  r = r && typeof Promise.reject == \"function\";\n  r = r && typeof Promise.prototype.then == \"function\";\n  r = r && typeof Promise.all == \"function\";\n  var globalObject = window ? window : global; // Crypto (http://www.w3.org/TR/WebCryptoAPI/)\n\n  r = r && _typeof(globalObject.crypto) == \"object\";\n  r = r && _typeof(globalObject.crypto.subtle) == \"object\";\n  r = r && typeof globalObject.crypto.getRandomValues == \"function\";\n  r = r && typeof globalObject.crypto.subtle.importKey == \"function\";\n  r = r && typeof globalObject.crypto.subtle.generateKey == \"function\";\n  r = r && typeof globalObject.crypto.subtle.exportKey == \"function\";\n  r = r && typeof globalObject.crypto.subtle.wrapKey == \"function\";\n  r = r && typeof globalObject.crypto.subtle.unwrapKey == \"function\";\n  r = r && typeof globalObject.crypto.subtle.encrypt == \"function\";\n  r = r && typeof globalObject.crypto.subtle.decrypt == \"function\";\n  r = r && typeof globalObject.crypto.subtle.sign == \"function\"; // ArrayBuffer (http://people.mozilla.org/~jorendorff/es6-draft.html#sec-arraybuffer-constructor)\n\n  r = r && typeof ArrayBuffer == \"function\";\n  r = r && (typeof Uint8Array == \"function\" || (typeof Uint8Array === \"undefined\" ? \"undefined\" : _typeof(Uint8Array)) == \"object\"); // Safari uses \"object\"\n\n  r = r && (typeof Uint32Array == \"function\" || (typeof Uint32Array === \"undefined\" ? \"undefined\" : _typeof(Uint32Array)) == \"object\"); // Safari uses \"object\"\n  // skipping Uint32Array.prototype.buffer because https://people.mozilla.org/~jorendorff/es6-draft.html#sec-properties-of-the-%typedarrayprototype%-object\n  // JSON (http://www.ecma-international.org/ecma-262/5.1/#sec-15.12.3)\n\n  r = r && (typeof JSON === \"undefined\" ? \"undefined\" : _typeof(JSON)) == \"object\";\n  r = r && typeof JSON.parse == \"function\";\n  r = r && typeof JSON.stringify == \"function\"; // Base64 (http://www.w3.org/TR/html5/webappapis.html#dom-windowbase64-atob)\n\n  r = r && typeof atob == \"function\";\n  r = r && typeof btoa == \"function\"; // skipping Array functions (map, join, push, length, etc.)\n  // skipping String functions (split, charCodeAt, fromCharCode, replace, etc.)\n  // skipping regexp.test and parseInt\n\n  return r;\n};\n/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../node_modules/buffer/index.js */ \"./node_modules/buffer/index.js\").Buffer, __webpack_require__(/*! ./../node_modules/webpack/buildin/global.js */ \"./node_modules/webpack/buildin/global.js\")))\n\n//# sourceURL=webpack://Jose/./lib/jose-core.js?");
+__webpack_require__.r(__webpack_exports__);
+/* WEBPACK VAR INJECTION */(function(Buffer, global) {/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "crypto", function() { return crypto; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Utils", function() { return Utils; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "JoseJWE", function() { return JoseJWE; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "JoseJWS", function() { return JoseJWS; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "setCrypto", function() { return setCrypto; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "caniuse", function() { return caniuse; });
+/* harmony import */ var _jose_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./jose-utils */ "./lib/jose-utils.js");
+/* harmony import */ var _jose_jwe_encrypt__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./jose-jwe-encrypt */ "./lib/jose-jwe-encrypt.js");
+/* harmony import */ var _jose_jwe_decrypt__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./jose-jwe-decrypt */ "./lib/jose-jwe-decrypt.js");
+/* harmony import */ var _jose_jws_sign__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./jose-jws-sign */ "./lib/jose-jws-sign.js");
+/* harmony import */ var _jose_jws_verify__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./jose-jws-verify */ "./lib/jose-jws-verify.js");
+/* harmony import */ var _jose_jwe_webcryptographer__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./jose-jwe-webcryptographer */ "./lib/jose-jwe-webcryptographer.js");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "WebCryptographer", function() { return _jose_jwe_webcryptographer__WEBPACK_IMPORTED_MODULE_5__["WebCryptographer"]; });
+
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+/*-
+ * Copyright 2014 Square Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+
+
+
+var crypto;
+/**
+ * Javascript Object Signing and Encryption library.
+ *
+ * @author Alok Menghrajani <alok@squareup.com>
+ */
+
+var Utils = _jose_utils__WEBPACK_IMPORTED_MODULE_0__;
+
+/**
+ * Initializes a JoseJWE object.
+ */
+
+var JoseJWE = {
+  Encrypter: _jose_jwe_encrypt__WEBPACK_IMPORTED_MODULE_1__["Encrypter"],
+  Decrypter: _jose_jwe_decrypt__WEBPACK_IMPORTED_MODULE_2__["Decrypter"]
+};
+/**
+ * Initializes a JoseJWS object.
+ */
+
+var JoseJWS = {
+  Signer: _jose_jws_sign__WEBPACK_IMPORTED_MODULE_3__["Signer"],
+  Verifier: _jose_jws_verify__WEBPACK_IMPORTED_MODULE_4__["Verifier"]
+};
+/**
+ * Set crypto provider to use (window.crypto, node-webcrypto-ossl, node-webcrypto-pkcs11 etc.).
+ */
+
+var setCrypto = function setCrypto(cp) {
+  crypto = cp;
+};
+/**
+ * Default to the global "crypto" variable
+ */
+
+if (typeof window !== "undefined") {
+  if (typeof window.crypto !== "undefined") {
+    setCrypto(window.crypto);
+
+    if (!crypto.subtle) {
+      crypto.subtle = crypto.webkitSubtle;
+    }
+  }
+}
+/**
+ * Use Node versions of atob, btoa functions outside the browser
+ */
+
+
+if (typeof atob !== "function") {
+  atob = function atob(str) {
+    return new Buffer(str, 'base64').toString('binary');
+  };
+}
+
+if (typeof btoa !== "function") {
+  btoa = function btoa(str) {
+    var buffer;
+
+    if (str instanceof Buffer) {
+      buffer = str;
+    } else {
+      buffer = new Buffer(str.toString(), 'binary');
+    }
+
+    return buffer.toString('base64');
+  };
+}
+/**
+ * Checks if we have all the required APIs.
+ *
+ * It might make sense to take a Cryptographer and delegate some of the checks
+ * to the cryptographer. I however wanted to keep things simple, so I put all
+ * the checks here for now.
+ *
+ * This list is generated manually and needs to be kept up-to-date.
+ *
+ * Casual testing shows that:
+ * - things work in Chrome 40.0.2214.115
+ * - things work in Firefox 35.0.1
+ * - Safari 7.1.3 doesn't support JWK keys.
+ * - Internet Explorer doesn't support Promises.
+ *
+ * Note: We don't check if the browser supports specific crypto operations.
+ *       I.e. it's possible for this function to return true, but encryption or
+ *       decryption to subsequently fail because the browser does not support a
+ *       given encryption, decryption, key wrapping, key unwrapping or hmac
+ *       operation.
+ *
+ * @return bool
+ */
+
+
+var caniuse = function caniuse() {
+  var r = true; // Promises/A+ (https://promisesaplus.com/)
+
+  r = r && typeof Promise == "function";
+  r = r && typeof Promise.reject == "function";
+  r = r && typeof Promise.prototype.then == "function";
+  r = r && typeof Promise.all == "function";
+  var globalObject = window ? window : global; // Crypto (http://www.w3.org/TR/WebCryptoAPI/)
+
+  r = r && _typeof(globalObject.crypto) == "object";
+  r = r && _typeof(globalObject.crypto.subtle) == "object";
+  r = r && typeof globalObject.crypto.getRandomValues == "function";
+  r = r && typeof globalObject.crypto.subtle.importKey == "function";
+  r = r && typeof globalObject.crypto.subtle.generateKey == "function";
+  r = r && typeof globalObject.crypto.subtle.exportKey == "function";
+  r = r && typeof globalObject.crypto.subtle.wrapKey == "function";
+  r = r && typeof globalObject.crypto.subtle.unwrapKey == "function";
+  r = r && typeof globalObject.crypto.subtle.encrypt == "function";
+  r = r && typeof globalObject.crypto.subtle.decrypt == "function";
+  r = r && typeof globalObject.crypto.subtle.sign == "function"; // ArrayBuffer (http://people.mozilla.org/~jorendorff/es6-draft.html#sec-arraybuffer-constructor)
+
+  r = r && typeof ArrayBuffer == "function";
+  r = r && (typeof Uint8Array == "function" || (typeof Uint8Array === "undefined" ? "undefined" : _typeof(Uint8Array)) == "object"); // Safari uses "object"
+
+  r = r && (typeof Uint32Array == "function" || (typeof Uint32Array === "undefined" ? "undefined" : _typeof(Uint32Array)) == "object"); // Safari uses "object"
+  // skipping Uint32Array.prototype.buffer because https://people.mozilla.org/~jorendorff/es6-draft.html#sec-properties-of-the-%typedarrayprototype%-object
+  // JSON (http://www.ecma-international.org/ecma-262/5.1/#sec-15.12.3)
+
+  r = r && (typeof JSON === "undefined" ? "undefined" : _typeof(JSON)) == "object";
+  r = r && typeof JSON.parse == "function";
+  r = r && typeof JSON.stringify == "function"; // Base64 (http://www.w3.org/TR/html5/webappapis.html#dom-windowbase64-atob)
+
+  r = r && typeof atob == "function";
+  r = r && typeof btoa == "function"; // skipping Array functions (map, join, push, length, etc.)
+  // skipping String functions (split, charCodeAt, fromCharCode, replace, etc.)
+  // skipping regexp.test and parseInt
+
+  return r;
+};
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../node_modules/buffer/index.js */ "./node_modules/buffer/index.js").Buffer, __webpack_require__(/*! ./../node_modules/webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js")))
 
 /***/ }),
 
@@ -107,7 +277,117 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* WEBPACK VAR INJECTION */(f
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"Decrypter\", function() { return Decrypter; });\n/* harmony import */ var _jose_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./jose-utils */ \"./lib/jose-utils.js\");\nfunction _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError(\"Cannot call a class as a function\"); } }\n\nfunction _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if (\"value\" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }\n\nfunction _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }\n\n/*-\n * Copyright 2014 Square Inc.\n *\n * Licensed under the Apache License, Version 2.0 (the \"License\");\n * you may not use this file except in compliance with the License.\n * You may obtain a copy of the License at\n *\n *     http://www.apache.org/licenses/LICENSE-2.0\n *\n * Unless required by applicable law or agreed to in writing, software\n * distributed under the License is distributed on an \"AS IS\" BASIS,\n * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n * See the License for the specific language governing permissions and\n * limitations under the License.\n */\n\n/**\n * Handles decryption.\n *\n * @param cryptographer  an instance of WebCryptographer (or equivalent). Keep\n *                       in mind that decryption mutates the cryptographer.\n * @param key_promise    Promise<CryptoKey>, either RSA or shared key\n */\n\nvar Decrypter =\n/*#__PURE__*/\nfunction () {\n  function Decrypter(cryptographer, key_promise) {\n    _classCallCheck(this, Decrypter);\n\n    this.cryptographer = cryptographer;\n    this.key_promise = key_promise;\n    this.headers = {};\n    this.base64UrlEncoder = new _jose_utils__WEBPACK_IMPORTED_MODULE_0__[\"Base64Url\"]();\n  }\n\n  _createClass(Decrypter, [{\n    key: \"getHeaders\",\n    value: function getHeaders() {\n      return this.headers;\n    }\n    /**\n     * Performs decryption.\n     *\n     * @param cipher_text  String\n     * @return Promise<String>\n     */\n\n  }, {\n    key: \"decrypt\",\n    value: function decrypt(cipher_text) {\n      // Split cipher_text in 5 parts\n      var parts = cipher_text.split(\".\");\n\n      if (parts.length != 5) {\n        return Promise.reject(Error(\"decrypt: invalid input\"));\n      } // part 1: header\n\n\n      this.headers = JSON.parse(this.base64UrlEncoder.decode(parts[0]));\n\n      if (!this.headers.alg) {\n        return Promise.reject(Error(\"decrypt: missing alg\"));\n      }\n\n      if (!this.headers.enc) {\n        return Promise.reject(Error(\"decrypt: missing enc\"));\n      }\n\n      this.cryptographer.setKeyEncryptionAlgorithm(this.headers.alg);\n      this.cryptographer.setContentEncryptionAlgorithm(this.headers.enc);\n\n      if (this.headers.crit) {\n        // We don't support the crit header\n        return Promise.reject(Error(\"decrypt: crit is not supported\"));\n      }\n\n      var cek_promise;\n\n      if (this.headers.alg == \"dir\") {\n        // with direct mode, we already have the cek\n        cek_promise = Promise.resolve(this.key_promise);\n      } else {\n        // part 2: decrypt the CEK\n        // In some modes (e.g. RSA-PKCS1v1.5), you must take precautions to prevent\n        // chosen-ciphertext attacks as described in RFC 3218, \"Preventing\n        // the Million Message Attack on Cryptographic Message Syntax\". We currently\n        // only support RSA-OAEP, so we don't generate a key if unwrapping fails.\n        var encrypted_cek = this.base64UrlEncoder.decodeArray(parts[1]);\n        cek_promise = this.key_promise.then(function (key) {\n          return this.cryptographer.unwrapCek(encrypted_cek, key);\n        }.bind(this));\n      } // part 3: decrypt the cipher text\n\n\n      var plain_text_promise = this.cryptographer.decrypt(cek_promise, _jose_utils__WEBPACK_IMPORTED_MODULE_0__[\"arrayFromString\"](parts[0]), this.base64UrlEncoder.decodeArray(parts[2]), this.base64UrlEncoder.decodeArray(parts[3]), this.base64UrlEncoder.decodeArray(parts[4]));\n      return plain_text_promise.then(_jose_utils__WEBPACK_IMPORTED_MODULE_0__[\"utf8StringFromArray\"]);\n    }\n  }]);\n\n  return Decrypter;\n}();\n\n//# sourceURL=webpack://Jose/./lib/jose-jwe-decrypt.js?");
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Decrypter", function() { return Decrypter; });
+/* harmony import */ var _jose_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./jose-utils */ "./lib/jose-utils.js");
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+/*-
+ * Copyright 2014 Square Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Handles decryption.
+ *
+ * @param cryptographer  an instance of WebCryptographer (or equivalent). Keep
+ *                       in mind that decryption mutates the cryptographer.
+ * @param key_promise    Promise<CryptoKey>, either RSA or shared key
+ */
+
+var Decrypter =
+/*#__PURE__*/
+function () {
+  function Decrypter(cryptographer, key_promise) {
+    _classCallCheck(this, Decrypter);
+
+    this.cryptographer = cryptographer;
+    this.key_promise = key_promise;
+    this.headers = {};
+    this.base64UrlEncoder = new _jose_utils__WEBPACK_IMPORTED_MODULE_0__["Base64Url"]();
+  }
+
+  _createClass(Decrypter, [{
+    key: "getHeaders",
+    value: function getHeaders() {
+      return this.headers;
+    }
+    /**
+     * Performs decryption.
+     *
+     * @param cipher_text  String
+     * @return Promise<String>
+     */
+
+  }, {
+    key: "decrypt",
+    value: function decrypt(cipher_text) {
+      // Split cipher_text in 5 parts
+      var parts = cipher_text.split(".");
+
+      if (parts.length != 5) {
+        return Promise.reject(Error("decrypt: invalid input"));
+      } // part 1: header
+
+
+      this.headers = JSON.parse(this.base64UrlEncoder.decode(parts[0]));
+
+      if (!this.headers.alg) {
+        return Promise.reject(Error("decrypt: missing alg"));
+      }
+
+      if (!this.headers.enc) {
+        return Promise.reject(Error("decrypt: missing enc"));
+      }
+
+      this.cryptographer.setKeyEncryptionAlgorithm(this.headers.alg);
+      this.cryptographer.setContentEncryptionAlgorithm(this.headers.enc);
+
+      if (this.headers.crit) {
+        // We don't support the crit header
+        return Promise.reject(Error("decrypt: crit is not supported"));
+      }
+
+      var cek_promise;
+
+      if (this.headers.alg == "dir") {
+        // with direct mode, we already have the cek
+        cek_promise = Promise.resolve(this.key_promise);
+      } else {
+        // part 2: decrypt the CEK
+        // In some modes (e.g. RSA-PKCS1v1.5), you must take precautions to prevent
+        // chosen-ciphertext attacks as described in RFC 3218, "Preventing
+        // the Million Message Attack on Cryptographic Message Syntax". We currently
+        // only support RSA-OAEP, so we don't generate a key if unwrapping fails.
+        var encrypted_cek = this.base64UrlEncoder.decodeArray(parts[1]);
+        cek_promise = this.key_promise.then(function (key) {
+          return this.cryptographer.unwrapCek(encrypted_cek, key);
+        }.bind(this));
+      } // part 3: decrypt the cipher text
+
+
+      var plain_text_promise = this.cryptographer.decrypt(cek_promise, _jose_utils__WEBPACK_IMPORTED_MODULE_0__["arrayFromString"](parts[0]), this.base64UrlEncoder.decodeArray(parts[2]), this.base64UrlEncoder.decodeArray(parts[3]), this.base64UrlEncoder.decodeArray(parts[4]));
+      return plain_text_promise.then(_jose_utils__WEBPACK_IMPORTED_MODULE_0__["utf8StringFromArray"]);
+    }
+  }]);
+
+  return Decrypter;
+}();
 
 /***/ }),
 
@@ -119,7 +399,140 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) *
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"Encrypter\", function() { return Encrypter; });\n/* harmony import */ var _jose_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./jose-utils */ \"./lib/jose-utils.js\");\nfunction _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError(\"Cannot call a class as a function\"); } }\n\nfunction _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if (\"value\" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }\n\nfunction _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }\n\n/*-\n * Copyright 2014 Square Inc.\n *\n * Licensed under the Apache License, Version 2.0 (the \"License\");\n * you may not use this file except in compliance with the License.\n * You may obtain a copy of the License at\n *\n *     http://www.apache.org/licenses/LICENSE-2.0\n *\n * Unless required by applicable law or agreed to in writing, software\n * distributed under the License is distributed on an \"AS IS\" BASIS,\n * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n * See the License for the specific language governing permissions and\n * limitations under the License.\n */\n\n/**\n * Handles encryption.\n *\n * @param cryptographer  an instance of WebCryptographer (or equivalent).\n * @param key_promise    Promise<CryptoKey>, either RSA or shared key\n */\n\nvar Encrypter =\n/*#__PURE__*/\nfunction () {\n  function Encrypter(cryptographer, key_promise) {\n    _classCallCheck(this, Encrypter);\n\n    this.cryptographer = cryptographer;\n    this.key_promise = key_promise;\n    this.userHeaders = {};\n  }\n  /**\n   * Adds a key/value pair which will be included in the header.\n   *\n   * The data lives in plaintext (an attacker can read the header) but is tamper\n   * proof (an attacker cannot modify the header).\n   *\n   * Note: some headers have semantic implications. E.g. if you set the \"zip\"\n   * header, you are responsible for properly compressing plain_text before\n   * calling encrypt().\n   *\n   * @param k  String\n   * @param v  String\n   */\n\n\n  _createClass(Encrypter, [{\n    key: \"addHeader\",\n    value: function addHeader(k, v) {\n      this.userHeaders[k] = v;\n    }\n    /**\n     * Performs encryption.\n     *\n     * @param plain_text  utf-8 string\n     * @return Promise<String>\n     */\n\n  }, {\n    key: \"encrypt\",\n    value: function encrypt(plain_text) {\n      /**\n       * Encrypts plain_text with CEK.\n       *\n       * @param cek_promise  Promise<CryptoKey>\n       * @param plain_text   string\n       * @return Promise<json>\n       */\n      var encryptPlainText = function encryptPlainText(cek_promise, plain_text) {\n        // Create header\n        var headers = {};\n\n        for (var i in this.userHeaders) {\n          headers[i] = this.userHeaders[i];\n        }\n\n        headers.alg = this.cryptographer.getKeyEncryptionAlgorithm();\n        headers.enc = this.cryptographer.getContentEncryptionAlgorithm();\n        var jwe_protected_header = new _jose_utils__WEBPACK_IMPORTED_MODULE_0__[\"Base64Url\"]().encode(JSON.stringify(headers)); // Create the IV\n\n        var iv = this.cryptographer.createIV(); // Create the AAD\n\n        var aad = _jose_utils__WEBPACK_IMPORTED_MODULE_0__[\"arrayFromString\"](jwe_protected_header);\n        plain_text = _jose_utils__WEBPACK_IMPORTED_MODULE_0__[\"arrayFromUtf8String\"](plain_text);\n        return this.cryptographer.encrypt(iv, aad, cek_promise, plain_text).then(function (r) {\n          r.header = jwe_protected_header;\n          r.iv = iv;\n          return r;\n        });\n      };\n\n      var cek_promise, encrypted_cek;\n\n      if (this.cryptographer.getKeyEncryptionAlgorithm() == \"dir\") {\n        // with direct encryption, this.key_promise provides the cek\n        // and encrypted_cek is empty\n        cek_promise = Promise.resolve(this.key_promise);\n        encrypted_cek = [];\n      } else {\n        // Create a CEK key\n        cek_promise = this.cryptographer.createCek(); // Key & Cek allows us to create the encrypted_cek\n\n        encrypted_cek = Promise.all([this.key_promise, cek_promise]).then(function (all) {\n          var key = all[0];\n          var cek = all[1];\n          return this.cryptographer.wrapCek(cek, key);\n        }.bind(this));\n      } // Cek allows us to encrypy the plain text\n\n\n      var enc_promise = encryptPlainText.bind(this, cek_promise, plain_text)(); // Once we have all the promises, we can base64 encode all the pieces.\n\n      return Promise.all([encrypted_cek, enc_promise]).then(function (all) {\n        var encrypted_cek = all[0];\n        var data = all[1];\n        var base64UrlEncoder = new _jose_utils__WEBPACK_IMPORTED_MODULE_0__[\"Base64Url\"]();\n        return data.header + \".\" + base64UrlEncoder.encodeArray(encrypted_cek) + \".\" + base64UrlEncoder.encodeArray(data.iv) + \".\" + base64UrlEncoder.encodeArray(data.cipher) + \".\" + base64UrlEncoder.encodeArray(data.tag);\n      });\n    }\n  }]);\n\n  return Encrypter;\n}();\n\n//# sourceURL=webpack://Jose/./lib/jose-jwe-encrypt.js?");
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Encrypter", function() { return Encrypter; });
+/* harmony import */ var _jose_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./jose-utils */ "./lib/jose-utils.js");
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+/*-
+ * Copyright 2014 Square Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Handles encryption.
+ *
+ * @param cryptographer  an instance of WebCryptographer (or equivalent).
+ * @param key_promise    Promise<CryptoKey>, either RSA or shared key
+ */
+
+var Encrypter =
+/*#__PURE__*/
+function () {
+  function Encrypter(cryptographer, key_promise) {
+    _classCallCheck(this, Encrypter);
+
+    this.cryptographer = cryptographer;
+    this.key_promise = key_promise;
+    this.userHeaders = {};
+  }
+  /**
+   * Adds a key/value pair which will be included in the header.
+   *
+   * The data lives in plaintext (an attacker can read the header) but is tamper
+   * proof (an attacker cannot modify the header).
+   *
+   * Note: some headers have semantic implications. E.g. if you set the "zip"
+   * header, you are responsible for properly compressing plain_text before
+   * calling encrypt().
+   *
+   * @param k  String
+   * @param v  String
+   */
+
+
+  _createClass(Encrypter, [{
+    key: "addHeader",
+    value: function addHeader(k, v) {
+      this.userHeaders[k] = v;
+    }
+    /**
+     * Performs encryption.
+     *
+     * @param plain_text  utf-8 string
+     * @return Promise<String>
+     */
+
+  }, {
+    key: "encrypt",
+    value: function encrypt(plain_text) {
+      /**
+       * Encrypts plain_text with CEK.
+       *
+       * @param cek_promise  Promise<CryptoKey>
+       * @param plain_text   string
+       * @return Promise<json>
+       */
+      var encryptPlainText = function encryptPlainText(cek_promise, plain_text) {
+        // Create header
+        var headers = {};
+
+        for (var i in this.userHeaders) {
+          headers[i] = this.userHeaders[i];
+        }
+
+        headers.alg = this.cryptographer.getKeyEncryptionAlgorithm();
+        headers.enc = this.cryptographer.getContentEncryptionAlgorithm();
+        var jwe_protected_header = new _jose_utils__WEBPACK_IMPORTED_MODULE_0__["Base64Url"]().encode(JSON.stringify(headers)); // Create the IV
+
+        var iv = this.cryptographer.createIV(); // Create the AAD
+
+        var aad = _jose_utils__WEBPACK_IMPORTED_MODULE_0__["arrayFromString"](jwe_protected_header);
+        plain_text = _jose_utils__WEBPACK_IMPORTED_MODULE_0__["arrayFromUtf8String"](plain_text);
+        return this.cryptographer.encrypt(iv, aad, cek_promise, plain_text).then(function (r) {
+          r.header = jwe_protected_header;
+          r.iv = iv;
+          return r;
+        });
+      };
+
+      var cek_promise, encrypted_cek;
+
+      if (this.cryptographer.getKeyEncryptionAlgorithm() == "dir") {
+        // with direct encryption, this.key_promise provides the cek
+        // and encrypted_cek is empty
+        cek_promise = Promise.resolve(this.key_promise);
+        encrypted_cek = [];
+      } else {
+        // Create a CEK key
+        cek_promise = this.cryptographer.createCek(); // Key & Cek allows us to create the encrypted_cek
+
+        encrypted_cek = Promise.all([this.key_promise, cek_promise]).then(function (all) {
+          var key = all[0];
+          var cek = all[1];
+          return this.cryptographer.wrapCek(cek, key);
+        }.bind(this));
+      } // Cek allows us to encrypy the plain text
+
+
+      var enc_promise = encryptPlainText.bind(this, cek_promise, plain_text)(); // Once we have all the promises, we can base64 encode all the pieces.
+
+      return Promise.all([encrypted_cek, enc_promise]).then(function (all) {
+        var encrypted_cek = all[0];
+        var data = all[1];
+        var base64UrlEncoder = new _jose_utils__WEBPACK_IMPORTED_MODULE_0__["Base64Url"]();
+        return data.header + "." + base64UrlEncoder.encodeArray(encrypted_cek) + "." + base64UrlEncoder.encodeArray(data.iv) + "." + base64UrlEncoder.encodeArray(data.cipher) + "." + base64UrlEncoder.encodeArray(data.tag);
+      });
+    }
+  }]);
+
+  return Encrypter;
+}();
 
 /***/ }),
 
@@ -131,7 +544,809 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) *
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"WebCryptographer\", function() { return WebCryptographer; });\n/* harmony import */ var _jose_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./jose-utils */ \"./lib/jose-utils.js\");\nfunction _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError(\"Cannot call a class as a function\"); } }\n\nfunction _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if (\"value\" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }\n\nfunction _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }\n\n/*-\n * Copyright 2014 Square Inc.\n *\n * Licensed under the Apache License, Version 2.0 (the \"License\");\n * you may not use this file except in compliance with the License.\n * You may obtain a copy of the License at\n *\n *     http://www.apache.org/licenses/LICENSE-2.0\n *\n * Unless required by applicable law or agreed to in writing, software\n * distributed under the License is distributed on an \"AS IS\" BASIS,\n * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n * See the License for the specific language governing permissions and\n * limitations under the License.\n */\n\n/**\n * The WebCryptographer uses http://www.w3.org/TR/WebCryptoAPI/ to perform\n * various crypto operations. In theory, this should help build the library with\n * different underlying crypto APIs. I'm however unclear if we'll run into code\n * duplication or callback vs Promise based API issues.\n */\n\nvar WebCryptographer =\n/*#__PURE__*/\nfunction () {\n  function WebCryptographer() {\n    _classCallCheck(this, WebCryptographer);\n\n    this.setKeyEncryptionAlgorithm(\"RSA-OAEP\");\n    this.setContentEncryptionAlgorithm(\"A256GCM\");\n    this.setContentSignAlgorithm(\"RS256\");\n  }\n  /**\n   * Overrides the default key encryption algorithm\n   * @param alg  string\n   */\n\n\n  _createClass(WebCryptographer, [{\n    key: \"setKeyEncryptionAlgorithm\",\n    value: function setKeyEncryptionAlgorithm(alg) {\n      this.key_encryption = this.getCryptoConfig(alg);\n    }\n  }, {\n    key: \"getKeyEncryptionAlgorithm\",\n    value: function getKeyEncryptionAlgorithm() {\n      return this.key_encryption.jwe_name;\n    }\n    /**\n     * Overrides the default content encryption algorithm\n     * @param alg  string\n     */\n\n  }, {\n    key: \"setContentEncryptionAlgorithm\",\n    value: function setContentEncryptionAlgorithm(alg) {\n      this.content_encryption = this.getCryptoConfig(alg);\n    }\n  }, {\n    key: \"getContentEncryptionAlgorithm\",\n    value: function getContentEncryptionAlgorithm() {\n      return this.content_encryption.jwe_name;\n    }\n    /**\n     * Overrides the default content sign algorithm\n     * @param alg  string\n     */\n\n  }, {\n    key: \"setContentSignAlgorithm\",\n    value: function setContentSignAlgorithm(alg) {\n      this.content_sign = this.getSignConfig(alg);\n    }\n  }, {\n    key: \"getContentSignAlgorithm\",\n    value: function getContentSignAlgorithm() {\n      return this.content_sign.jwa_name;\n    }\n    /**\n     * Generates an IV.\n     * This function mainly exists so that it can be mocked for testing purpose.\n     *\n     * @return Uint8Array with random bytes\n     */\n\n  }, {\n    key: \"createIV\",\n    value: function createIV() {\n      var iv = new Uint8Array(new Array(this.content_encryption.iv_bytes));\n      return Jose.crypto.getRandomValues(iv);\n    }\n    /**\n     * Creates a random content encryption key.\n     * This function mainly exists so that it can be mocked for testing purpose.\n     *\n     * @return Promise<CryptoKey>\n     */\n\n  }, {\n    key: \"createCek\",\n    value: function createCek() {\n      var hack = this.getCekWorkaround(this.content_encryption);\n      return Jose.crypto.subtle.generateKey(hack.id, true, hack.enc_op);\n    }\n  }, {\n    key: \"wrapCek\",\n    value: function wrapCek(cek, key) {\n      return Jose.crypto.subtle.wrapKey(\"raw\", cek, key, this.key_encryption.id);\n    }\n  }, {\n    key: \"unwrapCek\",\n    value: function unwrapCek(cek, key) {\n      var hack = this.getCekWorkaround(this.content_encryption);\n      var extractable = this.content_encryption.specific_cek_bytes > 0;\n      var key_encryption = this.key_encryption.id;\n      return Jose.crypto.subtle.unwrapKey(\"raw\", cek, key, key_encryption, hack.id, extractable, hack.dec_op);\n    }\n    /**\n     * Returns algorithm and operation needed to create a CEK.\n     *\n     * In some cases, e.g. A128CBC-HS256, the CEK gets split into two keys. The Web\n     * Crypto API does not allow us to generate an arbitrary number of bytes and\n     * then create a CryptoKey without any associated algorithm. We therefore piggy\n     * back on AES-CBS and HMAC which allows the creation of CEKs of size 16, 32, 64\n     * and 128 bytes.\n     */\n\n  }, {\n    key: \"getCekWorkaround\",\n    value: function getCekWorkaround(alg) {\n      var len = alg.specific_cek_bytes;\n\n      if (len) {\n        if (len == 16) {\n          return {\n            id: {\n              name: \"AES-CBC\",\n              length: 128\n            },\n            enc_op: [\"encrypt\"],\n            dec_op: [\"decrypt\"]\n          };\n        } else if (len == 32) {\n          return {\n            id: {\n              name: \"AES-CBC\",\n              length: 256\n            },\n            enc_op: [\"encrypt\"],\n            dec_op: [\"decrypt\"]\n          };\n        } else if (len == 64) {\n          return {\n            id: {\n              name: \"HMAC\",\n              hash: {\n                name: \"SHA-256\"\n              }\n            },\n            enc_op: [\"sign\"],\n            dec_op: [\"verify\"]\n          };\n        } else if (len == 128) {\n          return {\n            id: {\n              name: \"HMAC\",\n              hash: {\n                name: \"SHA-384\"\n              }\n            },\n            enc_op: [\"sign\"],\n            dec_op: [\"verify\"]\n          };\n        } else {\n          this.assert(false, \"getCekWorkaround: invalid len\");\n        }\n      }\n\n      return {\n        id: alg.id,\n        enc_op: [\"encrypt\"],\n        dec_op: [\"decrypt\"]\n      };\n    }\n    /**\n     * Encrypts plain_text with cek.\n     *\n     * @param iv          Uint8Array\n     * @param aad         Uint8Array\n     * @param cek_promise Promise<CryptoKey>\n     * @param plain_text  Uint8Array\n     * @return Promise<json>\n     */\n\n  }, {\n    key: \"encrypt\",\n    value: function encrypt(iv, aad, cek_promise, plain_text) {\n      var _this = this;\n\n      var config = this.content_encryption;\n\n      if (iv.length != config.iv_bytes) {\n        return Promise.reject(Error(\"invalid IV length\"));\n      }\n\n      if (config.auth.aead) {\n        var tag_bytes = config.auth.tag_bytes;\n        var enc = {\n          name: config.id.name,\n          iv: iv,\n          additionalData: aad,\n          tagLength: tag_bytes * 8\n        };\n        return cek_promise.then(function (cek) {\n          return Jose.crypto.subtle.encrypt(enc, cek, plain_text).then(function (cipher_text) {\n            var offset = cipher_text.byteLength - tag_bytes;\n            return {\n              cipher: cipher_text.slice(0, offset),\n              tag: cipher_text.slice(offset)\n            };\n          });\n        });\n      } else {\n        var keys = this.splitKey(config, cek_promise, [\"encrypt\"]);\n        var mac_key_promise = keys[0];\n        var enc_key_promise = keys[1]; // Encrypt the plain text\n\n        var cipher_text_promise = enc_key_promise.then(function (enc_key) {\n          var enc = {\n            name: config.id.name,\n            iv: iv\n          };\n          return Jose.crypto.subtle.encrypt(enc, enc_key, plain_text);\n        }); // compute MAC\n\n        var mac_promise = cipher_text_promise.then(function (cipher_text) {\n          return _this.truncatedMac(config, mac_key_promise, aad, iv, cipher_text);\n        });\n        return Promise.all([cipher_text_promise, mac_promise]).then(function (all) {\n          var cipher_text = all[0];\n          var mac = all[1];\n          return {\n            cipher: cipher_text,\n            tag: mac\n          };\n        });\n      }\n    }\n    /**\n     * Compares two Uint8Arrays in constant time.\n     *\n     * @return Promise<void>\n     */\n\n  }, {\n    key: \"compare\",\n    value: function compare(config, mac_key_promise, arr1, arr2) {\n      this.assert(arr1 instanceof Uint8Array, \"compare: invalid input\");\n      this.assert(arr2 instanceof Uint8Array, \"compare: invalid input\");\n      return mac_key_promise.then(function (mac_key) {\n        var hash1 = Jose.crypto.subtle.sign(config.auth.id, mac_key, arr1);\n        var hash2 = Jose.crypto.subtle.sign(config.auth.id, mac_key, arr2);\n        return Promise.all([hash1, hash2]).then(function (all) {\n          var hash1 = new Uint8Array(all[0]);\n          var hash2 = new Uint8Array(all[1]);\n\n          if (hash1.length != hash2.length) {\n            throw new Error(\"compare failed\");\n          }\n\n          for (var i = 0; i < hash1.length; i++) {\n            if (hash1[i] != hash2[i]) {\n              throw new Error(\"compare failed\");\n            }\n          }\n\n          return Promise.resolve(null);\n        });\n      });\n    }\n    /**\n     * Decrypts cipher_text with cek. Validates the tag.\n     *\n     * @param cek_promise    Promise<CryptoKey>\n     * @param aad protected header\n     * @param iv IV\n     * @param cipher_text text to be decrypted\n     * @param tag to be verified\n     * @return Promise<string>\n     */\n\n  }, {\n    key: \"decrypt\",\n    value: function decrypt(cek_promise, aad, iv, cipher_text, tag) {\n      var _this2 = this;\n\n      if (iv.length != this.content_encryption.iv_bytes) {\n        return Promise.reject(Error(\"decryptCiphertext: invalid IV\"));\n      }\n\n      var config = this.content_encryption;\n\n      if (config.auth.aead) {\n        var dec = {\n          name: config.id.name,\n          iv: iv,\n          additionalData: aad,\n          tagLength: config.auth.tag_bytes * 8\n        };\n        return cek_promise.then(function (cek) {\n          var buf = _jose_utils__WEBPACK_IMPORTED_MODULE_0__[\"arrayBufferConcat\"](cipher_text, tag);\n          return Jose.crypto.subtle.decrypt(dec, cek, buf);\n        });\n      } else {\n        var keys = this.splitKey(config, cek_promise, [\"decrypt\"]);\n        var mac_key_promise = keys[0];\n        var enc_key_promise = keys[1]; // Validate the MAC\n\n        var mac_promise = this.truncatedMac(config, mac_key_promise, aad, iv, cipher_text);\n        return Promise.all([enc_key_promise, mac_promise]).then(function (all) {\n          var enc_key = all[0];\n          var mac = all[1];\n          return _this2.compare(config, mac_key_promise, new Uint8Array(mac), tag).then(function () {\n            var dec = {\n              name: config.id.name,\n              iv: iv\n            };\n            return Jose.crypto.subtle.decrypt(dec, enc_key, cipher_text);\n          }).catch(function (err) {\n            return Promise.reject(Error(\"decryptCiphertext: MAC failed.\"));\n          });\n        });\n      }\n    }\n    /**\n     * Signs plain_text.\n     *\n     * @param aad         json\n     * @param payload     String or json\n     * @param key_promise Promise<CryptoKey>\n     * @return Promise<ArrayBuffer>\n     */\n\n  }, {\n    key: \"sign\",\n    value: function sign(aad, payload, key_promise) {\n      var config = this.content_sign;\n\n      if (aad.alg) {\n        config = this.getSignConfig(aad.alg);\n      } // Encrypt the plain text\n\n\n      return key_promise.then(function (key) {\n        var base64UrlEncoder = new _jose_utils__WEBPACK_IMPORTED_MODULE_0__[\"Base64Url\"]();\n        return Jose.crypto.subtle.sign(config.id, key, _jose_utils__WEBPACK_IMPORTED_MODULE_0__[\"arrayFromString\"](base64UrlEncoder.encode(JSON.stringify(aad)) + '.' + base64UrlEncoder.encodeArray(payload)));\n      });\n    }\n    /**\n     * Verify JWS.\n     *\n     * @param payload     Base64Url encoded payload\n     * @param aad         String Base64Url encoded JSON representation of the protected JWS header\n     * @param signature   Uint8Array containing the signature\n     * @param key_promise Promise<CryptoKey>\n     * @param key_id      value of the kid JoseHeader, it'll be passed as part of the result to the returned promise\n     * @return Promise<json>\n     */\n\n  }, {\n    key: \"verify\",\n    value: function verify(aad, payload, signature, key_promise, key_id) {\n      var that = this;\n      var config = this.content_sign;\n      return key_promise.then(function (key) {\n        config = that.getSignConfig(that.getJwaNameForSignKey(key));\n        return Jose.crypto.subtle.verify(config.id, key, signature, _jose_utils__WEBPACK_IMPORTED_MODULE_0__[\"arrayFromString\"](aad + \".\" + payload)).then(function (res) {\n          return {\n            kid: key_id,\n            verified: res\n          };\n        });\n      });\n    }\n  }, {\n    key: \"keyId\",\n    value: function keyId(rsa_key) {\n      return _jose_utils__WEBPACK_IMPORTED_MODULE_0__[\"sha256\"](rsa_key.n + \"+\" + rsa_key.d);\n    }\n    /**\n     * Splits a CEK into two pieces: a MAC key and an ENC key.\n     *\n     * This code is structured around the fact that the crypto API does not provide\n     * a way to validate truncated MACs. The MAC key is therefore always imported to\n     * sign data.\n     *\n     * @param config (used for key lengths & algorithms)\n     * @param cek_promise Promise<CryptoKey>  CEK key to split\n     * @param purpose Array<String> usages of the imported key\n     * @return [Promise<mac key>, Promise<enc key>]\n     */\n\n  }, {\n    key: \"splitKey\",\n    value: function splitKey(config, cek_promise, purpose) {\n      // We need to split the CEK key into a MAC and ENC keys\n      var cek_bytes_promise = cek_promise.then(function (cek) {\n        return Jose.crypto.subtle.exportKey(\"raw\", cek);\n      });\n      var mac_key_promise = cek_bytes_promise.then(function (cek_bytes) {\n        if (cek_bytes.byteLength * 8 != config.id.length + config.auth.key_bytes * 8) {\n          return Promise.reject(Error(\"encryptPlainText: incorrect cek length\"));\n        }\n\n        var bytes = cek_bytes.slice(0, config.auth.key_bytes);\n        return Jose.crypto.subtle.importKey(\"raw\", bytes, config.auth.id, false, [\"sign\"]);\n      });\n      var enc_key_promise = cek_bytes_promise.then(function (cek_bytes) {\n        if (cek_bytes.byteLength * 8 != config.id.length + config.auth.key_bytes * 8) {\n          return Promise.reject(Error(\"encryptPlainText: incorrect cek length\"));\n        }\n\n        var bytes = cek_bytes.slice(config.auth.key_bytes);\n        return Jose.crypto.subtle.importKey(\"raw\", bytes, config.id, false, purpose);\n      });\n      return [mac_key_promise, enc_key_promise];\n    }\n    /**\n     * Converts the Jose web algorithms into data which is\n     * useful for the Web Crypto API.\n     *\n     * length = in bits\n     * bytes = in bytes\n     */\n\n  }, {\n    key: \"getCryptoConfig\",\n    value: function getCryptoConfig(alg) {\n      switch (alg) {\n        // Key encryption\n        case \"RSA-OAEP\":\n          return {\n            jwe_name: \"RSA-OAEP\",\n            id: {\n              name: \"RSA-OAEP\",\n              hash: {\n                name: \"SHA-1\"\n              }\n            }\n          };\n\n        case \"RSA-OAEP-256\":\n          return {\n            jwe_name: \"RSA-OAEP-256\",\n            id: {\n              name: \"RSA-OAEP\",\n              hash: {\n                name: \"SHA-256\"\n              }\n            }\n          };\n\n        case \"A128KW\":\n          return {\n            jwe_name: \"A128KW\",\n            id: {\n              name: \"AES-KW\",\n              length: 128\n            }\n          };\n\n        case \"A256KW\":\n          return {\n            jwe_name: \"A256KW\",\n            id: {\n              name: \"AES-KW\",\n              length: 256\n            }\n          };\n\n        case \"dir\":\n          return {\n            jwe_name: \"dir\"\n          };\n        // Content encryption\n\n        case \"A128CBC-HS256\":\n          return {\n            jwe_name: \"A128CBC-HS256\",\n            id: {\n              name: \"AES-CBC\",\n              length: 128\n            },\n            iv_bytes: 16,\n            specific_cek_bytes: 32,\n            auth: {\n              key_bytes: 16,\n              id: {\n                name: \"HMAC\",\n                hash: {\n                  name: \"SHA-256\"\n                }\n              },\n              truncated_bytes: 16\n            }\n          };\n\n        case \"A256CBC-HS512\":\n          return {\n            jwe_name: \"A256CBC-HS512\",\n            id: {\n              name: \"AES-CBC\",\n              length: 256\n            },\n            iv_bytes: 16,\n            specific_cek_bytes: 64,\n            auth: {\n              key_bytes: 32,\n              id: {\n                name: \"HMAC\",\n                hash: {\n                  name: \"SHA-512\"\n                }\n              },\n              truncated_bytes: 32\n            }\n          };\n\n        case \"A128GCM\":\n          return {\n            jwe_name: \"A128GCM\",\n            id: {\n              name: \"AES-GCM\",\n              length: 128\n            },\n            iv_bytes: 12,\n            auth: {\n              aead: true,\n              tag_bytes: 16\n            }\n          };\n\n        case \"A256GCM\":\n          return {\n            jwe_name: \"A256GCM\",\n            id: {\n              name: \"AES-GCM\",\n              length: 256\n            },\n            iv_bytes: 12,\n            auth: {\n              aead: true,\n              tag_bytes: 16\n            }\n          };\n\n        default:\n          throw Error(\"unsupported algorithm: \" + alg);\n      }\n    }\n    /**\n     * Computes a truncated MAC.\n     *\n     * @param config              configuration\n     * @param mac_key_promise     Promise<CryptoKey>  mac key\n     * @param aad                 Uint8Array\n     * @param iv                  Uint8Array\n     * @param cipher_text         Uint8Array\n     * @return Promise<buffer>    truncated MAC\n     */\n\n  }, {\n    key: \"truncatedMac\",\n    value: function truncatedMac(config, mac_key_promise, aad, iv, cipher_text) {\n      return mac_key_promise.then(function (mac_key) {\n        var al = new Uint8Array(_jose_utils__WEBPACK_IMPORTED_MODULE_0__[\"arrayFromInt32\"](aad.length * 8));\n        var al_full = new Uint8Array(8);\n        al_full.set(al, 4);\n        var buf = _jose_utils__WEBPACK_IMPORTED_MODULE_0__[\"arrayBufferConcat\"](aad, iv, cipher_text, al_full);\n        return Jose.crypto.subtle.sign(config.auth.id, mac_key, buf).then(function (bytes) {\n          return bytes.slice(0, config.auth.truncated_bytes);\n        });\n      });\n    }\n    /**\n     * Converts the Jose web algorithms into data which is\n     * useful for the Web Crypto API.\n     */\n\n  }, {\n    key: \"getSignConfig\",\n    value: function getSignConfig(alg) {\n      switch (alg) {\n        case \"RS256\":\n          return {\n            jwa_name: \"RS256\",\n            id: {\n              name: \"RSASSA-PKCS1-v1_5\",\n              hash: {\n                name: \"SHA-256\"\n              }\n            }\n          };\n\n        case \"RS384\":\n          return {\n            jwa_name: \"RS384\",\n            id: {\n              name: \"RSASSA-PKCS1-v1_5\",\n              hash: {\n                name: \"SHA-384\"\n              }\n            }\n          };\n\n        case \"RS512\":\n          return {\n            jwa_name: \"RS512\",\n            id: {\n              name: \"RSASSA-PKCS1-v1_5\",\n              hash: {\n                name: \"SHA-512\"\n              }\n            }\n          };\n\n        case \"PS256\":\n          return {\n            jwa_name: \"PS256\",\n            id: {\n              name: \"RSA-PSS\",\n              hash: {\n                name: \"SHA-256\"\n              },\n              saltLength: 20\n            }\n          };\n\n        case \"PS384\":\n          return {\n            jwa_name: \"PS384\",\n            id: {\n              name: \"RSA-PSS\",\n              hash: {\n                name: \"SHA-384\"\n              },\n              saltLength: 20\n            }\n          };\n\n        case \"PS512\":\n          return {\n            jwa_name: \"PS512\",\n            id: {\n              name: \"RSA-PSS\",\n              hash: {\n                name: \"SHA-512\"\n              },\n              saltLength: 20\n            }\n          };\n\n        case \"HS256\":\n          return {\n            jwa_name: \"HS256\",\n            id: {\n              name: \"HMAC\",\n              hash: {\n                name: \"SHA-256\"\n              }\n            }\n          };\n\n        case \"HS384\":\n          return {\n            jwa_name: \"HS384\",\n            id: {\n              name: \"HMAC\",\n              hash: {\n                name: \"SHA-384\"\n              }\n            }\n          };\n\n        case \"HS512\":\n          return {\n            jwa_name: \"HS512\",\n            id: {\n              name: \"HMAC\",\n              hash: {\n                name: \"SHA-512\"\n              }\n            }\n          };\n\n        case \"ES256\":\n          return {\n            jwa_name: \"ES256\",\n            id: {\n              name: \"ECDSA\",\n              hash: {\n                name: \"SHA-256\"\n              }\n            }\n          };\n\n        case \"ES384\":\n          return {\n            jwa_name: \"ES384\",\n            id: {\n              name: \"ECDSA\",\n              hash: {\n                name: \"SHA-384\"\n              }\n            }\n          };\n\n        case \"ES512\":\n          return {\n            jwa_name: \"ES512\",\n            id: {\n              name: \"ECDSA\",\n              hash: {\n                name: \"SHA-512\"\n              }\n            }\n          };\n\n        default:\n          throw Error(\"unsupported algorithm: \" + alg);\n      }\n    }\n    /**\n     * Returns JWA name for a given CryptoKey\n     * @param key CryptoKey\n     */\n\n  }, {\n    key: \"getJwaNameForSignKey\",\n    value: function getJwaNameForSignKey(key) {\n      var rv = \"\",\n          sign_algo = key.algorithm.name,\n          hash_algo = key.algorithm.hash.name;\n\n      if (sign_algo == \"RSASSA-PKCS1-v1_5\") {\n        rv = \"R\";\n      } else if (sign_algo == \"RSA-PSS\") {\n        rv = \"P\";\n      } else {\n        throw new Error(\"unsupported sign/verify algorithm \" + sign_algo);\n      }\n\n      if (hash_algo.indexOf(\"SHA-\") === 0) {\n        rv += \"S\";\n      } else {\n        throw new Error(\"unsupported hash algorithm \" + sign_algo);\n      }\n\n      rv += hash_algo.substring(4);\n      return rv;\n    }\n    /**\n     * Derives key usage from algorithm's name\n     *\n     * @param alg String algorithm name\n     * @returns {*}\n     */\n\n  }, {\n    key: \"getKeyUsageByAlg\",\n    value: function getKeyUsageByAlg(alg) {\n      switch (alg) {\n        // signature\n        case \"RS256\":\n        case \"RS384\":\n        case \"RS512\":\n        case \"PS256\":\n        case \"PS384\":\n        case \"PS512\":\n        case \"HS256\":\n        case \"HS384\":\n        case \"HS512\":\n        case \"ES256\":\n        case \"ES384\":\n        case \"ES512\":\n        case \"ES256K\":\n          return {\n            publicKey: \"verify\",\n            privateKey: \"sign\"\n          };\n        // key encryption\n\n        case \"RSA-OAEP\":\n        case \"RSA-OAEP-256\":\n        case \"A128KW\":\n        case \"A256KW\":\n          return {\n            publicKey: \"wrapKey\",\n            privateKey: \"unwrapKey\"\n          };\n\n        default:\n          throw Error(\"unsupported algorithm: \" + alg);\n      }\n    }\n    /**\n    * Feel free to override this function.\n    */\n\n  }, {\n    key: \"assert\",\n    value: function assert(expr, msg) {\n      if (!expr) {\n        throw new Error(msg);\n      }\n    }\n  }]);\n\n  return WebCryptographer;\n}();\n\n//# sourceURL=webpack://Jose/./lib/jose-jwe-webcryptographer.js?");
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "WebCryptographer", function() { return WebCryptographer; });
+/* harmony import */ var _jose_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./jose-utils */ "./lib/jose-utils.js");
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+/*-
+ * Copyright 2014 Square Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * The WebCryptographer uses http://www.w3.org/TR/WebCryptoAPI/ to perform
+ * various crypto operations. In theory, this should help build the library with
+ * different underlying crypto APIs. I'm however unclear if we'll run into code
+ * duplication or callback vs Promise based API issues.
+ */
+
+var WebCryptographer =
+/*#__PURE__*/
+function () {
+  function WebCryptographer() {
+    _classCallCheck(this, WebCryptographer);
+
+    this.setKeyEncryptionAlgorithm("RSA-OAEP");
+    this.setContentEncryptionAlgorithm("A256GCM");
+    this.setContentSignAlgorithm("RS256");
+  }
+  /**
+   * Overrides the default key encryption algorithm
+   * @param alg  string
+   */
+
+
+  _createClass(WebCryptographer, [{
+    key: "setKeyEncryptionAlgorithm",
+    value: function setKeyEncryptionAlgorithm(alg) {
+      this.key_encryption = this.getCryptoConfig(alg);
+    }
+  }, {
+    key: "getKeyEncryptionAlgorithm",
+    value: function getKeyEncryptionAlgorithm() {
+      return this.key_encryption.jwe_name;
+    }
+    /**
+     * Overrides the default content encryption algorithm
+     * @param alg  string
+     */
+
+  }, {
+    key: "setContentEncryptionAlgorithm",
+    value: function setContentEncryptionAlgorithm(alg) {
+      this.content_encryption = this.getCryptoConfig(alg);
+    }
+  }, {
+    key: "getContentEncryptionAlgorithm",
+    value: function getContentEncryptionAlgorithm() {
+      return this.content_encryption.jwe_name;
+    }
+    /**
+     * Overrides the default content sign algorithm
+     * @param alg  string
+     */
+
+  }, {
+    key: "setContentSignAlgorithm",
+    value: function setContentSignAlgorithm(alg) {
+      this.content_sign = this.getSignConfig(alg);
+    }
+  }, {
+    key: "getContentSignAlgorithm",
+    value: function getContentSignAlgorithm() {
+      return this.content_sign.jwa_name;
+    }
+    /**
+     * Generates an IV.
+     * This function mainly exists so that it can be mocked for testing purpose.
+     *
+     * @return Uint8Array with random bytes
+     */
+
+  }, {
+    key: "createIV",
+    value: function createIV() {
+      var iv = new Uint8Array(new Array(this.content_encryption.iv_bytes));
+      return Jose.crypto.getRandomValues(iv);
+    }
+    /**
+     * Creates a random content encryption key.
+     * This function mainly exists so that it can be mocked for testing purpose.
+     *
+     * @return Promise<CryptoKey>
+     */
+
+  }, {
+    key: "createCek",
+    value: function createCek() {
+      var hack = this.getCekWorkaround(this.content_encryption);
+      return Jose.crypto.subtle.generateKey(hack.id, true, hack.enc_op);
+    }
+  }, {
+    key: "wrapCek",
+    value: function wrapCek(cek, key) {
+      return Jose.crypto.subtle.wrapKey("raw", cek, key, this.key_encryption.id);
+    }
+  }, {
+    key: "unwrapCek",
+    value: function unwrapCek(cek, key) {
+      var hack = this.getCekWorkaround(this.content_encryption);
+      var extractable = this.content_encryption.specific_cek_bytes > 0;
+      var key_encryption = this.key_encryption.id;
+      return Jose.crypto.subtle.unwrapKey("raw", cek, key, key_encryption, hack.id, extractable, hack.dec_op);
+    }
+    /**
+     * Returns algorithm and operation needed to create a CEK.
+     *
+     * In some cases, e.g. A128CBC-HS256, the CEK gets split into two keys. The Web
+     * Crypto API does not allow us to generate an arbitrary number of bytes and
+     * then create a CryptoKey without any associated algorithm. We therefore piggy
+     * back on AES-CBS and HMAC which allows the creation of CEKs of size 16, 32, 64
+     * and 128 bytes.
+     */
+
+  }, {
+    key: "getCekWorkaround",
+    value: function getCekWorkaround(alg) {
+      var len = alg.specific_cek_bytes;
+
+      if (len) {
+        if (len == 16) {
+          return {
+            id: {
+              name: "AES-CBC",
+              length: 128
+            },
+            enc_op: ["encrypt"],
+            dec_op: ["decrypt"]
+          };
+        } else if (len == 32) {
+          return {
+            id: {
+              name: "AES-CBC",
+              length: 256
+            },
+            enc_op: ["encrypt"],
+            dec_op: ["decrypt"]
+          };
+        } else if (len == 64) {
+          return {
+            id: {
+              name: "HMAC",
+              hash: {
+                name: "SHA-256"
+              }
+            },
+            enc_op: ["sign"],
+            dec_op: ["verify"]
+          };
+        } else if (len == 128) {
+          return {
+            id: {
+              name: "HMAC",
+              hash: {
+                name: "SHA-384"
+              }
+            },
+            enc_op: ["sign"],
+            dec_op: ["verify"]
+          };
+        } else {
+          this.assert(false, "getCekWorkaround: invalid len");
+        }
+      }
+
+      return {
+        id: alg.id,
+        enc_op: ["encrypt"],
+        dec_op: ["decrypt"]
+      };
+    }
+    /**
+     * Encrypts plain_text with cek.
+     *
+     * @param iv          Uint8Array
+     * @param aad         Uint8Array
+     * @param cek_promise Promise<CryptoKey>
+     * @param plain_text  Uint8Array
+     * @return Promise<json>
+     */
+
+  }, {
+    key: "encrypt",
+    value: function encrypt(iv, aad, cek_promise, plain_text) {
+      var _this = this;
+
+      var config = this.content_encryption;
+
+      if (iv.length != config.iv_bytes) {
+        return Promise.reject(Error("invalid IV length"));
+      }
+
+      if (config.auth.aead) {
+        var tag_bytes = config.auth.tag_bytes;
+        var enc = {
+          name: config.id.name,
+          iv: iv,
+          additionalData: aad,
+          tagLength: tag_bytes * 8
+        };
+        return cek_promise.then(function (cek) {
+          return Jose.crypto.subtle.encrypt(enc, cek, plain_text).then(function (cipher_text) {
+            var offset = cipher_text.byteLength - tag_bytes;
+            return {
+              cipher: cipher_text.slice(0, offset),
+              tag: cipher_text.slice(offset)
+            };
+          });
+        });
+      } else {
+        var keys = this.splitKey(config, cek_promise, ["encrypt"]);
+        var mac_key_promise = keys[0];
+        var enc_key_promise = keys[1]; // Encrypt the plain text
+
+        var cipher_text_promise = enc_key_promise.then(function (enc_key) {
+          var enc = {
+            name: config.id.name,
+            iv: iv
+          };
+          return Jose.crypto.subtle.encrypt(enc, enc_key, plain_text);
+        }); // compute MAC
+
+        var mac_promise = cipher_text_promise.then(function (cipher_text) {
+          return _this.truncatedMac(config, mac_key_promise, aad, iv, cipher_text);
+        });
+        return Promise.all([cipher_text_promise, mac_promise]).then(function (all) {
+          var cipher_text = all[0];
+          var mac = all[1];
+          return {
+            cipher: cipher_text,
+            tag: mac
+          };
+        });
+      }
+    }
+    /**
+     * Compares two Uint8Arrays in constant time.
+     *
+     * @return Promise<void>
+     */
+
+  }, {
+    key: "compare",
+    value: function compare(config, mac_key_promise, arr1, arr2) {
+      this.assert(arr1 instanceof Uint8Array, "compare: invalid input");
+      this.assert(arr2 instanceof Uint8Array, "compare: invalid input");
+      return mac_key_promise.then(function (mac_key) {
+        var hash1 = Jose.crypto.subtle.sign(config.auth.id, mac_key, arr1);
+        var hash2 = Jose.crypto.subtle.sign(config.auth.id, mac_key, arr2);
+        return Promise.all([hash1, hash2]).then(function (all) {
+          var hash1 = new Uint8Array(all[0]);
+          var hash2 = new Uint8Array(all[1]);
+
+          if (hash1.length != hash2.length) {
+            throw new Error("compare failed");
+          }
+
+          for (var i = 0; i < hash1.length; i++) {
+            if (hash1[i] != hash2[i]) {
+              throw new Error("compare failed");
+            }
+          }
+
+          return Promise.resolve(null);
+        });
+      });
+    }
+    /**
+     * Decrypts cipher_text with cek. Validates the tag.
+     *
+     * @param cek_promise    Promise<CryptoKey>
+     * @param aad protected header
+     * @param iv IV
+     * @param cipher_text text to be decrypted
+     * @param tag to be verified
+     * @return Promise<string>
+     */
+
+  }, {
+    key: "decrypt",
+    value: function decrypt(cek_promise, aad, iv, cipher_text, tag) {
+      var _this2 = this;
+
+      if (iv.length != this.content_encryption.iv_bytes) {
+        return Promise.reject(Error("decryptCiphertext: invalid IV"));
+      }
+
+      var config = this.content_encryption;
+
+      if (config.auth.aead) {
+        var dec = {
+          name: config.id.name,
+          iv: iv,
+          additionalData: aad,
+          tagLength: config.auth.tag_bytes * 8
+        };
+        return cek_promise.then(function (cek) {
+          var buf = _jose_utils__WEBPACK_IMPORTED_MODULE_0__["arrayBufferConcat"](cipher_text, tag);
+          return Jose.crypto.subtle.decrypt(dec, cek, buf);
+        });
+      } else {
+        var keys = this.splitKey(config, cek_promise, ["decrypt"]);
+        var mac_key_promise = keys[0];
+        var enc_key_promise = keys[1]; // Validate the MAC
+
+        var mac_promise = this.truncatedMac(config, mac_key_promise, aad, iv, cipher_text);
+        return Promise.all([enc_key_promise, mac_promise]).then(function (all) {
+          var enc_key = all[0];
+          var mac = all[1];
+          return _this2.compare(config, mac_key_promise, new Uint8Array(mac), tag).then(function () {
+            var dec = {
+              name: config.id.name,
+              iv: iv
+            };
+            return Jose.crypto.subtle.decrypt(dec, enc_key, cipher_text);
+          }).catch(function (err) {
+            return Promise.reject(Error("decryptCiphertext: MAC failed."));
+          });
+        });
+      }
+    }
+    /**
+     * Signs plain_text.
+     *
+     * @param aad         json
+     * @param payload     String or json
+     * @param key_promise Promise<CryptoKey>
+     * @return Promise<ArrayBuffer>
+     */
+
+  }, {
+    key: "sign",
+    value: function sign(aad, payload, key_promise) {
+      var config = this.content_sign;
+
+      if (aad.alg) {
+        config = this.getSignConfig(aad.alg);
+      } // Encrypt the plain text
+
+
+      return key_promise.then(function (key) {
+        var base64UrlEncoder = new _jose_utils__WEBPACK_IMPORTED_MODULE_0__["Base64Url"]();
+        return Jose.crypto.subtle.sign(config.id, key, _jose_utils__WEBPACK_IMPORTED_MODULE_0__["arrayFromString"](base64UrlEncoder.encode(JSON.stringify(aad)) + '.' + base64UrlEncoder.encodeArray(payload)));
+      });
+    }
+    /**
+     * Verify JWS.
+     *
+     * @param payload     Base64Url encoded payload
+     * @param aad         String Base64Url encoded JSON representation of the protected JWS header
+     * @param signature   Uint8Array containing the signature
+     * @param key_promise Promise<CryptoKey>
+     * @param key_id      value of the kid JoseHeader, it'll be passed as part of the result to the returned promise
+     * @return Promise<json>
+     */
+
+  }, {
+    key: "verify",
+    value: function verify(aad, payload, signature, key_promise, key_id) {
+      var that = this;
+      var config = this.content_sign;
+      return key_promise.then(function (key) {
+        return Jose.crypto.subtle.verify(config.id, key, signature, _jose_utils__WEBPACK_IMPORTED_MODULE_0__["arrayFromString"](aad + "." + payload)).then(function (res) {
+          return {
+            kid: key_id,
+            verified: res
+          };
+        });
+      });
+    }
+  }, {
+    key: "keyId",
+    value: function keyId(rsa_key) {
+      return _jose_utils__WEBPACK_IMPORTED_MODULE_0__["sha256"](rsa_key.n + "+" + rsa_key.d);
+    }
+    /**
+     * Splits a CEK into two pieces: a MAC key and an ENC key.
+     *
+     * This code is structured around the fact that the crypto API does not provide
+     * a way to validate truncated MACs. The MAC key is therefore always imported to
+     * sign data.
+     *
+     * @param config (used for key lengths & algorithms)
+     * @param cek_promise Promise<CryptoKey>  CEK key to split
+     * @param purpose Array<String> usages of the imported key
+     * @return [Promise<mac key>, Promise<enc key>]
+     */
+
+  }, {
+    key: "splitKey",
+    value: function splitKey(config, cek_promise, purpose) {
+      // We need to split the CEK key into a MAC and ENC keys
+      var cek_bytes_promise = cek_promise.then(function (cek) {
+        return Jose.crypto.subtle.exportKey("raw", cek);
+      });
+      var mac_key_promise = cek_bytes_promise.then(function (cek_bytes) {
+        if (cek_bytes.byteLength * 8 != config.id.length + config.auth.key_bytes * 8) {
+          return Promise.reject(Error("encryptPlainText: incorrect cek length"));
+        }
+
+        var bytes = cek_bytes.slice(0, config.auth.key_bytes);
+        return Jose.crypto.subtle.importKey("raw", bytes, config.auth.id, false, ["sign"]);
+      });
+      var enc_key_promise = cek_bytes_promise.then(function (cek_bytes) {
+        if (cek_bytes.byteLength * 8 != config.id.length + config.auth.key_bytes * 8) {
+          return Promise.reject(Error("encryptPlainText: incorrect cek length"));
+        }
+
+        var bytes = cek_bytes.slice(config.auth.key_bytes);
+        return Jose.crypto.subtle.importKey("raw", bytes, config.id, false, purpose);
+      });
+      return [mac_key_promise, enc_key_promise];
+    }
+    /**
+     * Converts the Jose web algorithms into data which is
+     * useful for the Web Crypto API.
+     *
+     * length = in bits
+     * bytes = in bytes
+     */
+
+  }, {
+    key: "getCryptoConfig",
+    value: function getCryptoConfig(alg) {
+      switch (alg) {
+        // Key encryption
+        case "RSA-OAEP":
+          return {
+            jwe_name: "RSA-OAEP",
+            id: {
+              name: "RSA-OAEP",
+              hash: {
+                name: "SHA-1"
+              }
+            }
+          };
+
+        case "RSA-OAEP-256":
+          return {
+            jwe_name: "RSA-OAEP-256",
+            id: {
+              name: "RSA-OAEP",
+              hash: {
+                name: "SHA-256"
+              }
+            }
+          };
+
+        case "A128KW":
+          return {
+            jwe_name: "A128KW",
+            id: {
+              name: "AES-KW",
+              length: 128
+            }
+          };
+
+        case "A256KW":
+          return {
+            jwe_name: "A256KW",
+            id: {
+              name: "AES-KW",
+              length: 256
+            }
+          };
+
+        case "dir":
+          return {
+            jwe_name: "dir"
+          };
+        // Content encryption
+
+        case "A128CBC-HS256":
+          return {
+            jwe_name: "A128CBC-HS256",
+            id: {
+              name: "AES-CBC",
+              length: 128
+            },
+            iv_bytes: 16,
+            specific_cek_bytes: 32,
+            auth: {
+              key_bytes: 16,
+              id: {
+                name: "HMAC",
+                hash: {
+                  name: "SHA-256"
+                }
+              },
+              truncated_bytes: 16
+            }
+          };
+
+        case "A256CBC-HS512":
+          return {
+            jwe_name: "A256CBC-HS512",
+            id: {
+              name: "AES-CBC",
+              length: 256
+            },
+            iv_bytes: 16,
+            specific_cek_bytes: 64,
+            auth: {
+              key_bytes: 32,
+              id: {
+                name: "HMAC",
+                hash: {
+                  name: "SHA-512"
+                }
+              },
+              truncated_bytes: 32
+            }
+          };
+
+        case "A128GCM":
+          return {
+            jwe_name: "A128GCM",
+            id: {
+              name: "AES-GCM",
+              length: 128
+            },
+            iv_bytes: 12,
+            auth: {
+              aead: true,
+              tag_bytes: 16
+            }
+          };
+
+        case "A256GCM":
+          return {
+            jwe_name: "A256GCM",
+            id: {
+              name: "AES-GCM",
+              length: 256
+            },
+            iv_bytes: 12,
+            auth: {
+              aead: true,
+              tag_bytes: 16
+            }
+          };
+
+        default:
+          throw Error("unsupported algorithm: " + alg);
+      }
+    }
+    /**
+     * Computes a truncated MAC.
+     *
+     * @param config              configuration
+     * @param mac_key_promise     Promise<CryptoKey>  mac key
+     * @param aad                 Uint8Array
+     * @param iv                  Uint8Array
+     * @param cipher_text         Uint8Array
+     * @return Promise<buffer>    truncated MAC
+     */
+
+  }, {
+    key: "truncatedMac",
+    value: function truncatedMac(config, mac_key_promise, aad, iv, cipher_text) {
+      return mac_key_promise.then(function (mac_key) {
+        var al = new Uint8Array(_jose_utils__WEBPACK_IMPORTED_MODULE_0__["arrayFromInt32"](aad.length * 8));
+        var al_full = new Uint8Array(8);
+        al_full.set(al, 4);
+        var buf = _jose_utils__WEBPACK_IMPORTED_MODULE_0__["arrayBufferConcat"](aad, iv, cipher_text, al_full);
+        return Jose.crypto.subtle.sign(config.auth.id, mac_key, buf).then(function (bytes) {
+          return bytes.slice(0, config.auth.truncated_bytes);
+        });
+      });
+    }
+    /**
+     * Converts the Jose web algorithms into data which is
+     * useful for the Web Crypto API.
+     */
+
+  }, {
+    key: "getSignConfig",
+    value: function getSignConfig(alg) {
+      switch (alg) {
+        case "RS256":
+          return {
+            jwa_name: "RS256",
+            id: {
+              name: "RSASSA-PKCS1-v1_5",
+              hash: {
+                name: "SHA-256"
+              }
+            }
+          };
+
+        case "RS384":
+          return {
+            jwa_name: "RS384",
+            id: {
+              name: "RSASSA-PKCS1-v1_5",
+              hash: {
+                name: "SHA-384"
+              }
+            }
+          };
+
+        case "RS512":
+          return {
+            jwa_name: "RS512",
+            id: {
+              name: "RSASSA-PKCS1-v1_5",
+              hash: {
+                name: "SHA-512"
+              }
+            }
+          };
+
+        case "PS256":
+          return {
+            jwa_name: "PS256",
+            id: {
+              name: "RSA-PSS",
+              hash: {
+                name: "SHA-256"
+              },
+              saltLength: 20
+            }
+          };
+
+        case "PS384":
+          return {
+            jwa_name: "PS384",
+            id: {
+              name: "RSA-PSS",
+              hash: {
+                name: "SHA-384"
+              },
+              saltLength: 20
+            }
+          };
+
+        case "PS512":
+          return {
+            jwa_name: "PS512",
+            id: {
+              name: "RSA-PSS",
+              hash: {
+                name: "SHA-512"
+              },
+              saltLength: 20
+            }
+          };
+
+        case "HS256":
+          return {
+            jwa_name: "HS256",
+            id: {
+              name: "HMAC",
+              hash: {
+                name: "SHA-256"
+              }
+            }
+          };
+
+        case "HS384":
+          return {
+            jwa_name: "HS384",
+            id: {
+              name: "HMAC",
+              hash: {
+                name: "SHA-384"
+              }
+            }
+          };
+
+        case "HS512":
+          return {
+            jwa_name: "HS512",
+            id: {
+              name: "HMAC",
+              hash: {
+                name: "SHA-512"
+              }
+            }
+          };
+
+        case "ES256":
+          return {
+            jwa_name: "ES256",
+            id: {
+              name: "ECDSA",
+              namedCurve: "P-256",
+              hash: {
+                name: "SHA-256"
+              }
+            }
+          };
+
+        case "ES384":
+          return {
+            jwa_name: "ES384",
+            id: {
+              name: "ECDSA",
+              namedCurve: "P-384",
+              hash: {
+                name: "SHA-384"
+              }
+            }
+          };
+
+        case "ES512":
+          return {
+            jwa_name: "ES512",
+            id: {
+              name: "ECDSA",
+              namedCurve: "P-521",
+              hash: {
+                name: "SHA-512"
+              }
+            }
+          };
+
+        default:
+          throw Error("unsupported algorithm: " + alg);
+      }
+    }
+    /**
+     * Derives key usage from algorithm's name
+     *
+     * @param alg String algorithm name
+     * @returns {*}
+     */
+
+  }, {
+    key: "getKeyUsageByAlg",
+    value: function getKeyUsageByAlg(alg) {
+      switch (alg) {
+        // signature
+        case "RS256":
+        case "RS384":
+        case "RS512":
+        case "PS256":
+        case "PS384":
+        case "PS512":
+        case "HS256":
+        case "HS384":
+        case "HS512":
+        case "ES256":
+        case "ES384":
+        case "ES512":
+        case "ES256K":
+          return {
+            publicKey: "verify",
+            privateKey: "sign"
+          };
+        // key encryption
+
+        case "RSA-OAEP":
+        case "RSA-OAEP-256":
+        case "A128KW":
+        case "A256KW":
+          return {
+            publicKey: "wrapKey",
+            privateKey: "unwrapKey"
+          };
+
+        default:
+          throw Error("unsupported algorithm: " + alg);
+      }
+    }
+    /**
+    * Feel free to override this function.
+    */
+
+  }, {
+    key: "assert",
+    value: function assert(expr, msg) {
+      if (!expr) {
+        throw new Error(msg);
+      }
+    }
+  }]);
+
+  return WebCryptographer;
+}();
 
 /***/ }),
 
@@ -143,7 +1358,299 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) *
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"Signer\", function() { return Signer; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"JWS\", function() { return JWS; });\n/* harmony import */ var _jose_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./jose-utils */ \"./lib/jose-utils.js\");\nfunction _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError(\"Cannot call a class as a function\"); } }\n\nfunction _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if (\"value\" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }\n\nfunction _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }\n\n/*-\n * Copyright 2015 Peculiar Ventures\n *\n * Licensed under the Apache License, Version 2.0 (the \"License\");\n * you may not use this file except in compliance with the License.\n * You may obtain a copy of the License at\n *\n *     http://www.apache.org/licenses/LICENSE-2.0\n *\n * Unless required by applicable law or agreed to in writing, software\n * distributed under the License is distributed on an \"AS IS\" BASIS,\n * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n * See the License for the specific language governing permissions and\n * limitations under the License.\n */\n\n/**\n * Handles decryption.\n *\n * @param cryptographer  an instance of WebCryptographer (or equivalent). Keep\n *                       in mind that decryption mutates the cryptographer.\n *\n * @author Patrizio Bruno <patrizio@desertconsulting.net>\n */\n\nvar Signer =\n/*#__PURE__*/\nfunction () {\n  function Signer(cryptographer) {\n    _classCallCheck(this, Signer);\n\n    this.cryptographer = cryptographer;\n    this.key_promises = {};\n    this.waiting_kid = 0;\n    this.headers = {};\n    this.signer_aads = {};\n    this.signer_headers = {};\n  }\n  /**\n   * Adds a signer to JoseJWS instance. It'll be the on of the signers of the resulting JWS.\n   *\n   * @param rsa_key        private RSA key in json format, Parameters can be base64\n   *                       encoded, strings or number (for 'e'). Or CryptoKey\n   * @param key_id         a string identifying the rsa_key. OPTIONAL\n   * @param aad            Object protected header\n   * @param header         Object unprotected header\n   */\n\n\n  _createClass(Signer, [{\n    key: \"addSigner\",\n    value: function addSigner(rsa_key, key_id, aad, header) {\n      var that = this;\n      var key_promise;\n\n      if (_jose_utils__WEBPACK_IMPORTED_MODULE_0__[\"isCryptoKey\"](rsa_key)) {\n        key_promise = new Promise(function (resolve) {\n          resolve(rsa_key);\n        });\n      } else {\n        var alg;\n\n        if (aad && aad.alg) {\n          alg = aad.alg;\n        } else {\n          alg = that.cryptographer.getContentSignAlgorithm();\n        }\n\n        key_promise = _jose_utils__WEBPACK_IMPORTED_MODULE_0__[\"importRsaPrivateKey\"](rsa_key, alg, \"sign\");\n      }\n\n      var kid_promise;\n\n      if (key_id) {\n        kid_promise = new Promise(function (resolve) {\n          resolve(key_id);\n        });\n      } else if (_jose_utils__WEBPACK_IMPORTED_MODULE_0__[\"isCryptoKey\"](rsa_key)) {\n        throw new Error(\"key_id is a mandatory argument when the key is a CryptoKey\");\n      } else {\n        kid_promise = Jose.WebCryptographer.keyId(rsa_key);\n      }\n\n      that.waiting_kid++;\n      return kid_promise.then(function (kid) {\n        that.key_promises[kid] = key_promise;\n        that.waiting_kid--;\n\n        if (aad) {\n          that.signer_aads[kid] = aad;\n        }\n\n        if (header) {\n          that.signer_headers[kid] = header;\n        }\n\n        return kid;\n      });\n    }\n    /**\n     * Adds a signature to a JWS object\n     * @param jws JWS Object to be signed or its representation\n     * @param aad     Object protected header\n     * @param header  Object unprotected header\n     * @return Promise<String>\n     */\n\n  }, {\n    key: \"addSignature\",\n    value: function addSignature(jws, aad, header) {\n      if (_jose_utils__WEBPACK_IMPORTED_MODULE_0__[\"isString\"](jws)) {\n        jws = JSON.parse(jws);\n      }\n\n      if (jws.payload && _jose_utils__WEBPACK_IMPORTED_MODULE_0__[\"isString\"](jws.payload) && jws.protected && _jose_utils__WEBPACK_IMPORTED_MODULE_0__[\"isString\"](jws.protected) && jws.header && jws.header instanceof Object && jws.signature && _jose_utils__WEBPACK_IMPORTED_MODULE_0__[\"isString\"](jws.signature)) {\n        return this.sign(JWS.fromObject(jws), aad, header);\n      } else {\n        throw new Error(\"JWS is not a valid JWS object\");\n      }\n    }\n    /**\n     * Computes signature.\n     *\n     * @param payload JWS Object or utf-8 string to be signed\n     * @param aad     Object protected header\n     * @param header  Object unprotected header\n     * @return Promise<JWS>\n     */\n\n  }, {\n    key: \"sign\",\n    value: function sign(payload, aad, header) {\n      var that = this;\n      var kids = [];\n\n      if (Object.keys(that.key_promises).length === 0) {\n        throw new Error(\"No signers defined. At least one is required to sign the JWS.\");\n      }\n\n      if (that.waiting_kid) {\n        throw new Error(\"still generating key IDs\");\n      }\n\n      function sign(message, protectedHeader, unprotectedHeader, rsa_key_promise, kid) {\n        var toBeSigned;\n\n        if (!protectedHeader) {\n          protectedHeader = {};\n        }\n\n        if (!protectedHeader.alg) {\n          protectedHeader.alg = that.cryptographer.getContentSignAlgorithm();\n          protectedHeader.typ = \"JWT\";\n        }\n\n        if (!protectedHeader.kid) {\n          protectedHeader.kid = kid;\n        }\n\n        if (_jose_utils__WEBPACK_IMPORTED_MODULE_0__[\"isString\"](message)) {\n          toBeSigned = _jose_utils__WEBPACK_IMPORTED_MODULE_0__[\"arrayFromUtf8String\"](message);\n        } else {\n          try {\n            toBeSigned = _jose_utils__WEBPACK_IMPORTED_MODULE_0__[\"arrayish\"](message);\n          } catch (e) {\n            if (message instanceof JWS) {\n              toBeSigned = _jose_utils__WEBPACK_IMPORTED_MODULE_0__[\"arrayFromString\"](new _jose_utils__WEBPACK_IMPORTED_MODULE_0__[\"Base64Url\"]().decode(message.payload));\n            } else if (message instanceof Object) {\n              toBeSigned = _jose_utils__WEBPACK_IMPORTED_MODULE_0__[\"arrayFromUtf8String\"](JSON.stringify(message));\n            } else {\n              throw new Error(\"cannot sign this message\");\n            }\n          }\n        }\n\n        return that.cryptographer.sign(protectedHeader, toBeSigned, rsa_key_promise).then(function (signature) {\n          var jws = new JWS(protectedHeader, unprotectedHeader, toBeSigned, signature);\n\n          if (message instanceof JWS) {\n            delete jws.payload;\n\n            if (!message.signatures) {\n              message.signatures = [jws];\n            } else {\n              message.signatures.push(jws);\n            }\n\n            return message;\n          }\n\n          return jws;\n        });\n      }\n\n      function doSign(pl, ph, uh, kps, kids) {\n        if (kids.length) {\n          var k_id = kids.shift();\n          var rv = sign(pl, that.signer_aads[k_id] || ph, that.signer_headers[k_id] || uh, kps[k_id], k_id);\n\n          if (kids.length) {\n            rv = rv.then(function (jws) {\n              return doSign(jws, null, null, kps, kids);\n            });\n          }\n\n          return rv;\n        }\n      }\n\n      for (var kid in that.key_promises) {\n        if (that.key_promises.hasOwnProperty(kid)) {\n          kids.push(kid);\n        }\n      }\n\n      return doSign(payload, aad, header, that.key_promises, kids);\n    }\n  }]);\n\n  return Signer;\n}();\n/**\n * Initialize a JWS object.\n *\n * @param protectedHeader protected header (JS object)\n * @param payload Uint8Array payload to be signed\n * @param signature ArrayBuffer signature of the payload\n * @param header unprotected header (JS object)\n *\n * @constructor\n */\n\nvar JWS =\n/*#__PURE__*/\nfunction () {\n  function JWS(protectedHeader, header, payload, signature) {\n    _classCallCheck(this, JWS);\n\n    this.header = header;\n    var base64UrlEncoder = new _jose_utils__WEBPACK_IMPORTED_MODULE_0__[\"Base64Url\"]();\n    this.payload = base64UrlEncoder.encodeArray(payload);\n\n    if (signature) {\n      this.signature = base64UrlEncoder.encodeArray(signature);\n    }\n\n    this.protected = base64UrlEncoder.encode(JSON.stringify(protectedHeader));\n  }\n\n  _createClass(JWS, [{\n    key: \"fromObject\",\n    value: function fromObject(obj) {\n      var rv = new JWS(obj.protected, obj.header, obj.payload, null);\n      rv.signature = obj.signature;\n      rv.signatures = obj.signatures;\n      return rv;\n    }\n    /**\n     * Serialize a JWS object using the JSON serialization format\n     *\n     * @returns {Object} a copy of this\n     */\n\n  }, {\n    key: \"JsonSerialize\",\n    value: function JsonSerialize() {\n      return JSON.stringify(this);\n    }\n    /**\n     * Serialize a JWS object using the Compact Serialization Format\n     *\n     * @returns {string} BASE64URL(UTF8(PROTECTED HEADER)).BASE64URL(PAYLOAD).BASE64URL(SIGNATURE)\n     */\n\n  }, {\n    key: \"CompactSerialize\",\n    value: function CompactSerialize() {\n      return this.protected + '.' + this.payload + '.' + this.signature;\n    }\n  }]);\n\n  return JWS;\n}();\n\n//# sourceURL=webpack://Jose/./lib/jose-jws-sign.js?");
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Signer", function() { return Signer; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "JWS", function() { return JWS; });
+/* harmony import */ var _jose_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./jose-utils */ "./lib/jose-utils.js");
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+/*-
+ * Copyright 2015 Peculiar Ventures
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Handles decryption.
+ *
+ * @param cryptographer  an instance of WebCryptographer (or equivalent). Keep
+ *                       in mind that decryption mutates the cryptographer.
+ *
+ * @author Patrizio Bruno <patrizio@desertconsulting.net>
+ */
+
+var Signer =
+/*#__PURE__*/
+function () {
+  function Signer(cryptographer) {
+    _classCallCheck(this, Signer);
+
+    this.cryptographer = cryptographer;
+    this.key_promises = {};
+    this.waiting_kid = 0;
+    this.headers = {};
+    this.signer_aads = {};
+    this.signer_headers = {};
+  }
+  /**
+   * Adds a signer to JoseJWS instance.
+   *
+   * @param key            private key in json format. Parameters can be base64
+   *                       encoded, strings or number (for e.g. 'e'), or CryptoKey.
+   * @param key_id         a string identifying the key. OPTIONAL
+   * @param aad            Object protected header
+   * @param header         Object unprotected header
+   */
+
+
+  _createClass(Signer, [{
+    key: "addSigner",
+    value: function addSigner(key, key_id, aad, header) {
+      var that = this;
+      var key_promise;
+
+      if (_jose_utils__WEBPACK_IMPORTED_MODULE_0__["isCryptoKey"](key)) {
+        key_promise = new Promise(function (resolve) {
+          resolve(key);
+        });
+      } else {
+        var alg;
+
+        if (aad && aad.alg) {
+          alg = aad.alg;
+        } else {
+          alg = that.cryptographer.getContentSignAlgorithm();
+        }
+
+        key_promise = _jose_utils__WEBPACK_IMPORTED_MODULE_0__["importPrivateKey"](key, alg, "sign");
+      }
+
+      var kid_promise;
+
+      if (key_id) {
+        kid_promise = new Promise(function (resolve) {
+          resolve(key_id);
+        });
+      } else if (_jose_utils__WEBPACK_IMPORTED_MODULE_0__["isCryptoKey"](key)) {
+        throw new Error("key_id is a mandatory argument when the key is a CryptoKey");
+      } else {
+        kid_promise = this.cryptographer.keyId(key);
+      }
+
+      that.waiting_kid++;
+      return kid_promise.then(function (kid) {
+        that.key_promises[kid] = key_promise;
+        that.waiting_kid--;
+
+        if (aad) {
+          that.signer_aads[kid] = aad;
+        }
+
+        if (header) {
+          that.signer_headers[kid] = header;
+        }
+
+        return kid;
+      });
+    }
+    /**
+     * Adds a signature to a JWS object
+     * @param jws     JWS Object to be signed or its representation
+     * @param aad     Object protected header
+     * @param header  Object unprotected header
+     * @return Promise<String>
+     */
+
+  }, {
+    key: "addSignature",
+    value: function addSignature(jws, aad, header) {
+      if (_jose_utils__WEBPACK_IMPORTED_MODULE_0__["isString"](jws)) {
+        jws = JSON.parse(jws);
+      }
+
+      if (jws.payload && _jose_utils__WEBPACK_IMPORTED_MODULE_0__["isString"](jws.payload) && jws.protected && _jose_utils__WEBPACK_IMPORTED_MODULE_0__["isString"](jws.protected) && jws.header && jws.header instanceof Object && jws.signature && _jose_utils__WEBPACK_IMPORTED_MODULE_0__["isString"](jws.signature)) {
+        return this.sign(JWS.fromObject(jws), aad, header);
+      } else {
+        throw new Error("JWS is not a valid JWS object");
+      }
+    }
+    /**
+     * Computes signature.
+     *
+     * @param payload JWS Object or utf-8 string to be signed
+     * @param aad     Object protected header
+     * @param header  Object unprotected header
+     * @return Promise<JWS>
+     */
+
+  }, {
+    key: "sign",
+    value: function sign(payload, aad, header) {
+      var that = this;
+      var kids = [];
+
+      if (Object.keys(that.key_promises).length === 0) {
+        throw new Error("No signers defined. At least one is required to sign the JWS.");
+      }
+
+      if (that.waiting_kid) {
+        throw new Error("still generating key IDs");
+      }
+
+      function sign(message, protectedHeader, unprotectedHeader, key_promise, kid) {
+        var toBeSigned;
+
+        if (!protectedHeader) {
+          protectedHeader = {};
+        }
+
+        if (!protectedHeader.alg) {
+          protectedHeader.alg = that.cryptographer.getContentSignAlgorithm();
+          protectedHeader.typ = "JWT";
+        }
+
+        if (!protectedHeader.kid) {
+          protectedHeader.kid = kid;
+        }
+
+        if (_jose_utils__WEBPACK_IMPORTED_MODULE_0__["isString"](message)) {
+          toBeSigned = _jose_utils__WEBPACK_IMPORTED_MODULE_0__["arrayFromUtf8String"](message);
+        } else {
+          try {
+            toBeSigned = _jose_utils__WEBPACK_IMPORTED_MODULE_0__["arrayish"](message);
+          } catch (e) {
+            if (message instanceof JWS) {
+              toBeSigned = _jose_utils__WEBPACK_IMPORTED_MODULE_0__["arrayFromString"](new _jose_utils__WEBPACK_IMPORTED_MODULE_0__["Base64Url"]().decode(message.payload));
+            } else if (message instanceof Object) {
+              toBeSigned = _jose_utils__WEBPACK_IMPORTED_MODULE_0__["arrayFromUtf8String"](JSON.stringify(message));
+            } else {
+              throw new Error("cannot sign this message");
+            }
+          }
+        }
+
+        return that.cryptographer.sign(protectedHeader, toBeSigned, key_promise).then(function (signature) {
+          var jws = new JWS(protectedHeader, unprotectedHeader, toBeSigned, signature);
+
+          if (message instanceof JWS) {
+            delete jws.payload;
+
+            if (!message.signatures) {
+              message.signatures = [jws];
+            } else {
+              message.signatures.push(jws);
+            }
+
+            return message;
+          }
+
+          return jws;
+        });
+      }
+
+      function doSign(pl, ph, uh, kps, kids) {
+        if (kids.length) {
+          var k_id = kids.shift();
+          var rv = sign(pl, that.signer_aads[k_id] || ph, that.signer_headers[k_id] || uh, kps[k_id], k_id);
+
+          if (kids.length) {
+            rv = rv.then(function (jws) {
+              return doSign(jws, null, null, kps, kids);
+            });
+          }
+
+          return rv;
+        }
+      }
+
+      for (var kid in that.key_promises) {
+        if (that.key_promises.hasOwnProperty(kid)) {
+          kids.push(kid);
+        }
+      }
+
+      return doSign(payload, aad, header, that.key_promises, kids);
+    }
+  }]);
+
+  return Signer;
+}();
+/**
+ * Initialize a JWS object.
+ *
+ * @param protectedHeader protected header (JS object)
+ * @param payload Uint8Array payload to be signed
+ * @param signature ArrayBuffer signature of the payload
+ * @param header unprotected header (JS object)
+ *
+ * @constructor
+ */
+
+var JWS =
+/*#__PURE__*/
+function () {
+  function JWS(protectedHeader, header, payload, signature) {
+    _classCallCheck(this, JWS);
+
+    this.header = header;
+    var base64UrlEncoder = new _jose_utils__WEBPACK_IMPORTED_MODULE_0__["Base64Url"]();
+    this.payload = base64UrlEncoder.encodeArray(payload);
+
+    if (signature) {
+      this.signature = base64UrlEncoder.encodeArray(signature);
+    }
+
+    this.protected = base64UrlEncoder.encode(JSON.stringify(protectedHeader));
+  }
+
+  _createClass(JWS, [{
+    key: "fromObject",
+    value: function fromObject(obj) {
+      var rv = new JWS(obj.protected, obj.header, obj.payload, null);
+      rv.signature = obj.signature;
+      rv.signatures = obj.signatures;
+      return rv;
+    }
+    /**
+     * Serialize a JWS object using the JSON serialization format
+     *
+     * @returns {Object} a copy of this
+     */
+
+  }, {
+    key: "JsonSerialize",
+    value: function JsonSerialize() {
+      return JSON.stringify(this);
+    }
+    /**
+     * Serialize a JWS object using the Compact Serialization Format
+     *
+     * @returns {string} BASE64URL(UTF8(PROTECTED HEADER)).BASE64URL(PAYLOAD).BASE64URL(SIGNATURE)
+     */
+
+  }, {
+    key: "CompactSerialize",
+    value: function CompactSerialize() {
+      return this.protected + '.' + this.payload + '.' + this.signature;
+    }
+  }]);
+
+  return JWS;
+}();
 
 /***/ }),
 
@@ -155,7 +1662,227 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) *
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"Verifier\", function() { return Verifier; });\n/* harmony import */ var _jose_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./jose-utils */ \"./lib/jose-utils.js\");\nfunction _typeof(obj) { if (typeof Symbol === \"function\" && typeof Symbol.iterator === \"symbol\") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === \"function\" && obj.constructor === Symbol && obj !== Symbol.prototype ? \"symbol\" : typeof obj; }; } return _typeof(obj); }\n\nfunction _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError(\"Cannot call a class as a function\"); } }\n\nfunction _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if (\"value\" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }\n\nfunction _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }\n\n/*-\n * Copyright 2015 Peculiar Ventures\n *\n * Licensed under the Apache License, Version 2.0 (the \"License\");\n * you may not use this file except in compliance with the License.\n * You may obtain a copy of the License at\n *\n *     http://www.apache.org/licenses/LICENSE-2.0\n *\n * Unless required by applicable law or agreed to in writing, software\n * distributed under the License is distributed on an \"AS IS\" BASIS,\n * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n * See the License for the specific language governing permissions and\n * limitations under the License.\n */\n\n/**\n * Handles signature verification.\n *\n * @param cryptographer  an instance of WebCryptographer (or equivalent). Keep\n *                       in mind that decryption mutates the cryptographer.\n * @param message        a JWS message\n * @param keyfinder (optional) a function returning a Promise<CryptoKey> given\n *                             a key id\n *\n * @author Patrizio Bruno <patrizio@desertconsulting.net>\n */\n\nvar Verifier =\n/*#__PURE__*/\nfunction () {\n  function Verifier(cryptographer, message, keyfinder) {\n    _classCallCheck(this, Verifier);\n\n    var that = this,\n        alg,\n        jwt,\n        aad,\n        header,\n        payload,\n        signatures,\n        protectedHeader,\n        jwtRx = /^([0-9a-z_\\-]+)\\.([0-9a-z_\\-]+)\\.([0-9a-z_\\-]+)$/i;\n    that.cryptographer = cryptographer;\n    alg = cryptographer.getContentSignAlgorithm();\n    that.cryptographer = new Jose.WebCryptographer();\n\n    if (_jose_utils__WEBPACK_IMPORTED_MODULE_0__[\"isString\"](message)) {\n      if (jwt = jwtRx.exec(message)) {\n        if (jwt.length != 4) {\n          throw new Error(\"wrong JWS compact serialization format\");\n        }\n\n        message = {\n          protected: jwt[1],\n          payload: jwt[2],\n          signature: jwt[3]\n        };\n      } else {\n        message = JSON.parse(message);\n      }\n    } else if (_typeof(message) != \"object\") {\n      throw new Error(\"data format not supported\");\n    }\n\n    aad = message.protected;\n    header = message.header;\n    payload = message.payload;\n    signatures = message.signatures instanceof Array ? message.signatures.slice(0) : [];\n    signatures.forEach(function (sign) {\n      sign.aad = sign.protected;\n      sign.protected = JSON.parse(new _jose_utils__WEBPACK_IMPORTED_MODULE_0__[\"Base64Url\"]().decode(sign.protected));\n    });\n    that.aad = aad;\n    protectedHeader = new _jose_utils__WEBPACK_IMPORTED_MODULE_0__[\"Base64Url\"]().decode(aad);\n\n    try {\n      protectedHeader = JSON.parse(protectedHeader);\n    } catch (e) {}\n\n    if (!protectedHeader && !header) {\n      throw new Error(\"at least one header is required\");\n    }\n\n    if (!protectedHeader.alg) {\n      throw new Error(\"'alg' is a mandatory header\");\n    }\n\n    if (protectedHeader.alg != alg) {\n      throw new Error(\"the alg header '\" + protectedHeader.alg + \"' doesn't match the requested algorithm '\" + alg + \"'\");\n    }\n\n    if (protectedHeader && protectedHeader.typ && protectedHeader.typ != \"JWT\") {\n      throw new Error(\"typ '\" + protectedHeader.typ + \"' not supported\");\n    }\n\n    if (message.signature) {\n      signatures.unshift({\n        aad: aad,\n        protected: protectedHeader,\n        header: header,\n        signature: message.signature\n      });\n    }\n\n    that.signatures = [];\n\n    for (var i = 0; i < signatures.length; i++) {\n      that.signatures[i] = JSON.parse(JSON.stringify(signatures[i]));\n      that.signatures[i].signature = _jose_utils__WEBPACK_IMPORTED_MODULE_0__[\"arrayFromString\"](new _jose_utils__WEBPACK_IMPORTED_MODULE_0__[\"Base64Url\"]().decode(signatures[i].signature));\n    }\n\n    that.payload = payload;\n    that.key_promises = {};\n    that.waiting_kid = 0;\n\n    if (keyfinder) {\n      that.keyfinder = keyfinder;\n    }\n  }\n  /**\n   * Add supported recipients to verify multiple signatures\n   *\n   * @param rsa_key        public RSA key in json format. Parameters can be base64\n   *                       encoded, strings or number (for 'e').\n   * @param key_id         a string identifying the rsa_key. OPTIONAL\n   * @param alg            String signature algorithm. OPTIONAL\n   * @returns Promise<string> a Promise of a key id\n   */\n\n\n  _createClass(Verifier, [{\n    key: \"addRecipient\",\n    value: function addRecipient(rsa_key, key_id, alg) {\n      var that = this,\n          kid_promise,\n          key_promise = _jose_utils__WEBPACK_IMPORTED_MODULE_0__[\"isCryptoKey\"](rsa_key) ? new Promise(function (resolve) {\n        resolve(rsa_key);\n      }) : _jose_utils__WEBPACK_IMPORTED_MODULE_0__[\"importRsaPublicKey\"](rsa_key, alg || that.cryptographer.getContentSignAlgorithm(), \"verify\");\n\n      if (key_id) {\n        kid_promise = new Promise(function (resolve) {\n          resolve(key_id);\n        });\n      } else if (_jose_utils__WEBPACK_IMPORTED_MODULE_0__[\"isCryptoKey\"](rsa_key)) {\n        throw new Error(\"key_id is a mandatory argument when the key is a CryptoKey\");\n      } else {\n        console.log(\"it's not safe to not pass a key_id\");\n        kid_promise = Jose.WebCryptographer.keyId(rsa_key);\n      }\n\n      that.waiting_kid++;\n      return kid_promise.then(function (kid) {\n        that.key_promises[kid] = key_promise;\n        that.waiting_kid--;\n        return kid;\n      });\n    }\n    /**\n     * Verifies a JWS signature\n     *\n     * @returns Promise<Array> a Promise of an array of objects { kid: string, verified: bool, payload?: string }\n     *\n     * payload is only populated and usable if verified is true\n     */\n\n  }, {\n    key: \"verify\",\n    value: function verify() {\n      var that = this,\n          signatures = that.signatures,\n          key_promises = that.key_promises,\n          keyfinder = that.keyfinder,\n          promises = [],\n          check = !!keyfinder || Object.keys(that.key_promises).length > 0;\n\n      if (!check) {\n        throw new Error(\"No recipients defined. At least one is required to verify the JWS.\");\n      }\n\n      if (that.waiting_kid) {\n        throw new Error(\"still generating key IDs\");\n      }\n\n      signatures.forEach(function (sig) {\n        var kid = sig.protected.kid;\n\n        if (keyfinder) {\n          key_promises[kid] = keyfinder(kid);\n        }\n\n        promises.push(that.cryptographer.verify(sig.aad, that.payload, sig.signature, key_promises[kid], kid).then(function (vr) {\n          if (vr.verified) {\n            vr.payload = new _jose_utils__WEBPACK_IMPORTED_MODULE_0__[\"Base64Url\"]().decode(that.payload);\n          }\n\n          return vr;\n        }));\n      });\n      return Promise.all(promises);\n    }\n  }]);\n\n  return Verifier;\n}();\n\n//# sourceURL=webpack://Jose/./lib/jose-jws-verify.js?");
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Verifier", function() { return Verifier; });
+/* harmony import */ var _jose_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./jose-utils */ "./lib/jose-utils.js");
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+/*-
+ * Copyright 2015 Peculiar Ventures
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Handles signature verification.
+ *
+ * @param cryptographer  an instance of WebCryptographer (or equivalent). Keep
+ *                       in mind that decryption mutates the cryptographer.
+ * @param message        a JWS message
+ * @param keyfinder (optional) a function returning a Promise<CryptoKey> given
+ *                             a key id
+ *
+ * @author Patrizio Bruno <patrizio@desertconsulting.net>
+ */
+
+var Verifier =
+/*#__PURE__*/
+function () {
+  function Verifier(cryptographer, message, keyfinder) {
+    _classCallCheck(this, Verifier);
+
+    var that = this,
+        alg,
+        jwt,
+        aad,
+        header,
+        payload,
+        signatures,
+        protectedHeader,
+        jwtRx = /^([0-9a-z_\-]+)\.([0-9a-z_\-]+)\.([0-9a-z_\-]+)$/i;
+    that.cryptographer = cryptographer;
+    alg = cryptographer.getContentSignAlgorithm();
+
+    if (_jose_utils__WEBPACK_IMPORTED_MODULE_0__["isString"](message)) {
+      if (jwt = jwtRx.exec(message)) {
+        if (jwt.length != 4) {
+          throw new Error("wrong JWS compact serialization format");
+        }
+
+        message = {
+          protected: jwt[1],
+          payload: jwt[2],
+          signature: jwt[3]
+        };
+      } else {
+        message = JSON.parse(message);
+      }
+    } else if (_typeof(message) != "object") {
+      throw new Error("data format not supported");
+    }
+
+    aad = message.protected;
+    header = message.header;
+    payload = message.payload;
+    signatures = message.signatures instanceof Array ? message.signatures.slice(0) : [];
+    signatures.forEach(function (sign) {
+      sign.aad = sign.protected;
+      sign.protected = JSON.parse(new _jose_utils__WEBPACK_IMPORTED_MODULE_0__["Base64Url"]().decode(sign.protected));
+    });
+    that.aad = aad;
+    protectedHeader = new _jose_utils__WEBPACK_IMPORTED_MODULE_0__["Base64Url"]().decode(aad);
+
+    try {
+      protectedHeader = JSON.parse(protectedHeader);
+    } catch (e) {}
+
+    if (!protectedHeader && !header) {
+      throw new Error("at least one header is required");
+    }
+
+    if (!protectedHeader.alg) {
+      throw new Error("'alg' is a mandatory header");
+    }
+
+    if (protectedHeader.alg != alg) {
+      throw new Error("the alg header '" + protectedHeader.alg + "' doesn't match the requested algorithm '" + alg + "'");
+    }
+
+    if (protectedHeader && protectedHeader.typ && protectedHeader.typ != "JWT") {
+      throw new Error("typ '" + protectedHeader.typ + "' not supported");
+    }
+
+    if (message.signature) {
+      signatures.unshift({
+        aad: aad,
+        protected: protectedHeader,
+        header: header,
+        signature: message.signature
+      });
+    }
+
+    that.signatures = [];
+
+    for (var i = 0; i < signatures.length; i++) {
+      that.signatures[i] = JSON.parse(JSON.stringify(signatures[i]));
+      that.signatures[i].signature = _jose_utils__WEBPACK_IMPORTED_MODULE_0__["arrayFromString"](new _jose_utils__WEBPACK_IMPORTED_MODULE_0__["Base64Url"]().decode(signatures[i].signature));
+    }
+
+    that.payload = payload;
+    that.key_promises = {};
+    that.waiting_kid = 0;
+
+    if (keyfinder) {
+      that.keyfinder = keyfinder;
+    }
+  }
+  /**
+   * Add supported recipients to verify multiple signatures
+   *
+   * @param key            public key in json format. Parameters can be base64
+   *                       encoded, strings or number (for 'e'), or CryptoKey.
+   * @param key_id         a string identifying the key. OPTIONAL
+   * @param alg            String signature algorithm. OPTIONAL
+   * @returns Promise<string> a Promise of a key id
+   */
+
+
+  _createClass(Verifier, [{
+    key: "addRecipient",
+    value: function addRecipient(key, key_id, alg) {
+      var that = this;
+      var kid_promise;
+      var key_promise;
+
+      if (_jose_utils__WEBPACK_IMPORTED_MODULE_0__["isCryptoKey"](key)) {
+        key_promise = new Promise(function (resolve) {
+          resolve(key);
+        });
+      } else {
+        key_promise = _jose_utils__WEBPACK_IMPORTED_MODULE_0__["importPublicKey"](key, alg || that.cryptographer.getContentSignAlgorithm(), "verify");
+      }
+
+      if (key_id) {
+        kid_promise = new Promise(function (resolve) {
+          resolve(key_id);
+        });
+      } else if (_jose_utils__WEBPACK_IMPORTED_MODULE_0__["isCryptoKey"](key)) {
+        throw new Error("key_id is a mandatory argument when the key is a CryptoKey");
+      } else {
+        console.log("it's unsafe to omit a key_id");
+        kid_promise = this.cryptographer.keyId(key);
+      }
+
+      that.waiting_kid++;
+      return kid_promise.then(function (kid) {
+        that.key_promises[kid] = key_promise;
+        that.waiting_kid--;
+        return kid;
+      });
+    }
+    /**
+     * Verifies a JWS signature
+     *
+     * @returns Promise<Array> a Promise of an array of objects { kid: string, verified: bool, payload?: string }
+     *
+     * payload is only populated and usable if verified is true
+     */
+
+  }, {
+    key: "verify",
+    value: function verify() {
+      var that = this,
+          signatures = that.signatures,
+          key_promises = that.key_promises,
+          keyfinder = that.keyfinder,
+          promises = [],
+          check = !!keyfinder || Object.keys(that.key_promises).length > 0;
+
+      if (!check) {
+        throw new Error("No recipients defined. At least one is required to verify the JWS.");
+      }
+
+      if (that.waiting_kid) {
+        throw new Error("still generating key IDs");
+      }
+
+      signatures.forEach(function (sig) {
+        var kid = sig.protected.kid;
+
+        if (keyfinder) {
+          key_promises[kid] = keyfinder(kid);
+        }
+
+        promises.push(that.cryptographer.verify(sig.aad, that.payload, sig.signature, key_promises[kid], kid).then(function (vr) {
+          if (vr.verified) {
+            vr.payload = new _jose_utils__WEBPACK_IMPORTED_MODULE_0__["Base64Url"]().decode(that.payload);
+          }
+
+          return vr;
+        }));
+      });
+      return Promise.all(promises);
+    }
+  }]);
+
+  return Verifier;
+}();
 
 /***/ }),
 
@@ -163,11 +1890,542 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) *
 /*!***************************!*\
   !*** ./lib/jose-utils.js ***!
   \***************************/
-/*! exports provided: importRsaPublicKey, importRsaPrivateKey, isString, arrayish, convertRsaKey, arrayFromString, arrayFromUtf8String, stringFromArray, utf8StringFromArray, stripLeadingZeros, arrayFromInt32, arrayBufferConcat, sha256, isCryptoKey, Base64Url */
+/*! exports provided: importPublicKey, importPrivateKey, importEcPublicKey, importEcPrivateKey, importRsaPublicKey, importRsaPrivateKey, isString, arrayish, convertRsaKey, arrayFromString, arrayFromUtf8String, stringFromArray, utf8StringFromArray, stripLeadingZeros, arrayFromInt32, arrayBufferConcat, sha256, isCryptoKey, Base64Url */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"importRsaPublicKey\", function() { return importRsaPublicKey; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"importRsaPrivateKey\", function() { return importRsaPrivateKey; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"isString\", function() { return isString; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"arrayish\", function() { return arrayish; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"convertRsaKey\", function() { return convertRsaKey; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"arrayFromString\", function() { return arrayFromString; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"arrayFromUtf8String\", function() { return arrayFromUtf8String; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"stringFromArray\", function() { return stringFromArray; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"utf8StringFromArray\", function() { return utf8StringFromArray; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"stripLeadingZeros\", function() { return stripLeadingZeros; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"arrayFromInt32\", function() { return arrayFromInt32; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"arrayBufferConcat\", function() { return arrayBufferConcat; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"sha256\", function() { return sha256; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"isCryptoKey\", function() { return isCryptoKey; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"Base64Url\", function() { return Base64Url; });\n/* harmony import */ var _jose_jwe_webcryptographer__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./jose-jwe-webcryptographer */ \"./lib/jose-jwe-webcryptographer.js\");\nfunction _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError(\"Cannot call a class as a function\"); } }\n\nfunction _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if (\"value\" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }\n\nfunction _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }\n\n/*-\n * Copyright 2014 Square Inc.\n *\n * Licensed under the Apache License, Version 2.0 (the \"License\");\n * you may not use this file except in compliance with the License.\n * You may obtain a copy of the License at\n *\n *     http://www.apache.org/licenses/LICENSE-2.0\n *\n * Unless required by applicable law or agreed to in writing, software\n * distributed under the License is distributed on an \"AS IS\" BASIS,\n * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n * See the License for the specific language governing permissions and\n * limitations under the License.\n */\n\nvar webCryptographer = new _jose_jwe_webcryptographer__WEBPACK_IMPORTED_MODULE_0__[\"WebCryptographer\"]();\n/**\n * Converts the output from `openssl x509 -text` or `openssl rsa -text` into a\n * CryptoKey which can then be used with RSA-OAEP. Also accepts (and validates)\n * JWK keys.\n *\n * TODO: this code probably belongs in the webcryptographer.\n *\n * @param rsa_key  public RSA key in json format. Parameters can be base64\n *                 encoded, strings or number (for 'e').\n * @param alg      String, name of the algorithm\n * @return Promise<CryptoKey>\n */\n\nvar importRsaPublicKey = function importRsaPublicKey(rsa_key, alg) {\n  var jwk;\n  var config;\n  var usage = webCryptographer.getKeyUsageByAlg(alg);\n\n  if (usage.publicKey == \"wrapKey\") {\n    if (!rsa_key.alg) {\n      rsa_key.alg = alg;\n    }\n\n    jwk = convertRsaKey(rsa_key, [\"n\", \"e\"]);\n    config = webCryptographer.getCryptoConfig(alg);\n  } else {\n    var rk = {};\n\n    for (var name in rsa_key) {\n      if (rsa_key.hasOwnProperty(name)) {\n        rk[name] = rsa_key[name];\n      }\n    }\n\n    if (!rk.alg && alg) {\n      rk.alg = alg;\n    }\n\n    config = webCryptographer.getSignConfig(rk.alg);\n    jwk = convertRsaKey(rk, [\"n\", \"e\"]);\n    jwk.ext = true;\n  }\n\n  return Jose.crypto.subtle.importKey(\"jwk\", jwk, config.id, false, [usage.publicKey]);\n};\n/**\n * Converts the output from `openssl x509 -text` or `openssl rsa -text` into a\n * CryptoKey which can then be used with RSA-OAEP and RSA. Also accepts (and validates)\n * JWK keys.\n *\n * TODO: this code probably belongs in the webcryptographer.\n *\n * @param rsa_key  private RSA key in json format. Parameters can be base64\n *                 encoded, strings or number (for 'e').\n * @param alg      String, name of the algorithm\n * @return Promise<CryptoKey>\n */\n\nvar importRsaPrivateKey = function importRsaPrivateKey(rsa_key, alg) {\n  var jwk;\n  var config;\n  var usage = webCryptographer.getKeyUsageByAlg(alg);\n\n  if (usage.privateKey == \"unwrapKey\") {\n    if (!rsa_key.alg) {\n      rsa_key.alg = alg;\n    }\n\n    jwk = convertRsaKey(rsa_key, [\"n\", \"e\", \"d\", \"p\", \"q\", \"dp\", \"dq\", \"qi\"]);\n    config = webCryptographer.getCryptoConfig(alg);\n  } else {\n    var rk = {};\n\n    for (var name in rsa_key) {\n      if (rsa_key.hasOwnProperty(name)) {\n        rk[name] = rsa_key[name];\n      }\n    }\n\n    config = webCryptographer.getSignConfig(alg);\n\n    if (!rk.alg && alg) {\n      rk.alg = alg;\n    }\n\n    jwk = convertRsaKey(rk, [\"n\", \"e\", \"d\", \"p\", \"q\", \"dp\", \"dq\", \"qi\"]);\n    jwk.ext = true;\n  }\n\n  return Jose.crypto.subtle.importKey(\"jwk\", jwk, config.id, false, [usage.privateKey]);\n}; // Private functions\n\nvar isString = function isString(str) {\n  return typeof str == \"string\" || str instanceof String;\n};\n/**\n * Takes an arrayish (an array, ArrayBuffer or Uint8Array)\n * and returns an array or a Uint8Array.\n *\n * @param arr  arrayish\n * @return array or Uint8Array\n */\n\nvar arrayish = function arrayish(arr) {\n  if (arr instanceof Array) {\n    return arr;\n  }\n\n  if (arr instanceof Uint8Array) {\n    return arr;\n  }\n\n  if (arr instanceof ArrayBuffer) {\n    return new Uint8Array(arr);\n  }\n\n  webCryptographer.assert(false, \"arrayish: invalid input\");\n};\n/**\n * Checks if an RSA key contains all the expected parameters. Also checks their\n * types. Converts hex encoded strings (or numbers) to base64.\n *\n * @param rsa_key     RSA key in json format. Parameters can be base64 encoded,\n *                    strings or number (for 'e').\n * @param parameters  array<string>\n * @return json\n */\n\nvar convertRsaKey = function convertRsaKey(rsa_key, parameters) {\n  var r = {};\n  var alg; // Check that we have all the parameters\n\n  var missing = [];\n  parameters.map(function (p) {\n    if (typeof rsa_key[p] == \"undefined\") {\n      missing.push(p);\n    }\n  });\n\n  if (missing.length > 0) {\n    webCryptographer.assert(false, \"convertRsaKey: Was expecting \" + missing.join());\n  } // kty is either missing or is set to \"RSA\"\n\n\n  if (typeof rsa_key.kty != \"undefined\") {\n    webCryptographer.assert(rsa_key.kty == \"RSA\", \"convertRsaKey: expecting rsa_key['kty'] to be 'RSA'\");\n  }\n\n  r.kty = \"RSA\";\n\n  try {\n    webCryptographer.getSignConfig(rsa_key.alg);\n    alg = rsa_key.alg;\n  } catch (err) {\n    try {\n      webCryptographer.getCryptoConfig(rsa_key.alg);\n      alg = rsa_key.alg;\n    } catch (er) {\n      webCryptographer.assert(alg, \"convertRsaKey: expecting rsa_key['alg'] to have a valid value\");\n    }\n  }\n\n  r.alg = alg; // note: we punt on checking key_ops\n\n  var intFromHex = function intFromHex(e) {\n    return parseInt(e, 16);\n  };\n\n  for (var i = 0; i < parameters.length; i++) {\n    var p = parameters[i];\n    var v = rsa_key[p];\n    var base64UrlEncoder = new Base64Url();\n\n    if (p == \"e\") {\n      if (typeof v == \"number\") {\n        v = base64UrlEncoder.encodeArray(stripLeadingZeros(arrayFromInt32(v)));\n      }\n    } else if (/^([0-9a-fA-F]{2}:)+[0-9a-fA-F]{2}$/.test(v)) {\n      var arr = v.split(\":\").map(intFromHex);\n      v = base64UrlEncoder.encodeArray(stripLeadingZeros(arr));\n    } else if (typeof v != \"string\") {\n      webCryptographer.assert(false, \"convertRsaKey: expecting rsa_key['\" + p + \"'] to be a string\");\n    }\n\n    r[p] = v;\n  }\n\n  return r;\n};\n/**\n * Converts a string into an array of ascii codes.\n *\n * @param str  ascii string\n * @return Uint8Array\n */\n\nvar arrayFromString = function arrayFromString(str) {\n  webCryptographer.assert(isString(str), \"arrayFromString: invalid input\");\n  var arr = str.split('').map(function (c) {\n    return c.charCodeAt(0);\n  });\n  return new Uint8Array(arr);\n};\n/**\n * Converts a string into an array of utf-8 codes.\n *\n* @param str  utf-8 string\n * @return Uint8Array\n */\n\nvar arrayFromUtf8String = function arrayFromUtf8String(str) {\n  webCryptographer.assert(isString(str), \"arrayFromUtf8String: invalid input\"); // javascript represents strings as utf-16. Jose imposes the use of\n  // utf-8, so we need to convert from one representation to the other.\n\n  str = unescape(encodeURIComponent(str));\n  return arrayFromString(str);\n};\n/**\n * Converts an array of ascii bytes into a string.\n *\n * @param arr  arrayish\n * @return ascii string\n */\n\nvar stringFromArray = function stringFromArray(arr) {\n  arr = arrayish(arr);\n  var r = '';\n\n  for (var i = 0; i < arr.length; i++) {\n    r += String.fromCharCode(arr[i]);\n  }\n\n  return r;\n};\n/**\n * Converts an array of ascii bytes into a string.\n *\n * @param arr  ArrayBuffer\n * @return ascii string\n */\n\nvar utf8StringFromArray = function utf8StringFromArray(arr) {\n  webCryptographer.assert(arr instanceof ArrayBuffer, \"utf8StringFromArray: invalid input\"); // javascript represents strings as utf-16. Jose imposes the use of\n  // utf-8, so we need to convert from one representation to the other.\n\n  var r = stringFromArray(arr);\n  return decodeURIComponent(escape(r));\n};\n/**\n * Strips leading zero in an array.\n *\n * @param arr  arrayish\n * @return array\n */\n\nvar stripLeadingZeros = function stripLeadingZeros(arr) {\n  if (arr instanceof ArrayBuffer) {\n    arr = new Uint8Array(arr);\n  }\n\n  var is_leading_zero = true;\n  var r = [];\n\n  for (var i = 0; i < arr.length; i++) {\n    if (is_leading_zero && arr[i] === 0) {\n      continue;\n    }\n\n    is_leading_zero = false;\n    r.push(arr[i]);\n  }\n\n  return r;\n};\n/**\n * Converts a number into an array of 4 bytes (big endian).\n *\n * @param i  number\n * @return ArrayBuffer\n */\n\nvar arrayFromInt32 = function arrayFromInt32(i) {\n  webCryptographer.assert(typeof i == \"number\", \"arrayFromInt32: invalid input\");\n  webCryptographer.assert(i == i | 0, \"arrayFromInt32: out of range\");\n  var buf = new Uint8Array(new Uint32Array([i]).buffer);\n  var r = new Uint8Array(4);\n\n  for (var j = 0; j < 4; j++) {\n    r[j] = buf[3 - j];\n  }\n\n  return r.buffer;\n};\n/**\n * Concatenates arrayishes.\n * \n * note: cannot be a Arrow function, because Arrow functions do not expose 'arguments' object\n * and Rest parameters are not supported in Babel yet.\n *\n * @param arguments two or more arrayishes\n * @return Uint8Array\n */\n\nfunction arrayBufferConcat()\n/* ... */\n{\n  // Compute total size\n  var args = [];\n  var total = 0;\n\n  for (var i = 0; i < arguments.length; i++) {\n    args.push(arrayish(arguments[i]));\n    total += args[i].length;\n  }\n\n  var r = new Uint8Array(total);\n  var offset = 0;\n\n  for (i = 0; i < arguments.length; i++) {\n    for (var j = 0; j < args[i].length; j++) {\n      r[offset++] = args[i][j];\n    }\n  }\n\n  webCryptographer.assert(offset == total, \"arrayBufferConcat: unexpected offset\");\n  return r;\n}\nvar sha256 = function sha256(str) {\n  // Browser docs indicate the first parameter to crypto.subtle.digest to be a\n  // DOMString. This was initially implemented as an object and continues to be\n  // supported, so we favor the older form for backwards compatibility.\n  return Jose.crypto.subtle.digest({\n    name: \"SHA-256\"\n  }, arrayFromString(str)).then(function (hash) {\n    return this.encodeArray(hash);\n  });\n};\nvar isCryptoKey = function isCryptoKey(rsa_key) {\n  // Some browsers don't expose the CryptoKey as an object, so we need to check\n  // the constructor's name.\n  if (rsa_key.constructor.name == 'CryptoKey') {\n    return true;\n  } // In the presence of minifiers, relying on class names can be problematic,\n  // so let's also allow objects that have an 'algorithm' property.\n\n\n  if (rsa_key.hasOwnProperty('algorithm')) {\n    return true;\n  }\n\n  return false;\n};\nvar Base64Url =\n/*#__PURE__*/\nfunction () {\n  function Base64Url() {\n    _classCallCheck(this, Base64Url);\n  }\n\n  _createClass(Base64Url, [{\n    key: \"encode\",\n\n    /**\n     * Base64Url encodes a string (no trailing '=')\n     *\n     * @param str  string\n     * @return string\n     */\n    value: function encode(str) {\n      webCryptographer.assert(isString(str), \"Base64Url.encode: invalid input\");\n      return btoa(str).replace(/\\+/g, \"-\").replace(/\\//g, \"_\").replace(/=+$/, \"\");\n    }\n    /**\n     * Base64Url encodes an array\n     *\n     * @param arr array or ArrayBuffer\n     * @return string\n     */\n\n  }, {\n    key: \"encodeArray\",\n    value: function encodeArray(arr) {\n      return this.encode(stringFromArray(arr));\n    }\n    /**\n     * Base64Url decodes a string\n     *\n     * @param str  string\n     * @return string\n     */\n\n  }, {\n    key: \"decode\",\n    value: function decode(str) {\n      webCryptographer.assert(isString(str), \"Base64Url.decode: invalid input\"); // atob is nice and ignores missing '='\n\n      return atob(str.replace(/-/g, \"+\").replace(/_/g, \"/\"));\n    }\n  }, {\n    key: \"decodeArray\",\n    value: function decodeArray(str) {\n      webCryptographer.assert(isString(str), \"Base64Url.decodeArray: invalid input\");\n      return arrayFromString(this.decode(str));\n    }\n  }]);\n\n  return Base64Url;\n}();\n\n//# sourceURL=webpack://Jose/./lib/jose-utils.js?");
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "importPublicKey", function() { return importPublicKey; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "importPrivateKey", function() { return importPrivateKey; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "importEcPublicKey", function() { return importEcPublicKey; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "importEcPrivateKey", function() { return importEcPrivateKey; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "importRsaPublicKey", function() { return importRsaPublicKey; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "importRsaPrivateKey", function() { return importRsaPrivateKey; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isString", function() { return isString; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "arrayish", function() { return arrayish; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "convertRsaKey", function() { return convertRsaKey; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "arrayFromString", function() { return arrayFromString; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "arrayFromUtf8String", function() { return arrayFromUtf8String; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "stringFromArray", function() { return stringFromArray; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "utf8StringFromArray", function() { return utf8StringFromArray; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "stripLeadingZeros", function() { return stripLeadingZeros; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "arrayFromInt32", function() { return arrayFromInt32; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "arrayBufferConcat", function() { return arrayBufferConcat; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "sha256", function() { return sha256; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isCryptoKey", function() { return isCryptoKey; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Base64Url", function() { return Base64Url; });
+/* harmony import */ var _jose_jwe_webcryptographer__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./jose-jwe-webcryptographer */ "./lib/jose-jwe-webcryptographer.js");
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+/*-
+ * Copyright 2014 Square Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+var webCryptographer = new _jose_jwe_webcryptographer__WEBPACK_IMPORTED_MODULE_0__["WebCryptographer"]();
+/**
+ * Import a public key in JWK format, either RSA or ECDSA.
+ *
+ * @param key   JWK public key
+ * @param alg   Name of the JWA signing algorithm (e.g. RS256)
+ * @return Promise<CryptoKey>
+ */
+
+var importPublicKey = function importPublicKey(key, alg) {
+  switch (alg) {
+    case "RS256":
+    case "RS384":
+    case "RS512":
+    case "PS256":
+    case "PS384":
+    case "PS512":
+      return importRsaPublicKey(key, alg);
+
+    case "ES256":
+    case "ES384":
+    case "ES512":
+      return importEcPublicKey(key, alg);
+
+    default:
+      throw Error("unsupported algorithm: " + alg);
+  }
+};
+/**
+ * Import a private key in JWK format, either RSA or EC.
+ *
+ * @param key   JWK private key
+ * @param alg   Name of the JWA signing algorithm (e.g. RS256)
+ * @return Promise<CryptoKey>
+ */
+
+var importPrivateKey = function importPrivateKey(key, alg) {
+  switch (alg) {
+    case "RS256":
+    case "RS384":
+    case "RS512":
+    case "PS256":
+    case "PS384":
+    case "PS512":
+      return importRsaPrivateKey(key, alg);
+
+    case "ES256":
+    case "ES384":
+    case "ES512":
+      return importEcPrivateKey(key, alg);
+
+    default:
+      throw Error("unsupported algorithm: " + alg);
+  }
+};
+/**
+ * Import a public EC key in JWK format.
+ *
+ * @param key   JWK public key
+ * @param alg   Name of the JWA signing algorithm (e.g. ES256)
+ * @return Promise<CryptoKey>
+ */
+
+var importEcPublicKey = function importEcPublicKey(ec_key, alg) {
+  var config = webCryptographer.getSignConfig(alg);
+  var usage = webCryptographer.getKeyUsageByAlg(alg);
+  return Jose.crypto.subtle.importKey("jwk", ec_key, config.id, false, [usage.publicKey]);
+};
+/**
+ * Import a private EC key in JWK format.
+ *
+ * @param key   JWK private key
+ * @param alg   Name of the JWA signing algorithm (e.g. ES256)
+ * @return Promise<CryptoKey>
+ */
+
+var importEcPrivateKey = function importEcPrivateKey(ec_key, alg) {
+  var config = webCryptographer.getSignConfig(alg);
+  var usage = webCryptographer.getKeyUsageByAlg(alg);
+  return Jose.crypto.subtle.importKey("jwk", ec_key, config.id, false, [usage.privateKey]);
+};
+/**
+ * Converts the output from `openssl x509 -text` or `openssl rsa -text` into a
+ * CryptoKey which can then be used with RSA-OAEP. Also accepts (and validates)
+ * JWK keys.
+ *
+ * TODO: this code probably belongs in the webcryptographer.
+ *
+ * @param rsa_key  public RSA key in json format. Parameters can be base64
+ *                 encoded, strings or number (for 'e').
+ * @param alg      String, name of the algorithm
+ * @return Promise<CryptoKey>
+ */
+
+var importRsaPublicKey = function importRsaPublicKey(rsa_key, alg) {
+  var jwk;
+  var config;
+  var usage = webCryptographer.getKeyUsageByAlg(alg);
+
+  if (usage.publicKey == "wrapKey") {
+    if (!rsa_key.alg) {
+      rsa_key.alg = alg;
+    }
+
+    jwk = convertRsaKey(rsa_key, ["n", "e"]);
+    config = webCryptographer.getCryptoConfig(alg);
+  } else {
+    var rk = {};
+
+    for (var name in rsa_key) {
+      if (rsa_key.hasOwnProperty(name)) {
+        rk[name] = rsa_key[name];
+      }
+    }
+
+    if (!rk.alg && alg) {
+      rk.alg = alg;
+    }
+
+    config = webCryptographer.getSignConfig(rk.alg);
+    jwk = convertRsaKey(rk, ["n", "e"]);
+    jwk.ext = true;
+  }
+
+  return Jose.crypto.subtle.importKey("jwk", jwk, config.id, false, [usage.publicKey]);
+};
+/**
+ * Converts the output from `openssl x509 -text` or `openssl rsa -text` into a
+ * CryptoKey which can then be used with RSA-OAEP and RSA. Also accepts (and validates)
+ * JWK keys.
+ *
+ * TODO: this code probably belongs in the webcryptographer.
+ *
+ * @param rsa_key  private RSA key in json format. Parameters can be base64
+ *                 encoded, strings or number (for 'e').
+ * @param alg      String, name of the algorithm
+ * @return Promise<CryptoKey>
+ */
+
+var importRsaPrivateKey = function importRsaPrivateKey(rsa_key, alg) {
+  var jwk;
+  var config;
+  var usage = webCryptographer.getKeyUsageByAlg(alg);
+
+  if (usage.privateKey == "unwrapKey") {
+    if (!rsa_key.alg) {
+      rsa_key.alg = alg;
+    }
+
+    jwk = convertRsaKey(rsa_key, ["n", "e", "d", "p", "q", "dp", "dq", "qi"]);
+    config = webCryptographer.getCryptoConfig(alg);
+  } else {
+    var rk = {};
+
+    for (var name in rsa_key) {
+      if (rsa_key.hasOwnProperty(name)) {
+        rk[name] = rsa_key[name];
+      }
+    }
+
+    config = webCryptographer.getSignConfig(alg);
+
+    if (!rk.alg && alg) {
+      rk.alg = alg;
+    }
+
+    jwk = convertRsaKey(rk, ["n", "e", "d", "p", "q", "dp", "dq", "qi"]);
+    jwk.ext = true;
+  }
+
+  return Jose.crypto.subtle.importKey("jwk", jwk, config.id, false, [usage.privateKey]);
+}; // Private functions
+
+var isString = function isString(str) {
+  return typeof str == "string" || str instanceof String;
+};
+/**
+ * Takes an arrayish (an array, ArrayBuffer or Uint8Array)
+ * and returns an array or a Uint8Array.
+ *
+ * @param arr  arrayish
+ * @return array or Uint8Array
+ */
+
+var arrayish = function arrayish(arr) {
+  if (arr instanceof Array) {
+    return arr;
+  }
+
+  if (arr instanceof Uint8Array) {
+    return arr;
+  }
+
+  if (arr instanceof ArrayBuffer) {
+    return new Uint8Array(arr);
+  }
+
+  webCryptographer.assert(false, "arrayish: invalid input");
+};
+/**
+ * Checks if an RSA key contains all the expected parameters. Also checks their
+ * types. Converts hex encoded strings (or numbers) to base64.
+ *
+ * @param rsa_key     RSA key in json format. Parameters can be base64 encoded,
+ *                    strings or number (for 'e').
+ * @param parameters  array<string>
+ * @return json
+ */
+
+var convertRsaKey = function convertRsaKey(rsa_key, parameters) {
+  var r = {};
+  var alg; // Check that we have all the parameters
+
+  var missing = [];
+  parameters.map(function (p) {
+    if (typeof rsa_key[p] == "undefined") {
+      missing.push(p);
+    }
+  });
+
+  if (missing.length > 0) {
+    webCryptographer.assert(false, "convertRsaKey: Was expecting " + missing.join());
+  } // kty is either missing or is set to "RSA"
+
+
+  if (typeof rsa_key.kty != "undefined") {
+    webCryptographer.assert(rsa_key.kty == "RSA", "convertRsaKey: expecting rsa_key['kty'] to be 'RSA'");
+  }
+
+  r.kty = "RSA";
+
+  try {
+    webCryptographer.getSignConfig(rsa_key.alg);
+    alg = rsa_key.alg;
+  } catch (err) {
+    try {
+      webCryptographer.getCryptoConfig(rsa_key.alg);
+      alg = rsa_key.alg;
+    } catch (er) {
+      webCryptographer.assert(alg, "convertRsaKey: expecting rsa_key['alg'] to have a valid value");
+    }
+  }
+
+  r.alg = alg; // note: we punt on checking key_ops
+
+  var intFromHex = function intFromHex(e) {
+    return parseInt(e, 16);
+  };
+
+  for (var i = 0; i < parameters.length; i++) {
+    var p = parameters[i];
+    var v = rsa_key[p];
+    var base64UrlEncoder = new Base64Url();
+
+    if (p == "e") {
+      if (typeof v == "number") {
+        v = base64UrlEncoder.encodeArray(stripLeadingZeros(arrayFromInt32(v)));
+      }
+    } else if (/^([0-9a-fA-F]{2}:)+[0-9a-fA-F]{2}$/.test(v)) {
+      var arr = v.split(":").map(intFromHex);
+      v = base64UrlEncoder.encodeArray(stripLeadingZeros(arr));
+    } else if (typeof v != "string") {
+      webCryptographer.assert(false, "convertRsaKey: expecting rsa_key['" + p + "'] to be a string");
+    }
+
+    r[p] = v;
+  }
+
+  return r;
+};
+/**
+ * Converts a string into an array of ascii codes.
+ *
+ * @param str  ascii string
+ * @return Uint8Array
+ */
+
+var arrayFromString = function arrayFromString(str) {
+  webCryptographer.assert(isString(str), "arrayFromString: invalid input");
+  var arr = str.split('').map(function (c) {
+    return c.charCodeAt(0);
+  });
+  return new Uint8Array(arr);
+};
+/**
+ * Converts a string into an array of utf-8 codes.
+ *
+* @param str  utf-8 string
+ * @return Uint8Array
+ */
+
+var arrayFromUtf8String = function arrayFromUtf8String(str) {
+  webCryptographer.assert(isString(str), "arrayFromUtf8String: invalid input"); // javascript represents strings as utf-16. Jose imposes the use of
+  // utf-8, so we need to convert from one representation to the other.
+
+  str = unescape(encodeURIComponent(str));
+  return arrayFromString(str);
+};
+/**
+ * Converts an array of ascii bytes into a string.
+ *
+ * @param arr  arrayish
+ * @return ascii string
+ */
+
+var stringFromArray = function stringFromArray(arr) {
+  arr = arrayish(arr);
+  var r = '';
+
+  for (var i = 0; i < arr.length; i++) {
+    r += String.fromCharCode(arr[i]);
+  }
+
+  return r;
+};
+/**
+ * Converts an array of ascii bytes into a string.
+ *
+ * @param arr  ArrayBuffer
+ * @return ascii string
+ */
+
+var utf8StringFromArray = function utf8StringFromArray(arr) {
+  webCryptographer.assert(arr instanceof ArrayBuffer, "utf8StringFromArray: invalid input"); // javascript represents strings as utf-16. Jose imposes the use of
+  // utf-8, so we need to convert from one representation to the other.
+
+  var r = stringFromArray(arr);
+  return decodeURIComponent(escape(r));
+};
+/**
+ * Strips leading zero in an array.
+ *
+ * @param arr  arrayish
+ * @return array
+ */
+
+var stripLeadingZeros = function stripLeadingZeros(arr) {
+  if (arr instanceof ArrayBuffer) {
+    arr = new Uint8Array(arr);
+  }
+
+  var is_leading_zero = true;
+  var r = [];
+
+  for (var i = 0; i < arr.length; i++) {
+    if (is_leading_zero && arr[i] === 0) {
+      continue;
+    }
+
+    is_leading_zero = false;
+    r.push(arr[i]);
+  }
+
+  return r;
+};
+/**
+ * Converts a number into an array of 4 bytes (big endian).
+ *
+ * @param i  number
+ * @return ArrayBuffer
+ */
+
+var arrayFromInt32 = function arrayFromInt32(i) {
+  webCryptographer.assert(typeof i == "number", "arrayFromInt32: invalid input");
+  webCryptographer.assert(i == i | 0, "arrayFromInt32: out of range");
+  var buf = new Uint8Array(new Uint32Array([i]).buffer);
+  var r = new Uint8Array(4);
+
+  for (var j = 0; j < 4; j++) {
+    r[j] = buf[3 - j];
+  }
+
+  return r.buffer;
+};
+/**
+ * Concatenates arrayishes.
+ *
+ * note: cannot be a Arrow function, because Arrow functions do not expose 'arguments' object
+ * and Rest parameters are not supported in Babel yet.
+ *
+ * @param arguments two or more arrayishes
+ * @return Uint8Array
+ */
+
+function arrayBufferConcat()
+/* ... */
+{
+  // Compute total size
+  var args = [];
+  var total = 0;
+
+  for (var i = 0; i < arguments.length; i++) {
+    args.push(arrayish(arguments[i]));
+    total += args[i].length;
+  }
+
+  var r = new Uint8Array(total);
+  var offset = 0;
+
+  for (i = 0; i < arguments.length; i++) {
+    for (var j = 0; j < args[i].length; j++) {
+      r[offset++] = args[i][j];
+    }
+  }
+
+  webCryptographer.assert(offset == total, "arrayBufferConcat: unexpected offset");
+  return r;
+}
+var sha256 = function sha256(str) {
+  // Browser docs indicate the first parameter to crypto.subtle.digest to be a
+  // DOMString. This was initially implemented as an object and continues to be
+  // supported, so we favor the older form for backwards compatibility.
+  return Jose.crypto.subtle.digest({
+    name: "SHA-256"
+  }, arrayFromString(str)).then(function (hash) {
+    return new Base64Url().encodeArray(hash);
+  });
+};
+var isCryptoKey = function isCryptoKey(rsa_key) {
+  // Some browsers don't expose the CryptoKey as an object, so we need to check
+  // the constructor's name.
+  if (rsa_key.constructor.name == 'CryptoKey') {
+    return true;
+  } // In the presence of minifiers, relying on class names can be problematic,
+  // so let's also allow objects that have an 'algorithm' property.
+
+
+  if (rsa_key.hasOwnProperty('algorithm')) {
+    return true;
+  }
+
+  return false;
+};
+var Base64Url =
+/*#__PURE__*/
+function () {
+  function Base64Url() {
+    _classCallCheck(this, Base64Url);
+  }
+
+  _createClass(Base64Url, [{
+    key: "encode",
+
+    /**
+     * Base64Url encodes a string (no trailing '=')
+     *
+     * @param str  string
+     * @return string
+     */
+    value: function encode(str) {
+      webCryptographer.assert(isString(str), "Base64Url.encode: invalid input");
+      return btoa(str).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+    }
+    /**
+     * Base64Url encodes an array
+     *
+     * @param arr array or ArrayBuffer
+     * @return string
+     */
+
+  }, {
+    key: "encodeArray",
+    value: function encodeArray(arr) {
+      return this.encode(stringFromArray(arr));
+    }
+    /**
+     * Base64Url decodes a string
+     *
+     * @param str  string
+     * @return string
+     */
+
+  }, {
+    key: "decode",
+    value: function decode(str) {
+      webCryptographer.assert(isString(str), "Base64Url.decode: invalid input"); // atob is nice and ignores missing '='
+
+      return atob(str.replace(/-/g, "+").replace(/_/g, "/"));
+    }
+  }, {
+    key: "decodeArray",
+    value: function decodeArray(str) {
+      webCryptographer.assert(isString(str), "Base64Url.decodeArray: invalid input");
+      return arrayFromString(this.decode(str));
+    }
+  }]);
+
+  return Base64Url;
+}();
 
 /***/ }),
 
@@ -179,7 +2437,124 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) *
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-eval("\n\nexports.byteLength = byteLength;\nexports.toByteArray = toByteArray;\nexports.fromByteArray = fromByteArray;\nvar lookup = [];\nvar revLookup = [];\nvar Arr = typeof Uint8Array !== 'undefined' ? Uint8Array : Array;\nvar code = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';\n\nfor (var i = 0, len = code.length; i < len; ++i) {\n  lookup[i] = code[i];\n  revLookup[code.charCodeAt(i)] = i;\n} // Support decoding URL-safe base64 strings, as Node.js does.\n// See: https://en.wikipedia.org/wiki/Base64#URL_applications\n\n\nrevLookup['-'.charCodeAt(0)] = 62;\nrevLookup['_'.charCodeAt(0)] = 63;\n\nfunction getLens(b64) {\n  var len = b64.length;\n\n  if (len % 4 > 0) {\n    throw new Error('Invalid string. Length must be a multiple of 4');\n  } // Trim off extra bytes after placeholder bytes are found\n  // See: https://github.com/beatgammit/base64-js/issues/42\n\n\n  var validLen = b64.indexOf('=');\n  if (validLen === -1) validLen = len;\n  var placeHoldersLen = validLen === len ? 0 : 4 - validLen % 4;\n  return [validLen, placeHoldersLen];\n} // base64 is 4/3 + up to two characters of the original data\n\n\nfunction byteLength(b64) {\n  var lens = getLens(b64);\n  var validLen = lens[0];\n  var placeHoldersLen = lens[1];\n  return (validLen + placeHoldersLen) * 3 / 4 - placeHoldersLen;\n}\n\nfunction _byteLength(b64, validLen, placeHoldersLen) {\n  return (validLen + placeHoldersLen) * 3 / 4 - placeHoldersLen;\n}\n\nfunction toByteArray(b64) {\n  var tmp;\n  var lens = getLens(b64);\n  var validLen = lens[0];\n  var placeHoldersLen = lens[1];\n  var arr = new Arr(_byteLength(b64, validLen, placeHoldersLen));\n  var curByte = 0; // if there are placeholders, only get up to the last complete 4 chars\n\n  var len = placeHoldersLen > 0 ? validLen - 4 : validLen;\n\n  for (var i = 0; i < len; i += 4) {\n    tmp = revLookup[b64.charCodeAt(i)] << 18 | revLookup[b64.charCodeAt(i + 1)] << 12 | revLookup[b64.charCodeAt(i + 2)] << 6 | revLookup[b64.charCodeAt(i + 3)];\n    arr[curByte++] = tmp >> 16 & 0xFF;\n    arr[curByte++] = tmp >> 8 & 0xFF;\n    arr[curByte++] = tmp & 0xFF;\n  }\n\n  if (placeHoldersLen === 2) {\n    tmp = revLookup[b64.charCodeAt(i)] << 2 | revLookup[b64.charCodeAt(i + 1)] >> 4;\n    arr[curByte++] = tmp & 0xFF;\n  }\n\n  if (placeHoldersLen === 1) {\n    tmp = revLookup[b64.charCodeAt(i)] << 10 | revLookup[b64.charCodeAt(i + 1)] << 4 | revLookup[b64.charCodeAt(i + 2)] >> 2;\n    arr[curByte++] = tmp >> 8 & 0xFF;\n    arr[curByte++] = tmp & 0xFF;\n  }\n\n  return arr;\n}\n\nfunction tripletToBase64(num) {\n  return lookup[num >> 18 & 0x3F] + lookup[num >> 12 & 0x3F] + lookup[num >> 6 & 0x3F] + lookup[num & 0x3F];\n}\n\nfunction encodeChunk(uint8, start, end) {\n  var tmp;\n  var output = [];\n\n  for (var i = start; i < end; i += 3) {\n    tmp = (uint8[i] << 16 & 0xFF0000) + (uint8[i + 1] << 8 & 0xFF00) + (uint8[i + 2] & 0xFF);\n    output.push(tripletToBase64(tmp));\n  }\n\n  return output.join('');\n}\n\nfunction fromByteArray(uint8) {\n  var tmp;\n  var len = uint8.length;\n  var extraBytes = len % 3; // if we have 1 byte left, pad 2 bytes\n\n  var parts = [];\n  var maxChunkLength = 16383; // must be multiple of 3\n  // go through the array every three bytes, we'll deal with trailing stuff later\n\n  for (var i = 0, len2 = len - extraBytes; i < len2; i += maxChunkLength) {\n    parts.push(encodeChunk(uint8, i, i + maxChunkLength > len2 ? len2 : i + maxChunkLength));\n  } // pad the end with zeros, but make sure to not forget the extra bytes\n\n\n  if (extraBytes === 1) {\n    tmp = uint8[len - 1];\n    parts.push(lookup[tmp >> 2] + lookup[tmp << 4 & 0x3F] + '==');\n  } else if (extraBytes === 2) {\n    tmp = (uint8[len - 2] << 8) + uint8[len - 1];\n    parts.push(lookup[tmp >> 10] + lookup[tmp >> 4 & 0x3F] + lookup[tmp << 2 & 0x3F] + '=');\n  }\n\n  return parts.join('');\n}\n\n//# sourceURL=webpack://Jose/./node_modules/base64-js/index.js?");
+
+
+exports.byteLength = byteLength;
+exports.toByteArray = toByteArray;
+exports.fromByteArray = fromByteArray;
+var lookup = [];
+var revLookup = [];
+var Arr = typeof Uint8Array !== 'undefined' ? Uint8Array : Array;
+var code = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+
+for (var i = 0, len = code.length; i < len; ++i) {
+  lookup[i] = code[i];
+  revLookup[code.charCodeAt(i)] = i;
+} // Support decoding URL-safe base64 strings, as Node.js does.
+// See: https://en.wikipedia.org/wiki/Base64#URL_applications
+
+
+revLookup['-'.charCodeAt(0)] = 62;
+revLookup['_'.charCodeAt(0)] = 63;
+
+function getLens(b64) {
+  var len = b64.length;
+
+  if (len % 4 > 0) {
+    throw new Error('Invalid string. Length must be a multiple of 4');
+  } // Trim off extra bytes after placeholder bytes are found
+  // See: https://github.com/beatgammit/base64-js/issues/42
+
+
+  var validLen = b64.indexOf('=');
+  if (validLen === -1) validLen = len;
+  var placeHoldersLen = validLen === len ? 0 : 4 - validLen % 4;
+  return [validLen, placeHoldersLen];
+} // base64 is 4/3 + up to two characters of the original data
+
+
+function byteLength(b64) {
+  var lens = getLens(b64);
+  var validLen = lens[0];
+  var placeHoldersLen = lens[1];
+  return (validLen + placeHoldersLen) * 3 / 4 - placeHoldersLen;
+}
+
+function _byteLength(b64, validLen, placeHoldersLen) {
+  return (validLen + placeHoldersLen) * 3 / 4 - placeHoldersLen;
+}
+
+function toByteArray(b64) {
+  var tmp;
+  var lens = getLens(b64);
+  var validLen = lens[0];
+  var placeHoldersLen = lens[1];
+  var arr = new Arr(_byteLength(b64, validLen, placeHoldersLen));
+  var curByte = 0; // if there are placeholders, only get up to the last complete 4 chars
+
+  var len = placeHoldersLen > 0 ? validLen - 4 : validLen;
+
+  for (var i = 0; i < len; i += 4) {
+    tmp = revLookup[b64.charCodeAt(i)] << 18 | revLookup[b64.charCodeAt(i + 1)] << 12 | revLookup[b64.charCodeAt(i + 2)] << 6 | revLookup[b64.charCodeAt(i + 3)];
+    arr[curByte++] = tmp >> 16 & 0xFF;
+    arr[curByte++] = tmp >> 8 & 0xFF;
+    arr[curByte++] = tmp & 0xFF;
+  }
+
+  if (placeHoldersLen === 2) {
+    tmp = revLookup[b64.charCodeAt(i)] << 2 | revLookup[b64.charCodeAt(i + 1)] >> 4;
+    arr[curByte++] = tmp & 0xFF;
+  }
+
+  if (placeHoldersLen === 1) {
+    tmp = revLookup[b64.charCodeAt(i)] << 10 | revLookup[b64.charCodeAt(i + 1)] << 4 | revLookup[b64.charCodeAt(i + 2)] >> 2;
+    arr[curByte++] = tmp >> 8 & 0xFF;
+    arr[curByte++] = tmp & 0xFF;
+  }
+
+  return arr;
+}
+
+function tripletToBase64(num) {
+  return lookup[num >> 18 & 0x3F] + lookup[num >> 12 & 0x3F] + lookup[num >> 6 & 0x3F] + lookup[num & 0x3F];
+}
+
+function encodeChunk(uint8, start, end) {
+  var tmp;
+  var output = [];
+
+  for (var i = start; i < end; i += 3) {
+    tmp = (uint8[i] << 16 & 0xFF0000) + (uint8[i + 1] << 8 & 0xFF00) + (uint8[i + 2] & 0xFF);
+    output.push(tripletToBase64(tmp));
+  }
+
+  return output.join('');
+}
+
+function fromByteArray(uint8) {
+  var tmp;
+  var len = uint8.length;
+  var extraBytes = len % 3; // if we have 1 byte left, pad 2 bytes
+
+  var parts = [];
+  var maxChunkLength = 16383; // must be multiple of 3
+  // go through the array every three bytes, we'll deal with trailing stuff later
+
+  for (var i = 0, len2 = len - extraBytes; i < len2; i += maxChunkLength) {
+    parts.push(encodeChunk(uint8, i, i + maxChunkLength > len2 ? len2 : i + maxChunkLength));
+  } // pad the end with zeros, but make sure to not forget the extra bytes
+
+
+  if (extraBytes === 1) {
+    tmp = uint8[len - 1];
+    parts.push(lookup[tmp >> 2] + lookup[tmp << 4 & 0x3F] + '==');
+  } else if (extraBytes === 2) {
+    tmp = (uint8[len - 2] << 8) + uint8[len - 1];
+    parts.push(lookup[tmp >> 10] + lookup[tmp >> 4 & 0x3F] + lookup[tmp << 2 & 0x3F] + '=');
+  }
+
+  return parts.join('');
+}
 
 /***/ }),
 
@@ -191,7 +2566,1875 @@ eval("\n\nexports.byteLength = byteLength;\nexports.toByteArray = toByteArray;\n
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-eval("/* WEBPACK VAR INJECTION */(function(global) {/*!\n * The buffer module from node.js, for the browser.\n *\n * @author   Feross Aboukhadijeh <feross@feross.org> <http://feross.org>\n * @license  MIT\n */\n\n/* eslint-disable no-proto */\n\n\nvar base64 = __webpack_require__(/*! base64-js */ \"./node_modules/base64-js/index.js\");\n\nvar ieee754 = __webpack_require__(/*! ieee754 */ \"./node_modules/ieee754/index.js\");\n\nvar isArray = __webpack_require__(/*! isarray */ \"./node_modules/isarray/index.js\");\n\nexports.Buffer = Buffer;\nexports.SlowBuffer = SlowBuffer;\nexports.INSPECT_MAX_BYTES = 50;\n/**\n * If `Buffer.TYPED_ARRAY_SUPPORT`:\n *   === true    Use Uint8Array implementation (fastest)\n *   === false   Use Object implementation (most compatible, even IE6)\n *\n * Browsers that support typed arrays are IE 10+, Firefox 4+, Chrome 7+, Safari 5.1+,\n * Opera 11.6+, iOS 4.2+.\n *\n * Due to various browser bugs, sometimes the Object implementation will be used even\n * when the browser supports typed arrays.\n *\n * Note:\n *\n *   - Firefox 4-29 lacks support for adding new properties to `Uint8Array` instances,\n *     See: https://bugzilla.mozilla.org/show_bug.cgi?id=695438.\n *\n *   - Chrome 9-10 is missing the `TypedArray.prototype.subarray` function.\n *\n *   - IE10 has a broken `TypedArray.prototype.subarray` function which returns arrays of\n *     incorrect length in some situations.\n\n * We detect these buggy browsers and set `Buffer.TYPED_ARRAY_SUPPORT` to `false` so they\n * get the Object implementation, which is slower but behaves correctly.\n */\n\nBuffer.TYPED_ARRAY_SUPPORT = global.TYPED_ARRAY_SUPPORT !== undefined ? global.TYPED_ARRAY_SUPPORT : typedArraySupport();\n/*\n * Export kMaxLength after typed array support is determined.\n */\n\nexports.kMaxLength = kMaxLength();\n\nfunction typedArraySupport() {\n  try {\n    var arr = new Uint8Array(1);\n    arr.__proto__ = {\n      __proto__: Uint8Array.prototype,\n      foo: function foo() {\n        return 42;\n      }\n    };\n    return arr.foo() === 42 && // typed array instances can be augmented\n    typeof arr.subarray === 'function' && // chrome 9-10 lack `subarray`\n    arr.subarray(1, 1).byteLength === 0; // ie10 has broken `subarray`\n  } catch (e) {\n    return false;\n  }\n}\n\nfunction kMaxLength() {\n  return Buffer.TYPED_ARRAY_SUPPORT ? 0x7fffffff : 0x3fffffff;\n}\n\nfunction createBuffer(that, length) {\n  if (kMaxLength() < length) {\n    throw new RangeError('Invalid typed array length');\n  }\n\n  if (Buffer.TYPED_ARRAY_SUPPORT) {\n    // Return an augmented `Uint8Array` instance, for best performance\n    that = new Uint8Array(length);\n    that.__proto__ = Buffer.prototype;\n  } else {\n    // Fallback: Return an object instance of the Buffer class\n    if (that === null) {\n      that = new Buffer(length);\n    }\n\n    that.length = length;\n  }\n\n  return that;\n}\n/**\n * The Buffer constructor returns instances of `Uint8Array` that have their\n * prototype changed to `Buffer.prototype`. Furthermore, `Buffer` is a subclass of\n * `Uint8Array`, so the returned instances will have all the node `Buffer` methods\n * and the `Uint8Array` methods. Square bracket notation works as expected -- it\n * returns a single octet.\n *\n * The `Uint8Array` prototype remains unmodified.\n */\n\n\nfunction Buffer(arg, encodingOrOffset, length) {\n  if (!Buffer.TYPED_ARRAY_SUPPORT && !(this instanceof Buffer)) {\n    return new Buffer(arg, encodingOrOffset, length);\n  } // Common case.\n\n\n  if (typeof arg === 'number') {\n    if (typeof encodingOrOffset === 'string') {\n      throw new Error('If encoding is specified then the first argument must be a string');\n    }\n\n    return allocUnsafe(this, arg);\n  }\n\n  return from(this, arg, encodingOrOffset, length);\n}\n\nBuffer.poolSize = 8192; // not used by this implementation\n// TODO: Legacy, not needed anymore. Remove in next major version.\n\nBuffer._augment = function (arr) {\n  arr.__proto__ = Buffer.prototype;\n  return arr;\n};\n\nfunction from(that, value, encodingOrOffset, length) {\n  if (typeof value === 'number') {\n    throw new TypeError('\"value\" argument must not be a number');\n  }\n\n  if (typeof ArrayBuffer !== 'undefined' && value instanceof ArrayBuffer) {\n    return fromArrayBuffer(that, value, encodingOrOffset, length);\n  }\n\n  if (typeof value === 'string') {\n    return fromString(that, value, encodingOrOffset);\n  }\n\n  return fromObject(that, value);\n}\n/**\n * Functionally equivalent to Buffer(arg, encoding) but throws a TypeError\n * if value is a number.\n * Buffer.from(str[, encoding])\n * Buffer.from(array)\n * Buffer.from(buffer)\n * Buffer.from(arrayBuffer[, byteOffset[, length]])\n **/\n\n\nBuffer.from = function (value, encodingOrOffset, length) {\n  return from(null, value, encodingOrOffset, length);\n};\n\nif (Buffer.TYPED_ARRAY_SUPPORT) {\n  Buffer.prototype.__proto__ = Uint8Array.prototype;\n  Buffer.__proto__ = Uint8Array;\n\n  if (typeof Symbol !== 'undefined' && Symbol.species && Buffer[Symbol.species] === Buffer) {\n    // Fix subarray() in ES2016. See: https://github.com/feross/buffer/pull/97\n    Object.defineProperty(Buffer, Symbol.species, {\n      value: null,\n      configurable: true\n    });\n  }\n}\n\nfunction assertSize(size) {\n  if (typeof size !== 'number') {\n    throw new TypeError('\"size\" argument must be a number');\n  } else if (size < 0) {\n    throw new RangeError('\"size\" argument must not be negative');\n  }\n}\n\nfunction alloc(that, size, fill, encoding) {\n  assertSize(size);\n\n  if (size <= 0) {\n    return createBuffer(that, size);\n  }\n\n  if (fill !== undefined) {\n    // Only pay attention to encoding if it's a string. This\n    // prevents accidentally sending in a number that would\n    // be interpretted as a start offset.\n    return typeof encoding === 'string' ? createBuffer(that, size).fill(fill, encoding) : createBuffer(that, size).fill(fill);\n  }\n\n  return createBuffer(that, size);\n}\n/**\n * Creates a new filled Buffer instance.\n * alloc(size[, fill[, encoding]])\n **/\n\n\nBuffer.alloc = function (size, fill, encoding) {\n  return alloc(null, size, fill, encoding);\n};\n\nfunction allocUnsafe(that, size) {\n  assertSize(size);\n  that = createBuffer(that, size < 0 ? 0 : checked(size) | 0);\n\n  if (!Buffer.TYPED_ARRAY_SUPPORT) {\n    for (var i = 0; i < size; ++i) {\n      that[i] = 0;\n    }\n  }\n\n  return that;\n}\n/**\n * Equivalent to Buffer(num), by default creates a non-zero-filled Buffer instance.\n * */\n\n\nBuffer.allocUnsafe = function (size) {\n  return allocUnsafe(null, size);\n};\n/**\n * Equivalent to SlowBuffer(num), by default creates a non-zero-filled Buffer instance.\n */\n\n\nBuffer.allocUnsafeSlow = function (size) {\n  return allocUnsafe(null, size);\n};\n\nfunction fromString(that, string, encoding) {\n  if (typeof encoding !== 'string' || encoding === '') {\n    encoding = 'utf8';\n  }\n\n  if (!Buffer.isEncoding(encoding)) {\n    throw new TypeError('\"encoding\" must be a valid string encoding');\n  }\n\n  var length = byteLength(string, encoding) | 0;\n  that = createBuffer(that, length);\n  var actual = that.write(string, encoding);\n\n  if (actual !== length) {\n    // Writing a hex string, for example, that contains invalid characters will\n    // cause everything after the first invalid character to be ignored. (e.g.\n    // 'abxxcd' will be treated as 'ab')\n    that = that.slice(0, actual);\n  }\n\n  return that;\n}\n\nfunction fromArrayLike(that, array) {\n  var length = array.length < 0 ? 0 : checked(array.length) | 0;\n  that = createBuffer(that, length);\n\n  for (var i = 0; i < length; i += 1) {\n    that[i] = array[i] & 255;\n  }\n\n  return that;\n}\n\nfunction fromArrayBuffer(that, array, byteOffset, length) {\n  array.byteLength; // this throws if `array` is not a valid ArrayBuffer\n\n  if (byteOffset < 0 || array.byteLength < byteOffset) {\n    throw new RangeError('\\'offset\\' is out of bounds');\n  }\n\n  if (array.byteLength < byteOffset + (length || 0)) {\n    throw new RangeError('\\'length\\' is out of bounds');\n  }\n\n  if (byteOffset === undefined && length === undefined) {\n    array = new Uint8Array(array);\n  } else if (length === undefined) {\n    array = new Uint8Array(array, byteOffset);\n  } else {\n    array = new Uint8Array(array, byteOffset, length);\n  }\n\n  if (Buffer.TYPED_ARRAY_SUPPORT) {\n    // Return an augmented `Uint8Array` instance, for best performance\n    that = array;\n    that.__proto__ = Buffer.prototype;\n  } else {\n    // Fallback: Return an object instance of the Buffer class\n    that = fromArrayLike(that, array);\n  }\n\n  return that;\n}\n\nfunction fromObject(that, obj) {\n  if (Buffer.isBuffer(obj)) {\n    var len = checked(obj.length) | 0;\n    that = createBuffer(that, len);\n\n    if (that.length === 0) {\n      return that;\n    }\n\n    obj.copy(that, 0, 0, len);\n    return that;\n  }\n\n  if (obj) {\n    if (typeof ArrayBuffer !== 'undefined' && obj.buffer instanceof ArrayBuffer || 'length' in obj) {\n      if (typeof obj.length !== 'number' || isnan(obj.length)) {\n        return createBuffer(that, 0);\n      }\n\n      return fromArrayLike(that, obj);\n    }\n\n    if (obj.type === 'Buffer' && isArray(obj.data)) {\n      return fromArrayLike(that, obj.data);\n    }\n  }\n\n  throw new TypeError('First argument must be a string, Buffer, ArrayBuffer, Array, or array-like object.');\n}\n\nfunction checked(length) {\n  // Note: cannot use `length < kMaxLength()` here because that fails when\n  // length is NaN (which is otherwise coerced to zero.)\n  if (length >= kMaxLength()) {\n    throw new RangeError('Attempt to allocate Buffer larger than maximum ' + 'size: 0x' + kMaxLength().toString(16) + ' bytes');\n  }\n\n  return length | 0;\n}\n\nfunction SlowBuffer(length) {\n  if (+length != length) {\n    // eslint-disable-line eqeqeq\n    length = 0;\n  }\n\n  return Buffer.alloc(+length);\n}\n\nBuffer.isBuffer = function isBuffer(b) {\n  return !!(b != null && b._isBuffer);\n};\n\nBuffer.compare = function compare(a, b) {\n  if (!Buffer.isBuffer(a) || !Buffer.isBuffer(b)) {\n    throw new TypeError('Arguments must be Buffers');\n  }\n\n  if (a === b) return 0;\n  var x = a.length;\n  var y = b.length;\n\n  for (var i = 0, len = Math.min(x, y); i < len; ++i) {\n    if (a[i] !== b[i]) {\n      x = a[i];\n      y = b[i];\n      break;\n    }\n  }\n\n  if (x < y) return -1;\n  if (y < x) return 1;\n  return 0;\n};\n\nBuffer.isEncoding = function isEncoding(encoding) {\n  switch (String(encoding).toLowerCase()) {\n    case 'hex':\n    case 'utf8':\n    case 'utf-8':\n    case 'ascii':\n    case 'latin1':\n    case 'binary':\n    case 'base64':\n    case 'ucs2':\n    case 'ucs-2':\n    case 'utf16le':\n    case 'utf-16le':\n      return true;\n\n    default:\n      return false;\n  }\n};\n\nBuffer.concat = function concat(list, length) {\n  if (!isArray(list)) {\n    throw new TypeError('\"list\" argument must be an Array of Buffers');\n  }\n\n  if (list.length === 0) {\n    return Buffer.alloc(0);\n  }\n\n  var i;\n\n  if (length === undefined) {\n    length = 0;\n\n    for (i = 0; i < list.length; ++i) {\n      length += list[i].length;\n    }\n  }\n\n  var buffer = Buffer.allocUnsafe(length);\n  var pos = 0;\n\n  for (i = 0; i < list.length; ++i) {\n    var buf = list[i];\n\n    if (!Buffer.isBuffer(buf)) {\n      throw new TypeError('\"list\" argument must be an Array of Buffers');\n    }\n\n    buf.copy(buffer, pos);\n    pos += buf.length;\n  }\n\n  return buffer;\n};\n\nfunction byteLength(string, encoding) {\n  if (Buffer.isBuffer(string)) {\n    return string.length;\n  }\n\n  if (typeof ArrayBuffer !== 'undefined' && typeof ArrayBuffer.isView === 'function' && (ArrayBuffer.isView(string) || string instanceof ArrayBuffer)) {\n    return string.byteLength;\n  }\n\n  if (typeof string !== 'string') {\n    string = '' + string;\n  }\n\n  var len = string.length;\n  if (len === 0) return 0; // Use a for loop to avoid recursion\n\n  var loweredCase = false;\n\n  for (;;) {\n    switch (encoding) {\n      case 'ascii':\n      case 'latin1':\n      case 'binary':\n        return len;\n\n      case 'utf8':\n      case 'utf-8':\n      case undefined:\n        return utf8ToBytes(string).length;\n\n      case 'ucs2':\n      case 'ucs-2':\n      case 'utf16le':\n      case 'utf-16le':\n        return len * 2;\n\n      case 'hex':\n        return len >>> 1;\n\n      case 'base64':\n        return base64ToBytes(string).length;\n\n      default:\n        if (loweredCase) return utf8ToBytes(string).length; // assume utf8\n\n        encoding = ('' + encoding).toLowerCase();\n        loweredCase = true;\n    }\n  }\n}\n\nBuffer.byteLength = byteLength;\n\nfunction slowToString(encoding, start, end) {\n  var loweredCase = false; // No need to verify that \"this.length <= MAX_UINT32\" since it's a read-only\n  // property of a typed array.\n  // This behaves neither like String nor Uint8Array in that we set start/end\n  // to their upper/lower bounds if the value passed is out of range.\n  // undefined is handled specially as per ECMA-262 6th Edition,\n  // Section 13.3.3.7 Runtime Semantics: KeyedBindingInitialization.\n\n  if (start === undefined || start < 0) {\n    start = 0;\n  } // Return early if start > this.length. Done here to prevent potential uint32\n  // coercion fail below.\n\n\n  if (start > this.length) {\n    return '';\n  }\n\n  if (end === undefined || end > this.length) {\n    end = this.length;\n  }\n\n  if (end <= 0) {\n    return '';\n  } // Force coersion to uint32. This will also coerce falsey/NaN values to 0.\n\n\n  end >>>= 0;\n  start >>>= 0;\n\n  if (end <= start) {\n    return '';\n  }\n\n  if (!encoding) encoding = 'utf8';\n\n  while (true) {\n    switch (encoding) {\n      case 'hex':\n        return hexSlice(this, start, end);\n\n      case 'utf8':\n      case 'utf-8':\n        return utf8Slice(this, start, end);\n\n      case 'ascii':\n        return asciiSlice(this, start, end);\n\n      case 'latin1':\n      case 'binary':\n        return latin1Slice(this, start, end);\n\n      case 'base64':\n        return base64Slice(this, start, end);\n\n      case 'ucs2':\n      case 'ucs-2':\n      case 'utf16le':\n      case 'utf-16le':\n        return utf16leSlice(this, start, end);\n\n      default:\n        if (loweredCase) throw new TypeError('Unknown encoding: ' + encoding);\n        encoding = (encoding + '').toLowerCase();\n        loweredCase = true;\n    }\n  }\n} // The property is used by `Buffer.isBuffer` and `is-buffer` (in Safari 5-7) to detect\n// Buffer instances.\n\n\nBuffer.prototype._isBuffer = true;\n\nfunction swap(b, n, m) {\n  var i = b[n];\n  b[n] = b[m];\n  b[m] = i;\n}\n\nBuffer.prototype.swap16 = function swap16() {\n  var len = this.length;\n\n  if (len % 2 !== 0) {\n    throw new RangeError('Buffer size must be a multiple of 16-bits');\n  }\n\n  for (var i = 0; i < len; i += 2) {\n    swap(this, i, i + 1);\n  }\n\n  return this;\n};\n\nBuffer.prototype.swap32 = function swap32() {\n  var len = this.length;\n\n  if (len % 4 !== 0) {\n    throw new RangeError('Buffer size must be a multiple of 32-bits');\n  }\n\n  for (var i = 0; i < len; i += 4) {\n    swap(this, i, i + 3);\n    swap(this, i + 1, i + 2);\n  }\n\n  return this;\n};\n\nBuffer.prototype.swap64 = function swap64() {\n  var len = this.length;\n\n  if (len % 8 !== 0) {\n    throw new RangeError('Buffer size must be a multiple of 64-bits');\n  }\n\n  for (var i = 0; i < len; i += 8) {\n    swap(this, i, i + 7);\n    swap(this, i + 1, i + 6);\n    swap(this, i + 2, i + 5);\n    swap(this, i + 3, i + 4);\n  }\n\n  return this;\n};\n\nBuffer.prototype.toString = function toString() {\n  var length = this.length | 0;\n  if (length === 0) return '';\n  if (arguments.length === 0) return utf8Slice(this, 0, length);\n  return slowToString.apply(this, arguments);\n};\n\nBuffer.prototype.equals = function equals(b) {\n  if (!Buffer.isBuffer(b)) throw new TypeError('Argument must be a Buffer');\n  if (this === b) return true;\n  return Buffer.compare(this, b) === 0;\n};\n\nBuffer.prototype.inspect = function inspect() {\n  var str = '';\n  var max = exports.INSPECT_MAX_BYTES;\n\n  if (this.length > 0) {\n    str = this.toString('hex', 0, max).match(/.{2}/g).join(' ');\n    if (this.length > max) str += ' ... ';\n  }\n\n  return '<Buffer ' + str + '>';\n};\n\nBuffer.prototype.compare = function compare(target, start, end, thisStart, thisEnd) {\n  if (!Buffer.isBuffer(target)) {\n    throw new TypeError('Argument must be a Buffer');\n  }\n\n  if (start === undefined) {\n    start = 0;\n  }\n\n  if (end === undefined) {\n    end = target ? target.length : 0;\n  }\n\n  if (thisStart === undefined) {\n    thisStart = 0;\n  }\n\n  if (thisEnd === undefined) {\n    thisEnd = this.length;\n  }\n\n  if (start < 0 || end > target.length || thisStart < 0 || thisEnd > this.length) {\n    throw new RangeError('out of range index');\n  }\n\n  if (thisStart >= thisEnd && start >= end) {\n    return 0;\n  }\n\n  if (thisStart >= thisEnd) {\n    return -1;\n  }\n\n  if (start >= end) {\n    return 1;\n  }\n\n  start >>>= 0;\n  end >>>= 0;\n  thisStart >>>= 0;\n  thisEnd >>>= 0;\n  if (this === target) return 0;\n  var x = thisEnd - thisStart;\n  var y = end - start;\n  var len = Math.min(x, y);\n  var thisCopy = this.slice(thisStart, thisEnd);\n  var targetCopy = target.slice(start, end);\n\n  for (var i = 0; i < len; ++i) {\n    if (thisCopy[i] !== targetCopy[i]) {\n      x = thisCopy[i];\n      y = targetCopy[i];\n      break;\n    }\n  }\n\n  if (x < y) return -1;\n  if (y < x) return 1;\n  return 0;\n}; // Finds either the first index of `val` in `buffer` at offset >= `byteOffset`,\n// OR the last index of `val` in `buffer` at offset <= `byteOffset`.\n//\n// Arguments:\n// - buffer - a Buffer to search\n// - val - a string, Buffer, or number\n// - byteOffset - an index into `buffer`; will be clamped to an int32\n// - encoding - an optional encoding, relevant is val is a string\n// - dir - true for indexOf, false for lastIndexOf\n\n\nfunction bidirectionalIndexOf(buffer, val, byteOffset, encoding, dir) {\n  // Empty buffer means no match\n  if (buffer.length === 0) return -1; // Normalize byteOffset\n\n  if (typeof byteOffset === 'string') {\n    encoding = byteOffset;\n    byteOffset = 0;\n  } else if (byteOffset > 0x7fffffff) {\n    byteOffset = 0x7fffffff;\n  } else if (byteOffset < -0x80000000) {\n    byteOffset = -0x80000000;\n  }\n\n  byteOffset = +byteOffset; // Coerce to Number.\n\n  if (isNaN(byteOffset)) {\n    // byteOffset: it it's undefined, null, NaN, \"foo\", etc, search whole buffer\n    byteOffset = dir ? 0 : buffer.length - 1;\n  } // Normalize byteOffset: negative offsets start from the end of the buffer\n\n\n  if (byteOffset < 0) byteOffset = buffer.length + byteOffset;\n\n  if (byteOffset >= buffer.length) {\n    if (dir) return -1;else byteOffset = buffer.length - 1;\n  } else if (byteOffset < 0) {\n    if (dir) byteOffset = 0;else return -1;\n  } // Normalize val\n\n\n  if (typeof val === 'string') {\n    val = Buffer.from(val, encoding);\n  } // Finally, search either indexOf (if dir is true) or lastIndexOf\n\n\n  if (Buffer.isBuffer(val)) {\n    // Special case: looking for empty string/buffer always fails\n    if (val.length === 0) {\n      return -1;\n    }\n\n    return arrayIndexOf(buffer, val, byteOffset, encoding, dir);\n  } else if (typeof val === 'number') {\n    val = val & 0xFF; // Search for a byte value [0-255]\n\n    if (Buffer.TYPED_ARRAY_SUPPORT && typeof Uint8Array.prototype.indexOf === 'function') {\n      if (dir) {\n        return Uint8Array.prototype.indexOf.call(buffer, val, byteOffset);\n      } else {\n        return Uint8Array.prototype.lastIndexOf.call(buffer, val, byteOffset);\n      }\n    }\n\n    return arrayIndexOf(buffer, [val], byteOffset, encoding, dir);\n  }\n\n  throw new TypeError('val must be string, number or Buffer');\n}\n\nfunction arrayIndexOf(arr, val, byteOffset, encoding, dir) {\n  var indexSize = 1;\n  var arrLength = arr.length;\n  var valLength = val.length;\n\n  if (encoding !== undefined) {\n    encoding = String(encoding).toLowerCase();\n\n    if (encoding === 'ucs2' || encoding === 'ucs-2' || encoding === 'utf16le' || encoding === 'utf-16le') {\n      if (arr.length < 2 || val.length < 2) {\n        return -1;\n      }\n\n      indexSize = 2;\n      arrLength /= 2;\n      valLength /= 2;\n      byteOffset /= 2;\n    }\n  }\n\n  function read(buf, i) {\n    if (indexSize === 1) {\n      return buf[i];\n    } else {\n      return buf.readUInt16BE(i * indexSize);\n    }\n  }\n\n  var i;\n\n  if (dir) {\n    var foundIndex = -1;\n\n    for (i = byteOffset; i < arrLength; i++) {\n      if (read(arr, i) === read(val, foundIndex === -1 ? 0 : i - foundIndex)) {\n        if (foundIndex === -1) foundIndex = i;\n        if (i - foundIndex + 1 === valLength) return foundIndex * indexSize;\n      } else {\n        if (foundIndex !== -1) i -= i - foundIndex;\n        foundIndex = -1;\n      }\n    }\n  } else {\n    if (byteOffset + valLength > arrLength) byteOffset = arrLength - valLength;\n\n    for (i = byteOffset; i >= 0; i--) {\n      var found = true;\n\n      for (var j = 0; j < valLength; j++) {\n        if (read(arr, i + j) !== read(val, j)) {\n          found = false;\n          break;\n        }\n      }\n\n      if (found) return i;\n    }\n  }\n\n  return -1;\n}\n\nBuffer.prototype.includes = function includes(val, byteOffset, encoding) {\n  return this.indexOf(val, byteOffset, encoding) !== -1;\n};\n\nBuffer.prototype.indexOf = function indexOf(val, byteOffset, encoding) {\n  return bidirectionalIndexOf(this, val, byteOffset, encoding, true);\n};\n\nBuffer.prototype.lastIndexOf = function lastIndexOf(val, byteOffset, encoding) {\n  return bidirectionalIndexOf(this, val, byteOffset, encoding, false);\n};\n\nfunction hexWrite(buf, string, offset, length) {\n  offset = Number(offset) || 0;\n  var remaining = buf.length - offset;\n\n  if (!length) {\n    length = remaining;\n  } else {\n    length = Number(length);\n\n    if (length > remaining) {\n      length = remaining;\n    }\n  } // must be an even number of digits\n\n\n  var strLen = string.length;\n  if (strLen % 2 !== 0) throw new TypeError('Invalid hex string');\n\n  if (length > strLen / 2) {\n    length = strLen / 2;\n  }\n\n  for (var i = 0; i < length; ++i) {\n    var parsed = parseInt(string.substr(i * 2, 2), 16);\n    if (isNaN(parsed)) return i;\n    buf[offset + i] = parsed;\n  }\n\n  return i;\n}\n\nfunction utf8Write(buf, string, offset, length) {\n  return blitBuffer(utf8ToBytes(string, buf.length - offset), buf, offset, length);\n}\n\nfunction asciiWrite(buf, string, offset, length) {\n  return blitBuffer(asciiToBytes(string), buf, offset, length);\n}\n\nfunction latin1Write(buf, string, offset, length) {\n  return asciiWrite(buf, string, offset, length);\n}\n\nfunction base64Write(buf, string, offset, length) {\n  return blitBuffer(base64ToBytes(string), buf, offset, length);\n}\n\nfunction ucs2Write(buf, string, offset, length) {\n  return blitBuffer(utf16leToBytes(string, buf.length - offset), buf, offset, length);\n}\n\nBuffer.prototype.write = function write(string, offset, length, encoding) {\n  // Buffer#write(string)\n  if (offset === undefined) {\n    encoding = 'utf8';\n    length = this.length;\n    offset = 0; // Buffer#write(string, encoding)\n  } else if (length === undefined && typeof offset === 'string') {\n    encoding = offset;\n    length = this.length;\n    offset = 0; // Buffer#write(string, offset[, length][, encoding])\n  } else if (isFinite(offset)) {\n    offset = offset | 0;\n\n    if (isFinite(length)) {\n      length = length | 0;\n      if (encoding === undefined) encoding = 'utf8';\n    } else {\n      encoding = length;\n      length = undefined;\n    } // legacy write(string, encoding, offset, length) - remove in v0.13\n\n  } else {\n    throw new Error('Buffer.write(string, encoding, offset[, length]) is no longer supported');\n  }\n\n  var remaining = this.length - offset;\n  if (length === undefined || length > remaining) length = remaining;\n\n  if (string.length > 0 && (length < 0 || offset < 0) || offset > this.length) {\n    throw new RangeError('Attempt to write outside buffer bounds');\n  }\n\n  if (!encoding) encoding = 'utf8';\n  var loweredCase = false;\n\n  for (;;) {\n    switch (encoding) {\n      case 'hex':\n        return hexWrite(this, string, offset, length);\n\n      case 'utf8':\n      case 'utf-8':\n        return utf8Write(this, string, offset, length);\n\n      case 'ascii':\n        return asciiWrite(this, string, offset, length);\n\n      case 'latin1':\n      case 'binary':\n        return latin1Write(this, string, offset, length);\n\n      case 'base64':\n        // Warning: maxLength not taken into account in base64Write\n        return base64Write(this, string, offset, length);\n\n      case 'ucs2':\n      case 'ucs-2':\n      case 'utf16le':\n      case 'utf-16le':\n        return ucs2Write(this, string, offset, length);\n\n      default:\n        if (loweredCase) throw new TypeError('Unknown encoding: ' + encoding);\n        encoding = ('' + encoding).toLowerCase();\n        loweredCase = true;\n    }\n  }\n};\n\nBuffer.prototype.toJSON = function toJSON() {\n  return {\n    type: 'Buffer',\n    data: Array.prototype.slice.call(this._arr || this, 0)\n  };\n};\n\nfunction base64Slice(buf, start, end) {\n  if (start === 0 && end === buf.length) {\n    return base64.fromByteArray(buf);\n  } else {\n    return base64.fromByteArray(buf.slice(start, end));\n  }\n}\n\nfunction utf8Slice(buf, start, end) {\n  end = Math.min(buf.length, end);\n  var res = [];\n  var i = start;\n\n  while (i < end) {\n    var firstByte = buf[i];\n    var codePoint = null;\n    var bytesPerSequence = firstByte > 0xEF ? 4 : firstByte > 0xDF ? 3 : firstByte > 0xBF ? 2 : 1;\n\n    if (i + bytesPerSequence <= end) {\n      var secondByte, thirdByte, fourthByte, tempCodePoint;\n\n      switch (bytesPerSequence) {\n        case 1:\n          if (firstByte < 0x80) {\n            codePoint = firstByte;\n          }\n\n          break;\n\n        case 2:\n          secondByte = buf[i + 1];\n\n          if ((secondByte & 0xC0) === 0x80) {\n            tempCodePoint = (firstByte & 0x1F) << 0x6 | secondByte & 0x3F;\n\n            if (tempCodePoint > 0x7F) {\n              codePoint = tempCodePoint;\n            }\n          }\n\n          break;\n\n        case 3:\n          secondByte = buf[i + 1];\n          thirdByte = buf[i + 2];\n\n          if ((secondByte & 0xC0) === 0x80 && (thirdByte & 0xC0) === 0x80) {\n            tempCodePoint = (firstByte & 0xF) << 0xC | (secondByte & 0x3F) << 0x6 | thirdByte & 0x3F;\n\n            if (tempCodePoint > 0x7FF && (tempCodePoint < 0xD800 || tempCodePoint > 0xDFFF)) {\n              codePoint = tempCodePoint;\n            }\n          }\n\n          break;\n\n        case 4:\n          secondByte = buf[i + 1];\n          thirdByte = buf[i + 2];\n          fourthByte = buf[i + 3];\n\n          if ((secondByte & 0xC0) === 0x80 && (thirdByte & 0xC0) === 0x80 && (fourthByte & 0xC0) === 0x80) {\n            tempCodePoint = (firstByte & 0xF) << 0x12 | (secondByte & 0x3F) << 0xC | (thirdByte & 0x3F) << 0x6 | fourthByte & 0x3F;\n\n            if (tempCodePoint > 0xFFFF && tempCodePoint < 0x110000) {\n              codePoint = tempCodePoint;\n            }\n          }\n\n      }\n    }\n\n    if (codePoint === null) {\n      // we did not generate a valid codePoint so insert a\n      // replacement char (U+FFFD) and advance only 1 byte\n      codePoint = 0xFFFD;\n      bytesPerSequence = 1;\n    } else if (codePoint > 0xFFFF) {\n      // encode to utf16 (surrogate pair dance)\n      codePoint -= 0x10000;\n      res.push(codePoint >>> 10 & 0x3FF | 0xD800);\n      codePoint = 0xDC00 | codePoint & 0x3FF;\n    }\n\n    res.push(codePoint);\n    i += bytesPerSequence;\n  }\n\n  return decodeCodePointsArray(res);\n} // Based on http://stackoverflow.com/a/22747272/680742, the browser with\n// the lowest limit is Chrome, with 0x10000 args.\n// We go 1 magnitude less, for safety\n\n\nvar MAX_ARGUMENTS_LENGTH = 0x1000;\n\nfunction decodeCodePointsArray(codePoints) {\n  var len = codePoints.length;\n\n  if (len <= MAX_ARGUMENTS_LENGTH) {\n    return String.fromCharCode.apply(String, codePoints); // avoid extra slice()\n  } // Decode in chunks to avoid \"call stack size exceeded\".\n\n\n  var res = '';\n  var i = 0;\n\n  while (i < len) {\n    res += String.fromCharCode.apply(String, codePoints.slice(i, i += MAX_ARGUMENTS_LENGTH));\n  }\n\n  return res;\n}\n\nfunction asciiSlice(buf, start, end) {\n  var ret = '';\n  end = Math.min(buf.length, end);\n\n  for (var i = start; i < end; ++i) {\n    ret += String.fromCharCode(buf[i] & 0x7F);\n  }\n\n  return ret;\n}\n\nfunction latin1Slice(buf, start, end) {\n  var ret = '';\n  end = Math.min(buf.length, end);\n\n  for (var i = start; i < end; ++i) {\n    ret += String.fromCharCode(buf[i]);\n  }\n\n  return ret;\n}\n\nfunction hexSlice(buf, start, end) {\n  var len = buf.length;\n  if (!start || start < 0) start = 0;\n  if (!end || end < 0 || end > len) end = len;\n  var out = '';\n\n  for (var i = start; i < end; ++i) {\n    out += toHex(buf[i]);\n  }\n\n  return out;\n}\n\nfunction utf16leSlice(buf, start, end) {\n  var bytes = buf.slice(start, end);\n  var res = '';\n\n  for (var i = 0; i < bytes.length; i += 2) {\n    res += String.fromCharCode(bytes[i] + bytes[i + 1] * 256);\n  }\n\n  return res;\n}\n\nBuffer.prototype.slice = function slice(start, end) {\n  var len = this.length;\n  start = ~~start;\n  end = end === undefined ? len : ~~end;\n\n  if (start < 0) {\n    start += len;\n    if (start < 0) start = 0;\n  } else if (start > len) {\n    start = len;\n  }\n\n  if (end < 0) {\n    end += len;\n    if (end < 0) end = 0;\n  } else if (end > len) {\n    end = len;\n  }\n\n  if (end < start) end = start;\n  var newBuf;\n\n  if (Buffer.TYPED_ARRAY_SUPPORT) {\n    newBuf = this.subarray(start, end);\n    newBuf.__proto__ = Buffer.prototype;\n  } else {\n    var sliceLen = end - start;\n    newBuf = new Buffer(sliceLen, undefined);\n\n    for (var i = 0; i < sliceLen; ++i) {\n      newBuf[i] = this[i + start];\n    }\n  }\n\n  return newBuf;\n};\n/*\n * Need to make sure that buffer isn't trying to write out of bounds.\n */\n\n\nfunction checkOffset(offset, ext, length) {\n  if (offset % 1 !== 0 || offset < 0) throw new RangeError('offset is not uint');\n  if (offset + ext > length) throw new RangeError('Trying to access beyond buffer length');\n}\n\nBuffer.prototype.readUIntLE = function readUIntLE(offset, byteLength, noAssert) {\n  offset = offset | 0;\n  byteLength = byteLength | 0;\n  if (!noAssert) checkOffset(offset, byteLength, this.length);\n  var val = this[offset];\n  var mul = 1;\n  var i = 0;\n\n  while (++i < byteLength && (mul *= 0x100)) {\n    val += this[offset + i] * mul;\n  }\n\n  return val;\n};\n\nBuffer.prototype.readUIntBE = function readUIntBE(offset, byteLength, noAssert) {\n  offset = offset | 0;\n  byteLength = byteLength | 0;\n\n  if (!noAssert) {\n    checkOffset(offset, byteLength, this.length);\n  }\n\n  var val = this[offset + --byteLength];\n  var mul = 1;\n\n  while (byteLength > 0 && (mul *= 0x100)) {\n    val += this[offset + --byteLength] * mul;\n  }\n\n  return val;\n};\n\nBuffer.prototype.readUInt8 = function readUInt8(offset, noAssert) {\n  if (!noAssert) checkOffset(offset, 1, this.length);\n  return this[offset];\n};\n\nBuffer.prototype.readUInt16LE = function readUInt16LE(offset, noAssert) {\n  if (!noAssert) checkOffset(offset, 2, this.length);\n  return this[offset] | this[offset + 1] << 8;\n};\n\nBuffer.prototype.readUInt16BE = function readUInt16BE(offset, noAssert) {\n  if (!noAssert) checkOffset(offset, 2, this.length);\n  return this[offset] << 8 | this[offset + 1];\n};\n\nBuffer.prototype.readUInt32LE = function readUInt32LE(offset, noAssert) {\n  if (!noAssert) checkOffset(offset, 4, this.length);\n  return (this[offset] | this[offset + 1] << 8 | this[offset + 2] << 16) + this[offset + 3] * 0x1000000;\n};\n\nBuffer.prototype.readUInt32BE = function readUInt32BE(offset, noAssert) {\n  if (!noAssert) checkOffset(offset, 4, this.length);\n  return this[offset] * 0x1000000 + (this[offset + 1] << 16 | this[offset + 2] << 8 | this[offset + 3]);\n};\n\nBuffer.prototype.readIntLE = function readIntLE(offset, byteLength, noAssert) {\n  offset = offset | 0;\n  byteLength = byteLength | 0;\n  if (!noAssert) checkOffset(offset, byteLength, this.length);\n  var val = this[offset];\n  var mul = 1;\n  var i = 0;\n\n  while (++i < byteLength && (mul *= 0x100)) {\n    val += this[offset + i] * mul;\n  }\n\n  mul *= 0x80;\n  if (val >= mul) val -= Math.pow(2, 8 * byteLength);\n  return val;\n};\n\nBuffer.prototype.readIntBE = function readIntBE(offset, byteLength, noAssert) {\n  offset = offset | 0;\n  byteLength = byteLength | 0;\n  if (!noAssert) checkOffset(offset, byteLength, this.length);\n  var i = byteLength;\n  var mul = 1;\n  var val = this[offset + --i];\n\n  while (i > 0 && (mul *= 0x100)) {\n    val += this[offset + --i] * mul;\n  }\n\n  mul *= 0x80;\n  if (val >= mul) val -= Math.pow(2, 8 * byteLength);\n  return val;\n};\n\nBuffer.prototype.readInt8 = function readInt8(offset, noAssert) {\n  if (!noAssert) checkOffset(offset, 1, this.length);\n  if (!(this[offset] & 0x80)) return this[offset];\n  return (0xff - this[offset] + 1) * -1;\n};\n\nBuffer.prototype.readInt16LE = function readInt16LE(offset, noAssert) {\n  if (!noAssert) checkOffset(offset, 2, this.length);\n  var val = this[offset] | this[offset + 1] << 8;\n  return val & 0x8000 ? val | 0xFFFF0000 : val;\n};\n\nBuffer.prototype.readInt16BE = function readInt16BE(offset, noAssert) {\n  if (!noAssert) checkOffset(offset, 2, this.length);\n  var val = this[offset + 1] | this[offset] << 8;\n  return val & 0x8000 ? val | 0xFFFF0000 : val;\n};\n\nBuffer.prototype.readInt32LE = function readInt32LE(offset, noAssert) {\n  if (!noAssert) checkOffset(offset, 4, this.length);\n  return this[offset] | this[offset + 1] << 8 | this[offset + 2] << 16 | this[offset + 3] << 24;\n};\n\nBuffer.prototype.readInt32BE = function readInt32BE(offset, noAssert) {\n  if (!noAssert) checkOffset(offset, 4, this.length);\n  return this[offset] << 24 | this[offset + 1] << 16 | this[offset + 2] << 8 | this[offset + 3];\n};\n\nBuffer.prototype.readFloatLE = function readFloatLE(offset, noAssert) {\n  if (!noAssert) checkOffset(offset, 4, this.length);\n  return ieee754.read(this, offset, true, 23, 4);\n};\n\nBuffer.prototype.readFloatBE = function readFloatBE(offset, noAssert) {\n  if (!noAssert) checkOffset(offset, 4, this.length);\n  return ieee754.read(this, offset, false, 23, 4);\n};\n\nBuffer.prototype.readDoubleLE = function readDoubleLE(offset, noAssert) {\n  if (!noAssert) checkOffset(offset, 8, this.length);\n  return ieee754.read(this, offset, true, 52, 8);\n};\n\nBuffer.prototype.readDoubleBE = function readDoubleBE(offset, noAssert) {\n  if (!noAssert) checkOffset(offset, 8, this.length);\n  return ieee754.read(this, offset, false, 52, 8);\n};\n\nfunction checkInt(buf, value, offset, ext, max, min) {\n  if (!Buffer.isBuffer(buf)) throw new TypeError('\"buffer\" argument must be a Buffer instance');\n  if (value > max || value < min) throw new RangeError('\"value\" argument is out of bounds');\n  if (offset + ext > buf.length) throw new RangeError('Index out of range');\n}\n\nBuffer.prototype.writeUIntLE = function writeUIntLE(value, offset, byteLength, noAssert) {\n  value = +value;\n  offset = offset | 0;\n  byteLength = byteLength | 0;\n\n  if (!noAssert) {\n    var maxBytes = Math.pow(2, 8 * byteLength) - 1;\n    checkInt(this, value, offset, byteLength, maxBytes, 0);\n  }\n\n  var mul = 1;\n  var i = 0;\n  this[offset] = value & 0xFF;\n\n  while (++i < byteLength && (mul *= 0x100)) {\n    this[offset + i] = value / mul & 0xFF;\n  }\n\n  return offset + byteLength;\n};\n\nBuffer.prototype.writeUIntBE = function writeUIntBE(value, offset, byteLength, noAssert) {\n  value = +value;\n  offset = offset | 0;\n  byteLength = byteLength | 0;\n\n  if (!noAssert) {\n    var maxBytes = Math.pow(2, 8 * byteLength) - 1;\n    checkInt(this, value, offset, byteLength, maxBytes, 0);\n  }\n\n  var i = byteLength - 1;\n  var mul = 1;\n  this[offset + i] = value & 0xFF;\n\n  while (--i >= 0 && (mul *= 0x100)) {\n    this[offset + i] = value / mul & 0xFF;\n  }\n\n  return offset + byteLength;\n};\n\nBuffer.prototype.writeUInt8 = function writeUInt8(value, offset, noAssert) {\n  value = +value;\n  offset = offset | 0;\n  if (!noAssert) checkInt(this, value, offset, 1, 0xff, 0);\n  if (!Buffer.TYPED_ARRAY_SUPPORT) value = Math.floor(value);\n  this[offset] = value & 0xff;\n  return offset + 1;\n};\n\nfunction objectWriteUInt16(buf, value, offset, littleEndian) {\n  if (value < 0) value = 0xffff + value + 1;\n\n  for (var i = 0, j = Math.min(buf.length - offset, 2); i < j; ++i) {\n    buf[offset + i] = (value & 0xff << 8 * (littleEndian ? i : 1 - i)) >>> (littleEndian ? i : 1 - i) * 8;\n  }\n}\n\nBuffer.prototype.writeUInt16LE = function writeUInt16LE(value, offset, noAssert) {\n  value = +value;\n  offset = offset | 0;\n  if (!noAssert) checkInt(this, value, offset, 2, 0xffff, 0);\n\n  if (Buffer.TYPED_ARRAY_SUPPORT) {\n    this[offset] = value & 0xff;\n    this[offset + 1] = value >>> 8;\n  } else {\n    objectWriteUInt16(this, value, offset, true);\n  }\n\n  return offset + 2;\n};\n\nBuffer.prototype.writeUInt16BE = function writeUInt16BE(value, offset, noAssert) {\n  value = +value;\n  offset = offset | 0;\n  if (!noAssert) checkInt(this, value, offset, 2, 0xffff, 0);\n\n  if (Buffer.TYPED_ARRAY_SUPPORT) {\n    this[offset] = value >>> 8;\n    this[offset + 1] = value & 0xff;\n  } else {\n    objectWriteUInt16(this, value, offset, false);\n  }\n\n  return offset + 2;\n};\n\nfunction objectWriteUInt32(buf, value, offset, littleEndian) {\n  if (value < 0) value = 0xffffffff + value + 1;\n\n  for (var i = 0, j = Math.min(buf.length - offset, 4); i < j; ++i) {\n    buf[offset + i] = value >>> (littleEndian ? i : 3 - i) * 8 & 0xff;\n  }\n}\n\nBuffer.prototype.writeUInt32LE = function writeUInt32LE(value, offset, noAssert) {\n  value = +value;\n  offset = offset | 0;\n  if (!noAssert) checkInt(this, value, offset, 4, 0xffffffff, 0);\n\n  if (Buffer.TYPED_ARRAY_SUPPORT) {\n    this[offset + 3] = value >>> 24;\n    this[offset + 2] = value >>> 16;\n    this[offset + 1] = value >>> 8;\n    this[offset] = value & 0xff;\n  } else {\n    objectWriteUInt32(this, value, offset, true);\n  }\n\n  return offset + 4;\n};\n\nBuffer.prototype.writeUInt32BE = function writeUInt32BE(value, offset, noAssert) {\n  value = +value;\n  offset = offset | 0;\n  if (!noAssert) checkInt(this, value, offset, 4, 0xffffffff, 0);\n\n  if (Buffer.TYPED_ARRAY_SUPPORT) {\n    this[offset] = value >>> 24;\n    this[offset + 1] = value >>> 16;\n    this[offset + 2] = value >>> 8;\n    this[offset + 3] = value & 0xff;\n  } else {\n    objectWriteUInt32(this, value, offset, false);\n  }\n\n  return offset + 4;\n};\n\nBuffer.prototype.writeIntLE = function writeIntLE(value, offset, byteLength, noAssert) {\n  value = +value;\n  offset = offset | 0;\n\n  if (!noAssert) {\n    var limit = Math.pow(2, 8 * byteLength - 1);\n    checkInt(this, value, offset, byteLength, limit - 1, -limit);\n  }\n\n  var i = 0;\n  var mul = 1;\n  var sub = 0;\n  this[offset] = value & 0xFF;\n\n  while (++i < byteLength && (mul *= 0x100)) {\n    if (value < 0 && sub === 0 && this[offset + i - 1] !== 0) {\n      sub = 1;\n    }\n\n    this[offset + i] = (value / mul >> 0) - sub & 0xFF;\n  }\n\n  return offset + byteLength;\n};\n\nBuffer.prototype.writeIntBE = function writeIntBE(value, offset, byteLength, noAssert) {\n  value = +value;\n  offset = offset | 0;\n\n  if (!noAssert) {\n    var limit = Math.pow(2, 8 * byteLength - 1);\n    checkInt(this, value, offset, byteLength, limit - 1, -limit);\n  }\n\n  var i = byteLength - 1;\n  var mul = 1;\n  var sub = 0;\n  this[offset + i] = value & 0xFF;\n\n  while (--i >= 0 && (mul *= 0x100)) {\n    if (value < 0 && sub === 0 && this[offset + i + 1] !== 0) {\n      sub = 1;\n    }\n\n    this[offset + i] = (value / mul >> 0) - sub & 0xFF;\n  }\n\n  return offset + byteLength;\n};\n\nBuffer.prototype.writeInt8 = function writeInt8(value, offset, noAssert) {\n  value = +value;\n  offset = offset | 0;\n  if (!noAssert) checkInt(this, value, offset, 1, 0x7f, -0x80);\n  if (!Buffer.TYPED_ARRAY_SUPPORT) value = Math.floor(value);\n  if (value < 0) value = 0xff + value + 1;\n  this[offset] = value & 0xff;\n  return offset + 1;\n};\n\nBuffer.prototype.writeInt16LE = function writeInt16LE(value, offset, noAssert) {\n  value = +value;\n  offset = offset | 0;\n  if (!noAssert) checkInt(this, value, offset, 2, 0x7fff, -0x8000);\n\n  if (Buffer.TYPED_ARRAY_SUPPORT) {\n    this[offset] = value & 0xff;\n    this[offset + 1] = value >>> 8;\n  } else {\n    objectWriteUInt16(this, value, offset, true);\n  }\n\n  return offset + 2;\n};\n\nBuffer.prototype.writeInt16BE = function writeInt16BE(value, offset, noAssert) {\n  value = +value;\n  offset = offset | 0;\n  if (!noAssert) checkInt(this, value, offset, 2, 0x7fff, -0x8000);\n\n  if (Buffer.TYPED_ARRAY_SUPPORT) {\n    this[offset] = value >>> 8;\n    this[offset + 1] = value & 0xff;\n  } else {\n    objectWriteUInt16(this, value, offset, false);\n  }\n\n  return offset + 2;\n};\n\nBuffer.prototype.writeInt32LE = function writeInt32LE(value, offset, noAssert) {\n  value = +value;\n  offset = offset | 0;\n  if (!noAssert) checkInt(this, value, offset, 4, 0x7fffffff, -0x80000000);\n\n  if (Buffer.TYPED_ARRAY_SUPPORT) {\n    this[offset] = value & 0xff;\n    this[offset + 1] = value >>> 8;\n    this[offset + 2] = value >>> 16;\n    this[offset + 3] = value >>> 24;\n  } else {\n    objectWriteUInt32(this, value, offset, true);\n  }\n\n  return offset + 4;\n};\n\nBuffer.prototype.writeInt32BE = function writeInt32BE(value, offset, noAssert) {\n  value = +value;\n  offset = offset | 0;\n  if (!noAssert) checkInt(this, value, offset, 4, 0x7fffffff, -0x80000000);\n  if (value < 0) value = 0xffffffff + value + 1;\n\n  if (Buffer.TYPED_ARRAY_SUPPORT) {\n    this[offset] = value >>> 24;\n    this[offset + 1] = value >>> 16;\n    this[offset + 2] = value >>> 8;\n    this[offset + 3] = value & 0xff;\n  } else {\n    objectWriteUInt32(this, value, offset, false);\n  }\n\n  return offset + 4;\n};\n\nfunction checkIEEE754(buf, value, offset, ext, max, min) {\n  if (offset + ext > buf.length) throw new RangeError('Index out of range');\n  if (offset < 0) throw new RangeError('Index out of range');\n}\n\nfunction writeFloat(buf, value, offset, littleEndian, noAssert) {\n  if (!noAssert) {\n    checkIEEE754(buf, value, offset, 4, 3.4028234663852886e+38, -3.4028234663852886e+38);\n  }\n\n  ieee754.write(buf, value, offset, littleEndian, 23, 4);\n  return offset + 4;\n}\n\nBuffer.prototype.writeFloatLE = function writeFloatLE(value, offset, noAssert) {\n  return writeFloat(this, value, offset, true, noAssert);\n};\n\nBuffer.prototype.writeFloatBE = function writeFloatBE(value, offset, noAssert) {\n  return writeFloat(this, value, offset, false, noAssert);\n};\n\nfunction writeDouble(buf, value, offset, littleEndian, noAssert) {\n  if (!noAssert) {\n    checkIEEE754(buf, value, offset, 8, 1.7976931348623157E+308, -1.7976931348623157E+308);\n  }\n\n  ieee754.write(buf, value, offset, littleEndian, 52, 8);\n  return offset + 8;\n}\n\nBuffer.prototype.writeDoubleLE = function writeDoubleLE(value, offset, noAssert) {\n  return writeDouble(this, value, offset, true, noAssert);\n};\n\nBuffer.prototype.writeDoubleBE = function writeDoubleBE(value, offset, noAssert) {\n  return writeDouble(this, value, offset, false, noAssert);\n}; // copy(targetBuffer, targetStart=0, sourceStart=0, sourceEnd=buffer.length)\n\n\nBuffer.prototype.copy = function copy(target, targetStart, start, end) {\n  if (!start) start = 0;\n  if (!end && end !== 0) end = this.length;\n  if (targetStart >= target.length) targetStart = target.length;\n  if (!targetStart) targetStart = 0;\n  if (end > 0 && end < start) end = start; // Copy 0 bytes; we're done\n\n  if (end === start) return 0;\n  if (target.length === 0 || this.length === 0) return 0; // Fatal error conditions\n\n  if (targetStart < 0) {\n    throw new RangeError('targetStart out of bounds');\n  }\n\n  if (start < 0 || start >= this.length) throw new RangeError('sourceStart out of bounds');\n  if (end < 0) throw new RangeError('sourceEnd out of bounds'); // Are we oob?\n\n  if (end > this.length) end = this.length;\n\n  if (target.length - targetStart < end - start) {\n    end = target.length - targetStart + start;\n  }\n\n  var len = end - start;\n  var i;\n\n  if (this === target && start < targetStart && targetStart < end) {\n    // descending copy from end\n    for (i = len - 1; i >= 0; --i) {\n      target[i + targetStart] = this[i + start];\n    }\n  } else if (len < 1000 || !Buffer.TYPED_ARRAY_SUPPORT) {\n    // ascending copy from start\n    for (i = 0; i < len; ++i) {\n      target[i + targetStart] = this[i + start];\n    }\n  } else {\n    Uint8Array.prototype.set.call(target, this.subarray(start, start + len), targetStart);\n  }\n\n  return len;\n}; // Usage:\n//    buffer.fill(number[, offset[, end]])\n//    buffer.fill(buffer[, offset[, end]])\n//    buffer.fill(string[, offset[, end]][, encoding])\n\n\nBuffer.prototype.fill = function fill(val, start, end, encoding) {\n  // Handle string cases:\n  if (typeof val === 'string') {\n    if (typeof start === 'string') {\n      encoding = start;\n      start = 0;\n      end = this.length;\n    } else if (typeof end === 'string') {\n      encoding = end;\n      end = this.length;\n    }\n\n    if (val.length === 1) {\n      var code = val.charCodeAt(0);\n\n      if (code < 256) {\n        val = code;\n      }\n    }\n\n    if (encoding !== undefined && typeof encoding !== 'string') {\n      throw new TypeError('encoding must be a string');\n    }\n\n    if (typeof encoding === 'string' && !Buffer.isEncoding(encoding)) {\n      throw new TypeError('Unknown encoding: ' + encoding);\n    }\n  } else if (typeof val === 'number') {\n    val = val & 255;\n  } // Invalid ranges are not set to a default, so can range check early.\n\n\n  if (start < 0 || this.length < start || this.length < end) {\n    throw new RangeError('Out of range index');\n  }\n\n  if (end <= start) {\n    return this;\n  }\n\n  start = start >>> 0;\n  end = end === undefined ? this.length : end >>> 0;\n  if (!val) val = 0;\n  var i;\n\n  if (typeof val === 'number') {\n    for (i = start; i < end; ++i) {\n      this[i] = val;\n    }\n  } else {\n    var bytes = Buffer.isBuffer(val) ? val : utf8ToBytes(new Buffer(val, encoding).toString());\n    var len = bytes.length;\n\n    for (i = 0; i < end - start; ++i) {\n      this[i + start] = bytes[i % len];\n    }\n  }\n\n  return this;\n}; // HELPER FUNCTIONS\n// ================\n\n\nvar INVALID_BASE64_RE = /[^+\\/0-9A-Za-z-_]/g;\n\nfunction base64clean(str) {\n  // Node strips out invalid characters like \\n and \\t from the string, base64-js does not\n  str = stringtrim(str).replace(INVALID_BASE64_RE, ''); // Node converts strings with length < 2 to ''\n\n  if (str.length < 2) return ''; // Node allows for non-padded base64 strings (missing trailing ===), base64-js does not\n\n  while (str.length % 4 !== 0) {\n    str = str + '=';\n  }\n\n  return str;\n}\n\nfunction stringtrim(str) {\n  if (str.trim) return str.trim();\n  return str.replace(/^\\s+|\\s+$/g, '');\n}\n\nfunction toHex(n) {\n  if (n < 16) return '0' + n.toString(16);\n  return n.toString(16);\n}\n\nfunction utf8ToBytes(string, units) {\n  units = units || Infinity;\n  var codePoint;\n  var length = string.length;\n  var leadSurrogate = null;\n  var bytes = [];\n\n  for (var i = 0; i < length; ++i) {\n    codePoint = string.charCodeAt(i); // is surrogate component\n\n    if (codePoint > 0xD7FF && codePoint < 0xE000) {\n      // last char was a lead\n      if (!leadSurrogate) {\n        // no lead yet\n        if (codePoint > 0xDBFF) {\n          // unexpected trail\n          if ((units -= 3) > -1) bytes.push(0xEF, 0xBF, 0xBD);\n          continue;\n        } else if (i + 1 === length) {\n          // unpaired lead\n          if ((units -= 3) > -1) bytes.push(0xEF, 0xBF, 0xBD);\n          continue;\n        } // valid lead\n\n\n        leadSurrogate = codePoint;\n        continue;\n      } // 2 leads in a row\n\n\n      if (codePoint < 0xDC00) {\n        if ((units -= 3) > -1) bytes.push(0xEF, 0xBF, 0xBD);\n        leadSurrogate = codePoint;\n        continue;\n      } // valid surrogate pair\n\n\n      codePoint = (leadSurrogate - 0xD800 << 10 | codePoint - 0xDC00) + 0x10000;\n    } else if (leadSurrogate) {\n      // valid bmp char, but last char was a lead\n      if ((units -= 3) > -1) bytes.push(0xEF, 0xBF, 0xBD);\n    }\n\n    leadSurrogate = null; // encode utf8\n\n    if (codePoint < 0x80) {\n      if ((units -= 1) < 0) break;\n      bytes.push(codePoint);\n    } else if (codePoint < 0x800) {\n      if ((units -= 2) < 0) break;\n      bytes.push(codePoint >> 0x6 | 0xC0, codePoint & 0x3F | 0x80);\n    } else if (codePoint < 0x10000) {\n      if ((units -= 3) < 0) break;\n      bytes.push(codePoint >> 0xC | 0xE0, codePoint >> 0x6 & 0x3F | 0x80, codePoint & 0x3F | 0x80);\n    } else if (codePoint < 0x110000) {\n      if ((units -= 4) < 0) break;\n      bytes.push(codePoint >> 0x12 | 0xF0, codePoint >> 0xC & 0x3F | 0x80, codePoint >> 0x6 & 0x3F | 0x80, codePoint & 0x3F | 0x80);\n    } else {\n      throw new Error('Invalid code point');\n    }\n  }\n\n  return bytes;\n}\n\nfunction asciiToBytes(str) {\n  var byteArray = [];\n\n  for (var i = 0; i < str.length; ++i) {\n    // Node's code seems to be doing this and not & 0x7F..\n    byteArray.push(str.charCodeAt(i) & 0xFF);\n  }\n\n  return byteArray;\n}\n\nfunction utf16leToBytes(str, units) {\n  var c, hi, lo;\n  var byteArray = [];\n\n  for (var i = 0; i < str.length; ++i) {\n    if ((units -= 2) < 0) break;\n    c = str.charCodeAt(i);\n    hi = c >> 8;\n    lo = c % 256;\n    byteArray.push(lo);\n    byteArray.push(hi);\n  }\n\n  return byteArray;\n}\n\nfunction base64ToBytes(str) {\n  return base64.toByteArray(base64clean(str));\n}\n\nfunction blitBuffer(src, dst, offset, length) {\n  for (var i = 0; i < length; ++i) {\n    if (i + offset >= dst.length || i >= src.length) break;\n    dst[i + offset] = src[i];\n  }\n\n  return i;\n}\n\nfunction isnan(val) {\n  return val !== val; // eslint-disable-line no-self-compare\n}\n/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../webpack/buildin/global.js */ \"./node_modules/webpack/buildin/global.js\")))\n\n//# sourceURL=webpack://Jose/./node_modules/buffer/index.js?");
+/* WEBPACK VAR INJECTION */(function(global) {/*!
+ * The buffer module from node.js, for the browser.
+ *
+ * @author   Feross Aboukhadijeh <feross@feross.org> <http://feross.org>
+ * @license  MIT
+ */
+
+/* eslint-disable no-proto */
+
+
+var base64 = __webpack_require__(/*! base64-js */ "./node_modules/base64-js/index.js");
+
+var ieee754 = __webpack_require__(/*! ieee754 */ "./node_modules/ieee754/index.js");
+
+var isArray = __webpack_require__(/*! isarray */ "./node_modules/buffer/node_modules/isarray/index.js");
+
+exports.Buffer = Buffer;
+exports.SlowBuffer = SlowBuffer;
+exports.INSPECT_MAX_BYTES = 50;
+/**
+ * If `Buffer.TYPED_ARRAY_SUPPORT`:
+ *   === true    Use Uint8Array implementation (fastest)
+ *   === false   Use Object implementation (most compatible, even IE6)
+ *
+ * Browsers that support typed arrays are IE 10+, Firefox 4+, Chrome 7+, Safari 5.1+,
+ * Opera 11.6+, iOS 4.2+.
+ *
+ * Due to various browser bugs, sometimes the Object implementation will be used even
+ * when the browser supports typed arrays.
+ *
+ * Note:
+ *
+ *   - Firefox 4-29 lacks support for adding new properties to `Uint8Array` instances,
+ *     See: https://bugzilla.mozilla.org/show_bug.cgi?id=695438.
+ *
+ *   - Chrome 9-10 is missing the `TypedArray.prototype.subarray` function.
+ *
+ *   - IE10 has a broken `TypedArray.prototype.subarray` function which returns arrays of
+ *     incorrect length in some situations.
+
+ * We detect these buggy browsers and set `Buffer.TYPED_ARRAY_SUPPORT` to `false` so they
+ * get the Object implementation, which is slower but behaves correctly.
+ */
+
+Buffer.TYPED_ARRAY_SUPPORT = global.TYPED_ARRAY_SUPPORT !== undefined ? global.TYPED_ARRAY_SUPPORT : typedArraySupport();
+/*
+ * Export kMaxLength after typed array support is determined.
+ */
+
+exports.kMaxLength = kMaxLength();
+
+function typedArraySupport() {
+  try {
+    var arr = new Uint8Array(1);
+    arr.__proto__ = {
+      __proto__: Uint8Array.prototype,
+      foo: function foo() {
+        return 42;
+      }
+    };
+    return arr.foo() === 42 && // typed array instances can be augmented
+    typeof arr.subarray === 'function' && // chrome 9-10 lack `subarray`
+    arr.subarray(1, 1).byteLength === 0; // ie10 has broken `subarray`
+  } catch (e) {
+    return false;
+  }
+}
+
+function kMaxLength() {
+  return Buffer.TYPED_ARRAY_SUPPORT ? 0x7fffffff : 0x3fffffff;
+}
+
+function createBuffer(that, length) {
+  if (kMaxLength() < length) {
+    throw new RangeError('Invalid typed array length');
+  }
+
+  if (Buffer.TYPED_ARRAY_SUPPORT) {
+    // Return an augmented `Uint8Array` instance, for best performance
+    that = new Uint8Array(length);
+    that.__proto__ = Buffer.prototype;
+  } else {
+    // Fallback: Return an object instance of the Buffer class
+    if (that === null) {
+      that = new Buffer(length);
+    }
+
+    that.length = length;
+  }
+
+  return that;
+}
+/**
+ * The Buffer constructor returns instances of `Uint8Array` that have their
+ * prototype changed to `Buffer.prototype`. Furthermore, `Buffer` is a subclass of
+ * `Uint8Array`, so the returned instances will have all the node `Buffer` methods
+ * and the `Uint8Array` methods. Square bracket notation works as expected -- it
+ * returns a single octet.
+ *
+ * The `Uint8Array` prototype remains unmodified.
+ */
+
+
+function Buffer(arg, encodingOrOffset, length) {
+  if (!Buffer.TYPED_ARRAY_SUPPORT && !(this instanceof Buffer)) {
+    return new Buffer(arg, encodingOrOffset, length);
+  } // Common case.
+
+
+  if (typeof arg === 'number') {
+    if (typeof encodingOrOffset === 'string') {
+      throw new Error('If encoding is specified then the first argument must be a string');
+    }
+
+    return allocUnsafe(this, arg);
+  }
+
+  return from(this, arg, encodingOrOffset, length);
+}
+
+Buffer.poolSize = 8192; // not used by this implementation
+// TODO: Legacy, not needed anymore. Remove in next major version.
+
+Buffer._augment = function (arr) {
+  arr.__proto__ = Buffer.prototype;
+  return arr;
+};
+
+function from(that, value, encodingOrOffset, length) {
+  if (typeof value === 'number') {
+    throw new TypeError('"value" argument must not be a number');
+  }
+
+  if (typeof ArrayBuffer !== 'undefined' && value instanceof ArrayBuffer) {
+    return fromArrayBuffer(that, value, encodingOrOffset, length);
+  }
+
+  if (typeof value === 'string') {
+    return fromString(that, value, encodingOrOffset);
+  }
+
+  return fromObject(that, value);
+}
+/**
+ * Functionally equivalent to Buffer(arg, encoding) but throws a TypeError
+ * if value is a number.
+ * Buffer.from(str[, encoding])
+ * Buffer.from(array)
+ * Buffer.from(buffer)
+ * Buffer.from(arrayBuffer[, byteOffset[, length]])
+ **/
+
+
+Buffer.from = function (value, encodingOrOffset, length) {
+  return from(null, value, encodingOrOffset, length);
+};
+
+if (Buffer.TYPED_ARRAY_SUPPORT) {
+  Buffer.prototype.__proto__ = Uint8Array.prototype;
+  Buffer.__proto__ = Uint8Array;
+
+  if (typeof Symbol !== 'undefined' && Symbol.species && Buffer[Symbol.species] === Buffer) {
+    // Fix subarray() in ES2016. See: https://github.com/feross/buffer/pull/97
+    Object.defineProperty(Buffer, Symbol.species, {
+      value: null,
+      configurable: true
+    });
+  }
+}
+
+function assertSize(size) {
+  if (typeof size !== 'number') {
+    throw new TypeError('"size" argument must be a number');
+  } else if (size < 0) {
+    throw new RangeError('"size" argument must not be negative');
+  }
+}
+
+function alloc(that, size, fill, encoding) {
+  assertSize(size);
+
+  if (size <= 0) {
+    return createBuffer(that, size);
+  }
+
+  if (fill !== undefined) {
+    // Only pay attention to encoding if it's a string. This
+    // prevents accidentally sending in a number that would
+    // be interpretted as a start offset.
+    return typeof encoding === 'string' ? createBuffer(that, size).fill(fill, encoding) : createBuffer(that, size).fill(fill);
+  }
+
+  return createBuffer(that, size);
+}
+/**
+ * Creates a new filled Buffer instance.
+ * alloc(size[, fill[, encoding]])
+ **/
+
+
+Buffer.alloc = function (size, fill, encoding) {
+  return alloc(null, size, fill, encoding);
+};
+
+function allocUnsafe(that, size) {
+  assertSize(size);
+  that = createBuffer(that, size < 0 ? 0 : checked(size) | 0);
+
+  if (!Buffer.TYPED_ARRAY_SUPPORT) {
+    for (var i = 0; i < size; ++i) {
+      that[i] = 0;
+    }
+  }
+
+  return that;
+}
+/**
+ * Equivalent to Buffer(num), by default creates a non-zero-filled Buffer instance.
+ * */
+
+
+Buffer.allocUnsafe = function (size) {
+  return allocUnsafe(null, size);
+};
+/**
+ * Equivalent to SlowBuffer(num), by default creates a non-zero-filled Buffer instance.
+ */
+
+
+Buffer.allocUnsafeSlow = function (size) {
+  return allocUnsafe(null, size);
+};
+
+function fromString(that, string, encoding) {
+  if (typeof encoding !== 'string' || encoding === '') {
+    encoding = 'utf8';
+  }
+
+  if (!Buffer.isEncoding(encoding)) {
+    throw new TypeError('"encoding" must be a valid string encoding');
+  }
+
+  var length = byteLength(string, encoding) | 0;
+  that = createBuffer(that, length);
+  var actual = that.write(string, encoding);
+
+  if (actual !== length) {
+    // Writing a hex string, for example, that contains invalid characters will
+    // cause everything after the first invalid character to be ignored. (e.g.
+    // 'abxxcd' will be treated as 'ab')
+    that = that.slice(0, actual);
+  }
+
+  return that;
+}
+
+function fromArrayLike(that, array) {
+  var length = array.length < 0 ? 0 : checked(array.length) | 0;
+  that = createBuffer(that, length);
+
+  for (var i = 0; i < length; i += 1) {
+    that[i] = array[i] & 255;
+  }
+
+  return that;
+}
+
+function fromArrayBuffer(that, array, byteOffset, length) {
+  array.byteLength; // this throws if `array` is not a valid ArrayBuffer
+
+  if (byteOffset < 0 || array.byteLength < byteOffset) {
+    throw new RangeError('\'offset\' is out of bounds');
+  }
+
+  if (array.byteLength < byteOffset + (length || 0)) {
+    throw new RangeError('\'length\' is out of bounds');
+  }
+
+  if (byteOffset === undefined && length === undefined) {
+    array = new Uint8Array(array);
+  } else if (length === undefined) {
+    array = new Uint8Array(array, byteOffset);
+  } else {
+    array = new Uint8Array(array, byteOffset, length);
+  }
+
+  if (Buffer.TYPED_ARRAY_SUPPORT) {
+    // Return an augmented `Uint8Array` instance, for best performance
+    that = array;
+    that.__proto__ = Buffer.prototype;
+  } else {
+    // Fallback: Return an object instance of the Buffer class
+    that = fromArrayLike(that, array);
+  }
+
+  return that;
+}
+
+function fromObject(that, obj) {
+  if (Buffer.isBuffer(obj)) {
+    var len = checked(obj.length) | 0;
+    that = createBuffer(that, len);
+
+    if (that.length === 0) {
+      return that;
+    }
+
+    obj.copy(that, 0, 0, len);
+    return that;
+  }
+
+  if (obj) {
+    if (typeof ArrayBuffer !== 'undefined' && obj.buffer instanceof ArrayBuffer || 'length' in obj) {
+      if (typeof obj.length !== 'number' || isnan(obj.length)) {
+        return createBuffer(that, 0);
+      }
+
+      return fromArrayLike(that, obj);
+    }
+
+    if (obj.type === 'Buffer' && isArray(obj.data)) {
+      return fromArrayLike(that, obj.data);
+    }
+  }
+
+  throw new TypeError('First argument must be a string, Buffer, ArrayBuffer, Array, or array-like object.');
+}
+
+function checked(length) {
+  // Note: cannot use `length < kMaxLength()` here because that fails when
+  // length is NaN (which is otherwise coerced to zero.)
+  if (length >= kMaxLength()) {
+    throw new RangeError('Attempt to allocate Buffer larger than maximum ' + 'size: 0x' + kMaxLength().toString(16) + ' bytes');
+  }
+
+  return length | 0;
+}
+
+function SlowBuffer(length) {
+  if (+length != length) {
+    // eslint-disable-line eqeqeq
+    length = 0;
+  }
+
+  return Buffer.alloc(+length);
+}
+
+Buffer.isBuffer = function isBuffer(b) {
+  return !!(b != null && b._isBuffer);
+};
+
+Buffer.compare = function compare(a, b) {
+  if (!Buffer.isBuffer(a) || !Buffer.isBuffer(b)) {
+    throw new TypeError('Arguments must be Buffers');
+  }
+
+  if (a === b) return 0;
+  var x = a.length;
+  var y = b.length;
+
+  for (var i = 0, len = Math.min(x, y); i < len; ++i) {
+    if (a[i] !== b[i]) {
+      x = a[i];
+      y = b[i];
+      break;
+    }
+  }
+
+  if (x < y) return -1;
+  if (y < x) return 1;
+  return 0;
+};
+
+Buffer.isEncoding = function isEncoding(encoding) {
+  switch (String(encoding).toLowerCase()) {
+    case 'hex':
+    case 'utf8':
+    case 'utf-8':
+    case 'ascii':
+    case 'latin1':
+    case 'binary':
+    case 'base64':
+    case 'ucs2':
+    case 'ucs-2':
+    case 'utf16le':
+    case 'utf-16le':
+      return true;
+
+    default:
+      return false;
+  }
+};
+
+Buffer.concat = function concat(list, length) {
+  if (!isArray(list)) {
+    throw new TypeError('"list" argument must be an Array of Buffers');
+  }
+
+  if (list.length === 0) {
+    return Buffer.alloc(0);
+  }
+
+  var i;
+
+  if (length === undefined) {
+    length = 0;
+
+    for (i = 0; i < list.length; ++i) {
+      length += list[i].length;
+    }
+  }
+
+  var buffer = Buffer.allocUnsafe(length);
+  var pos = 0;
+
+  for (i = 0; i < list.length; ++i) {
+    var buf = list[i];
+
+    if (!Buffer.isBuffer(buf)) {
+      throw new TypeError('"list" argument must be an Array of Buffers');
+    }
+
+    buf.copy(buffer, pos);
+    pos += buf.length;
+  }
+
+  return buffer;
+};
+
+function byteLength(string, encoding) {
+  if (Buffer.isBuffer(string)) {
+    return string.length;
+  }
+
+  if (typeof ArrayBuffer !== 'undefined' && typeof ArrayBuffer.isView === 'function' && (ArrayBuffer.isView(string) || string instanceof ArrayBuffer)) {
+    return string.byteLength;
+  }
+
+  if (typeof string !== 'string') {
+    string = '' + string;
+  }
+
+  var len = string.length;
+  if (len === 0) return 0; // Use a for loop to avoid recursion
+
+  var loweredCase = false;
+
+  for (;;) {
+    switch (encoding) {
+      case 'ascii':
+      case 'latin1':
+      case 'binary':
+        return len;
+
+      case 'utf8':
+      case 'utf-8':
+      case undefined:
+        return utf8ToBytes(string).length;
+
+      case 'ucs2':
+      case 'ucs-2':
+      case 'utf16le':
+      case 'utf-16le':
+        return len * 2;
+
+      case 'hex':
+        return len >>> 1;
+
+      case 'base64':
+        return base64ToBytes(string).length;
+
+      default:
+        if (loweredCase) return utf8ToBytes(string).length; // assume utf8
+
+        encoding = ('' + encoding).toLowerCase();
+        loweredCase = true;
+    }
+  }
+}
+
+Buffer.byteLength = byteLength;
+
+function slowToString(encoding, start, end) {
+  var loweredCase = false; // No need to verify that "this.length <= MAX_UINT32" since it's a read-only
+  // property of a typed array.
+  // This behaves neither like String nor Uint8Array in that we set start/end
+  // to their upper/lower bounds if the value passed is out of range.
+  // undefined is handled specially as per ECMA-262 6th Edition,
+  // Section 13.3.3.7 Runtime Semantics: KeyedBindingInitialization.
+
+  if (start === undefined || start < 0) {
+    start = 0;
+  } // Return early if start > this.length. Done here to prevent potential uint32
+  // coercion fail below.
+
+
+  if (start > this.length) {
+    return '';
+  }
+
+  if (end === undefined || end > this.length) {
+    end = this.length;
+  }
+
+  if (end <= 0) {
+    return '';
+  } // Force coersion to uint32. This will also coerce falsey/NaN values to 0.
+
+
+  end >>>= 0;
+  start >>>= 0;
+
+  if (end <= start) {
+    return '';
+  }
+
+  if (!encoding) encoding = 'utf8';
+
+  while (true) {
+    switch (encoding) {
+      case 'hex':
+        return hexSlice(this, start, end);
+
+      case 'utf8':
+      case 'utf-8':
+        return utf8Slice(this, start, end);
+
+      case 'ascii':
+        return asciiSlice(this, start, end);
+
+      case 'latin1':
+      case 'binary':
+        return latin1Slice(this, start, end);
+
+      case 'base64':
+        return base64Slice(this, start, end);
+
+      case 'ucs2':
+      case 'ucs-2':
+      case 'utf16le':
+      case 'utf-16le':
+        return utf16leSlice(this, start, end);
+
+      default:
+        if (loweredCase) throw new TypeError('Unknown encoding: ' + encoding);
+        encoding = (encoding + '').toLowerCase();
+        loweredCase = true;
+    }
+  }
+} // The property is used by `Buffer.isBuffer` and `is-buffer` (in Safari 5-7) to detect
+// Buffer instances.
+
+
+Buffer.prototype._isBuffer = true;
+
+function swap(b, n, m) {
+  var i = b[n];
+  b[n] = b[m];
+  b[m] = i;
+}
+
+Buffer.prototype.swap16 = function swap16() {
+  var len = this.length;
+
+  if (len % 2 !== 0) {
+    throw new RangeError('Buffer size must be a multiple of 16-bits');
+  }
+
+  for (var i = 0; i < len; i += 2) {
+    swap(this, i, i + 1);
+  }
+
+  return this;
+};
+
+Buffer.prototype.swap32 = function swap32() {
+  var len = this.length;
+
+  if (len % 4 !== 0) {
+    throw new RangeError('Buffer size must be a multiple of 32-bits');
+  }
+
+  for (var i = 0; i < len; i += 4) {
+    swap(this, i, i + 3);
+    swap(this, i + 1, i + 2);
+  }
+
+  return this;
+};
+
+Buffer.prototype.swap64 = function swap64() {
+  var len = this.length;
+
+  if (len % 8 !== 0) {
+    throw new RangeError('Buffer size must be a multiple of 64-bits');
+  }
+
+  for (var i = 0; i < len; i += 8) {
+    swap(this, i, i + 7);
+    swap(this, i + 1, i + 6);
+    swap(this, i + 2, i + 5);
+    swap(this, i + 3, i + 4);
+  }
+
+  return this;
+};
+
+Buffer.prototype.toString = function toString() {
+  var length = this.length | 0;
+  if (length === 0) return '';
+  if (arguments.length === 0) return utf8Slice(this, 0, length);
+  return slowToString.apply(this, arguments);
+};
+
+Buffer.prototype.equals = function equals(b) {
+  if (!Buffer.isBuffer(b)) throw new TypeError('Argument must be a Buffer');
+  if (this === b) return true;
+  return Buffer.compare(this, b) === 0;
+};
+
+Buffer.prototype.inspect = function inspect() {
+  var str = '';
+  var max = exports.INSPECT_MAX_BYTES;
+
+  if (this.length > 0) {
+    str = this.toString('hex', 0, max).match(/.{2}/g).join(' ');
+    if (this.length > max) str += ' ... ';
+  }
+
+  return '<Buffer ' + str + '>';
+};
+
+Buffer.prototype.compare = function compare(target, start, end, thisStart, thisEnd) {
+  if (!Buffer.isBuffer(target)) {
+    throw new TypeError('Argument must be a Buffer');
+  }
+
+  if (start === undefined) {
+    start = 0;
+  }
+
+  if (end === undefined) {
+    end = target ? target.length : 0;
+  }
+
+  if (thisStart === undefined) {
+    thisStart = 0;
+  }
+
+  if (thisEnd === undefined) {
+    thisEnd = this.length;
+  }
+
+  if (start < 0 || end > target.length || thisStart < 0 || thisEnd > this.length) {
+    throw new RangeError('out of range index');
+  }
+
+  if (thisStart >= thisEnd && start >= end) {
+    return 0;
+  }
+
+  if (thisStart >= thisEnd) {
+    return -1;
+  }
+
+  if (start >= end) {
+    return 1;
+  }
+
+  start >>>= 0;
+  end >>>= 0;
+  thisStart >>>= 0;
+  thisEnd >>>= 0;
+  if (this === target) return 0;
+  var x = thisEnd - thisStart;
+  var y = end - start;
+  var len = Math.min(x, y);
+  var thisCopy = this.slice(thisStart, thisEnd);
+  var targetCopy = target.slice(start, end);
+
+  for (var i = 0; i < len; ++i) {
+    if (thisCopy[i] !== targetCopy[i]) {
+      x = thisCopy[i];
+      y = targetCopy[i];
+      break;
+    }
+  }
+
+  if (x < y) return -1;
+  if (y < x) return 1;
+  return 0;
+}; // Finds either the first index of `val` in `buffer` at offset >= `byteOffset`,
+// OR the last index of `val` in `buffer` at offset <= `byteOffset`.
+//
+// Arguments:
+// - buffer - a Buffer to search
+// - val - a string, Buffer, or number
+// - byteOffset - an index into `buffer`; will be clamped to an int32
+// - encoding - an optional encoding, relevant is val is a string
+// - dir - true for indexOf, false for lastIndexOf
+
+
+function bidirectionalIndexOf(buffer, val, byteOffset, encoding, dir) {
+  // Empty buffer means no match
+  if (buffer.length === 0) return -1; // Normalize byteOffset
+
+  if (typeof byteOffset === 'string') {
+    encoding = byteOffset;
+    byteOffset = 0;
+  } else if (byteOffset > 0x7fffffff) {
+    byteOffset = 0x7fffffff;
+  } else if (byteOffset < -0x80000000) {
+    byteOffset = -0x80000000;
+  }
+
+  byteOffset = +byteOffset; // Coerce to Number.
+
+  if (isNaN(byteOffset)) {
+    // byteOffset: it it's undefined, null, NaN, "foo", etc, search whole buffer
+    byteOffset = dir ? 0 : buffer.length - 1;
+  } // Normalize byteOffset: negative offsets start from the end of the buffer
+
+
+  if (byteOffset < 0) byteOffset = buffer.length + byteOffset;
+
+  if (byteOffset >= buffer.length) {
+    if (dir) return -1;else byteOffset = buffer.length - 1;
+  } else if (byteOffset < 0) {
+    if (dir) byteOffset = 0;else return -1;
+  } // Normalize val
+
+
+  if (typeof val === 'string') {
+    val = Buffer.from(val, encoding);
+  } // Finally, search either indexOf (if dir is true) or lastIndexOf
+
+
+  if (Buffer.isBuffer(val)) {
+    // Special case: looking for empty string/buffer always fails
+    if (val.length === 0) {
+      return -1;
+    }
+
+    return arrayIndexOf(buffer, val, byteOffset, encoding, dir);
+  } else if (typeof val === 'number') {
+    val = val & 0xFF; // Search for a byte value [0-255]
+
+    if (Buffer.TYPED_ARRAY_SUPPORT && typeof Uint8Array.prototype.indexOf === 'function') {
+      if (dir) {
+        return Uint8Array.prototype.indexOf.call(buffer, val, byteOffset);
+      } else {
+        return Uint8Array.prototype.lastIndexOf.call(buffer, val, byteOffset);
+      }
+    }
+
+    return arrayIndexOf(buffer, [val], byteOffset, encoding, dir);
+  }
+
+  throw new TypeError('val must be string, number or Buffer');
+}
+
+function arrayIndexOf(arr, val, byteOffset, encoding, dir) {
+  var indexSize = 1;
+  var arrLength = arr.length;
+  var valLength = val.length;
+
+  if (encoding !== undefined) {
+    encoding = String(encoding).toLowerCase();
+
+    if (encoding === 'ucs2' || encoding === 'ucs-2' || encoding === 'utf16le' || encoding === 'utf-16le') {
+      if (arr.length < 2 || val.length < 2) {
+        return -1;
+      }
+
+      indexSize = 2;
+      arrLength /= 2;
+      valLength /= 2;
+      byteOffset /= 2;
+    }
+  }
+
+  function read(buf, i) {
+    if (indexSize === 1) {
+      return buf[i];
+    } else {
+      return buf.readUInt16BE(i * indexSize);
+    }
+  }
+
+  var i;
+
+  if (dir) {
+    var foundIndex = -1;
+
+    for (i = byteOffset; i < arrLength; i++) {
+      if (read(arr, i) === read(val, foundIndex === -1 ? 0 : i - foundIndex)) {
+        if (foundIndex === -1) foundIndex = i;
+        if (i - foundIndex + 1 === valLength) return foundIndex * indexSize;
+      } else {
+        if (foundIndex !== -1) i -= i - foundIndex;
+        foundIndex = -1;
+      }
+    }
+  } else {
+    if (byteOffset + valLength > arrLength) byteOffset = arrLength - valLength;
+
+    for (i = byteOffset; i >= 0; i--) {
+      var found = true;
+
+      for (var j = 0; j < valLength; j++) {
+        if (read(arr, i + j) !== read(val, j)) {
+          found = false;
+          break;
+        }
+      }
+
+      if (found) return i;
+    }
+  }
+
+  return -1;
+}
+
+Buffer.prototype.includes = function includes(val, byteOffset, encoding) {
+  return this.indexOf(val, byteOffset, encoding) !== -1;
+};
+
+Buffer.prototype.indexOf = function indexOf(val, byteOffset, encoding) {
+  return bidirectionalIndexOf(this, val, byteOffset, encoding, true);
+};
+
+Buffer.prototype.lastIndexOf = function lastIndexOf(val, byteOffset, encoding) {
+  return bidirectionalIndexOf(this, val, byteOffset, encoding, false);
+};
+
+function hexWrite(buf, string, offset, length) {
+  offset = Number(offset) || 0;
+  var remaining = buf.length - offset;
+
+  if (!length) {
+    length = remaining;
+  } else {
+    length = Number(length);
+
+    if (length > remaining) {
+      length = remaining;
+    }
+  } // must be an even number of digits
+
+
+  var strLen = string.length;
+  if (strLen % 2 !== 0) throw new TypeError('Invalid hex string');
+
+  if (length > strLen / 2) {
+    length = strLen / 2;
+  }
+
+  for (var i = 0; i < length; ++i) {
+    var parsed = parseInt(string.substr(i * 2, 2), 16);
+    if (isNaN(parsed)) return i;
+    buf[offset + i] = parsed;
+  }
+
+  return i;
+}
+
+function utf8Write(buf, string, offset, length) {
+  return blitBuffer(utf8ToBytes(string, buf.length - offset), buf, offset, length);
+}
+
+function asciiWrite(buf, string, offset, length) {
+  return blitBuffer(asciiToBytes(string), buf, offset, length);
+}
+
+function latin1Write(buf, string, offset, length) {
+  return asciiWrite(buf, string, offset, length);
+}
+
+function base64Write(buf, string, offset, length) {
+  return blitBuffer(base64ToBytes(string), buf, offset, length);
+}
+
+function ucs2Write(buf, string, offset, length) {
+  return blitBuffer(utf16leToBytes(string, buf.length - offset), buf, offset, length);
+}
+
+Buffer.prototype.write = function write(string, offset, length, encoding) {
+  // Buffer#write(string)
+  if (offset === undefined) {
+    encoding = 'utf8';
+    length = this.length;
+    offset = 0; // Buffer#write(string, encoding)
+  } else if (length === undefined && typeof offset === 'string') {
+    encoding = offset;
+    length = this.length;
+    offset = 0; // Buffer#write(string, offset[, length][, encoding])
+  } else if (isFinite(offset)) {
+    offset = offset | 0;
+
+    if (isFinite(length)) {
+      length = length | 0;
+      if (encoding === undefined) encoding = 'utf8';
+    } else {
+      encoding = length;
+      length = undefined;
+    } // legacy write(string, encoding, offset, length) - remove in v0.13
+
+  } else {
+    throw new Error('Buffer.write(string, encoding, offset[, length]) is no longer supported');
+  }
+
+  var remaining = this.length - offset;
+  if (length === undefined || length > remaining) length = remaining;
+
+  if (string.length > 0 && (length < 0 || offset < 0) || offset > this.length) {
+    throw new RangeError('Attempt to write outside buffer bounds');
+  }
+
+  if (!encoding) encoding = 'utf8';
+  var loweredCase = false;
+
+  for (;;) {
+    switch (encoding) {
+      case 'hex':
+        return hexWrite(this, string, offset, length);
+
+      case 'utf8':
+      case 'utf-8':
+        return utf8Write(this, string, offset, length);
+
+      case 'ascii':
+        return asciiWrite(this, string, offset, length);
+
+      case 'latin1':
+      case 'binary':
+        return latin1Write(this, string, offset, length);
+
+      case 'base64':
+        // Warning: maxLength not taken into account in base64Write
+        return base64Write(this, string, offset, length);
+
+      case 'ucs2':
+      case 'ucs-2':
+      case 'utf16le':
+      case 'utf-16le':
+        return ucs2Write(this, string, offset, length);
+
+      default:
+        if (loweredCase) throw new TypeError('Unknown encoding: ' + encoding);
+        encoding = ('' + encoding).toLowerCase();
+        loweredCase = true;
+    }
+  }
+};
+
+Buffer.prototype.toJSON = function toJSON() {
+  return {
+    type: 'Buffer',
+    data: Array.prototype.slice.call(this._arr || this, 0)
+  };
+};
+
+function base64Slice(buf, start, end) {
+  if (start === 0 && end === buf.length) {
+    return base64.fromByteArray(buf);
+  } else {
+    return base64.fromByteArray(buf.slice(start, end));
+  }
+}
+
+function utf8Slice(buf, start, end) {
+  end = Math.min(buf.length, end);
+  var res = [];
+  var i = start;
+
+  while (i < end) {
+    var firstByte = buf[i];
+    var codePoint = null;
+    var bytesPerSequence = firstByte > 0xEF ? 4 : firstByte > 0xDF ? 3 : firstByte > 0xBF ? 2 : 1;
+
+    if (i + bytesPerSequence <= end) {
+      var secondByte, thirdByte, fourthByte, tempCodePoint;
+
+      switch (bytesPerSequence) {
+        case 1:
+          if (firstByte < 0x80) {
+            codePoint = firstByte;
+          }
+
+          break;
+
+        case 2:
+          secondByte = buf[i + 1];
+
+          if ((secondByte & 0xC0) === 0x80) {
+            tempCodePoint = (firstByte & 0x1F) << 0x6 | secondByte & 0x3F;
+
+            if (tempCodePoint > 0x7F) {
+              codePoint = tempCodePoint;
+            }
+          }
+
+          break;
+
+        case 3:
+          secondByte = buf[i + 1];
+          thirdByte = buf[i + 2];
+
+          if ((secondByte & 0xC0) === 0x80 && (thirdByte & 0xC0) === 0x80) {
+            tempCodePoint = (firstByte & 0xF) << 0xC | (secondByte & 0x3F) << 0x6 | thirdByte & 0x3F;
+
+            if (tempCodePoint > 0x7FF && (tempCodePoint < 0xD800 || tempCodePoint > 0xDFFF)) {
+              codePoint = tempCodePoint;
+            }
+          }
+
+          break;
+
+        case 4:
+          secondByte = buf[i + 1];
+          thirdByte = buf[i + 2];
+          fourthByte = buf[i + 3];
+
+          if ((secondByte & 0xC0) === 0x80 && (thirdByte & 0xC0) === 0x80 && (fourthByte & 0xC0) === 0x80) {
+            tempCodePoint = (firstByte & 0xF) << 0x12 | (secondByte & 0x3F) << 0xC | (thirdByte & 0x3F) << 0x6 | fourthByte & 0x3F;
+
+            if (tempCodePoint > 0xFFFF && tempCodePoint < 0x110000) {
+              codePoint = tempCodePoint;
+            }
+          }
+
+      }
+    }
+
+    if (codePoint === null) {
+      // we did not generate a valid codePoint so insert a
+      // replacement char (U+FFFD) and advance only 1 byte
+      codePoint = 0xFFFD;
+      bytesPerSequence = 1;
+    } else if (codePoint > 0xFFFF) {
+      // encode to utf16 (surrogate pair dance)
+      codePoint -= 0x10000;
+      res.push(codePoint >>> 10 & 0x3FF | 0xD800);
+      codePoint = 0xDC00 | codePoint & 0x3FF;
+    }
+
+    res.push(codePoint);
+    i += bytesPerSequence;
+  }
+
+  return decodeCodePointsArray(res);
+} // Based on http://stackoverflow.com/a/22747272/680742, the browser with
+// the lowest limit is Chrome, with 0x10000 args.
+// We go 1 magnitude less, for safety
+
+
+var MAX_ARGUMENTS_LENGTH = 0x1000;
+
+function decodeCodePointsArray(codePoints) {
+  var len = codePoints.length;
+
+  if (len <= MAX_ARGUMENTS_LENGTH) {
+    return String.fromCharCode.apply(String, codePoints); // avoid extra slice()
+  } // Decode in chunks to avoid "call stack size exceeded".
+
+
+  var res = '';
+  var i = 0;
+
+  while (i < len) {
+    res += String.fromCharCode.apply(String, codePoints.slice(i, i += MAX_ARGUMENTS_LENGTH));
+  }
+
+  return res;
+}
+
+function asciiSlice(buf, start, end) {
+  var ret = '';
+  end = Math.min(buf.length, end);
+
+  for (var i = start; i < end; ++i) {
+    ret += String.fromCharCode(buf[i] & 0x7F);
+  }
+
+  return ret;
+}
+
+function latin1Slice(buf, start, end) {
+  var ret = '';
+  end = Math.min(buf.length, end);
+
+  for (var i = start; i < end; ++i) {
+    ret += String.fromCharCode(buf[i]);
+  }
+
+  return ret;
+}
+
+function hexSlice(buf, start, end) {
+  var len = buf.length;
+  if (!start || start < 0) start = 0;
+  if (!end || end < 0 || end > len) end = len;
+  var out = '';
+
+  for (var i = start; i < end; ++i) {
+    out += toHex(buf[i]);
+  }
+
+  return out;
+}
+
+function utf16leSlice(buf, start, end) {
+  var bytes = buf.slice(start, end);
+  var res = '';
+
+  for (var i = 0; i < bytes.length; i += 2) {
+    res += String.fromCharCode(bytes[i] + bytes[i + 1] * 256);
+  }
+
+  return res;
+}
+
+Buffer.prototype.slice = function slice(start, end) {
+  var len = this.length;
+  start = ~~start;
+  end = end === undefined ? len : ~~end;
+
+  if (start < 0) {
+    start += len;
+    if (start < 0) start = 0;
+  } else if (start > len) {
+    start = len;
+  }
+
+  if (end < 0) {
+    end += len;
+    if (end < 0) end = 0;
+  } else if (end > len) {
+    end = len;
+  }
+
+  if (end < start) end = start;
+  var newBuf;
+
+  if (Buffer.TYPED_ARRAY_SUPPORT) {
+    newBuf = this.subarray(start, end);
+    newBuf.__proto__ = Buffer.prototype;
+  } else {
+    var sliceLen = end - start;
+    newBuf = new Buffer(sliceLen, undefined);
+
+    for (var i = 0; i < sliceLen; ++i) {
+      newBuf[i] = this[i + start];
+    }
+  }
+
+  return newBuf;
+};
+/*
+ * Need to make sure that buffer isn't trying to write out of bounds.
+ */
+
+
+function checkOffset(offset, ext, length) {
+  if (offset % 1 !== 0 || offset < 0) throw new RangeError('offset is not uint');
+  if (offset + ext > length) throw new RangeError('Trying to access beyond buffer length');
+}
+
+Buffer.prototype.readUIntLE = function readUIntLE(offset, byteLength, noAssert) {
+  offset = offset | 0;
+  byteLength = byteLength | 0;
+  if (!noAssert) checkOffset(offset, byteLength, this.length);
+  var val = this[offset];
+  var mul = 1;
+  var i = 0;
+
+  while (++i < byteLength && (mul *= 0x100)) {
+    val += this[offset + i] * mul;
+  }
+
+  return val;
+};
+
+Buffer.prototype.readUIntBE = function readUIntBE(offset, byteLength, noAssert) {
+  offset = offset | 0;
+  byteLength = byteLength | 0;
+
+  if (!noAssert) {
+    checkOffset(offset, byteLength, this.length);
+  }
+
+  var val = this[offset + --byteLength];
+  var mul = 1;
+
+  while (byteLength > 0 && (mul *= 0x100)) {
+    val += this[offset + --byteLength] * mul;
+  }
+
+  return val;
+};
+
+Buffer.prototype.readUInt8 = function readUInt8(offset, noAssert) {
+  if (!noAssert) checkOffset(offset, 1, this.length);
+  return this[offset];
+};
+
+Buffer.prototype.readUInt16LE = function readUInt16LE(offset, noAssert) {
+  if (!noAssert) checkOffset(offset, 2, this.length);
+  return this[offset] | this[offset + 1] << 8;
+};
+
+Buffer.prototype.readUInt16BE = function readUInt16BE(offset, noAssert) {
+  if (!noAssert) checkOffset(offset, 2, this.length);
+  return this[offset] << 8 | this[offset + 1];
+};
+
+Buffer.prototype.readUInt32LE = function readUInt32LE(offset, noAssert) {
+  if (!noAssert) checkOffset(offset, 4, this.length);
+  return (this[offset] | this[offset + 1] << 8 | this[offset + 2] << 16) + this[offset + 3] * 0x1000000;
+};
+
+Buffer.prototype.readUInt32BE = function readUInt32BE(offset, noAssert) {
+  if (!noAssert) checkOffset(offset, 4, this.length);
+  return this[offset] * 0x1000000 + (this[offset + 1] << 16 | this[offset + 2] << 8 | this[offset + 3]);
+};
+
+Buffer.prototype.readIntLE = function readIntLE(offset, byteLength, noAssert) {
+  offset = offset | 0;
+  byteLength = byteLength | 0;
+  if (!noAssert) checkOffset(offset, byteLength, this.length);
+  var val = this[offset];
+  var mul = 1;
+  var i = 0;
+
+  while (++i < byteLength && (mul *= 0x100)) {
+    val += this[offset + i] * mul;
+  }
+
+  mul *= 0x80;
+  if (val >= mul) val -= Math.pow(2, 8 * byteLength);
+  return val;
+};
+
+Buffer.prototype.readIntBE = function readIntBE(offset, byteLength, noAssert) {
+  offset = offset | 0;
+  byteLength = byteLength | 0;
+  if (!noAssert) checkOffset(offset, byteLength, this.length);
+  var i = byteLength;
+  var mul = 1;
+  var val = this[offset + --i];
+
+  while (i > 0 && (mul *= 0x100)) {
+    val += this[offset + --i] * mul;
+  }
+
+  mul *= 0x80;
+  if (val >= mul) val -= Math.pow(2, 8 * byteLength);
+  return val;
+};
+
+Buffer.prototype.readInt8 = function readInt8(offset, noAssert) {
+  if (!noAssert) checkOffset(offset, 1, this.length);
+  if (!(this[offset] & 0x80)) return this[offset];
+  return (0xff - this[offset] + 1) * -1;
+};
+
+Buffer.prototype.readInt16LE = function readInt16LE(offset, noAssert) {
+  if (!noAssert) checkOffset(offset, 2, this.length);
+  var val = this[offset] | this[offset + 1] << 8;
+  return val & 0x8000 ? val | 0xFFFF0000 : val;
+};
+
+Buffer.prototype.readInt16BE = function readInt16BE(offset, noAssert) {
+  if (!noAssert) checkOffset(offset, 2, this.length);
+  var val = this[offset + 1] | this[offset] << 8;
+  return val & 0x8000 ? val | 0xFFFF0000 : val;
+};
+
+Buffer.prototype.readInt32LE = function readInt32LE(offset, noAssert) {
+  if (!noAssert) checkOffset(offset, 4, this.length);
+  return this[offset] | this[offset + 1] << 8 | this[offset + 2] << 16 | this[offset + 3] << 24;
+};
+
+Buffer.prototype.readInt32BE = function readInt32BE(offset, noAssert) {
+  if (!noAssert) checkOffset(offset, 4, this.length);
+  return this[offset] << 24 | this[offset + 1] << 16 | this[offset + 2] << 8 | this[offset + 3];
+};
+
+Buffer.prototype.readFloatLE = function readFloatLE(offset, noAssert) {
+  if (!noAssert) checkOffset(offset, 4, this.length);
+  return ieee754.read(this, offset, true, 23, 4);
+};
+
+Buffer.prototype.readFloatBE = function readFloatBE(offset, noAssert) {
+  if (!noAssert) checkOffset(offset, 4, this.length);
+  return ieee754.read(this, offset, false, 23, 4);
+};
+
+Buffer.prototype.readDoubleLE = function readDoubleLE(offset, noAssert) {
+  if (!noAssert) checkOffset(offset, 8, this.length);
+  return ieee754.read(this, offset, true, 52, 8);
+};
+
+Buffer.prototype.readDoubleBE = function readDoubleBE(offset, noAssert) {
+  if (!noAssert) checkOffset(offset, 8, this.length);
+  return ieee754.read(this, offset, false, 52, 8);
+};
+
+function checkInt(buf, value, offset, ext, max, min) {
+  if (!Buffer.isBuffer(buf)) throw new TypeError('"buffer" argument must be a Buffer instance');
+  if (value > max || value < min) throw new RangeError('"value" argument is out of bounds');
+  if (offset + ext > buf.length) throw new RangeError('Index out of range');
+}
+
+Buffer.prototype.writeUIntLE = function writeUIntLE(value, offset, byteLength, noAssert) {
+  value = +value;
+  offset = offset | 0;
+  byteLength = byteLength | 0;
+
+  if (!noAssert) {
+    var maxBytes = Math.pow(2, 8 * byteLength) - 1;
+    checkInt(this, value, offset, byteLength, maxBytes, 0);
+  }
+
+  var mul = 1;
+  var i = 0;
+  this[offset] = value & 0xFF;
+
+  while (++i < byteLength && (mul *= 0x100)) {
+    this[offset + i] = value / mul & 0xFF;
+  }
+
+  return offset + byteLength;
+};
+
+Buffer.prototype.writeUIntBE = function writeUIntBE(value, offset, byteLength, noAssert) {
+  value = +value;
+  offset = offset | 0;
+  byteLength = byteLength | 0;
+
+  if (!noAssert) {
+    var maxBytes = Math.pow(2, 8 * byteLength) - 1;
+    checkInt(this, value, offset, byteLength, maxBytes, 0);
+  }
+
+  var i = byteLength - 1;
+  var mul = 1;
+  this[offset + i] = value & 0xFF;
+
+  while (--i >= 0 && (mul *= 0x100)) {
+    this[offset + i] = value / mul & 0xFF;
+  }
+
+  return offset + byteLength;
+};
+
+Buffer.prototype.writeUInt8 = function writeUInt8(value, offset, noAssert) {
+  value = +value;
+  offset = offset | 0;
+  if (!noAssert) checkInt(this, value, offset, 1, 0xff, 0);
+  if (!Buffer.TYPED_ARRAY_SUPPORT) value = Math.floor(value);
+  this[offset] = value & 0xff;
+  return offset + 1;
+};
+
+function objectWriteUInt16(buf, value, offset, littleEndian) {
+  if (value < 0) value = 0xffff + value + 1;
+
+  for (var i = 0, j = Math.min(buf.length - offset, 2); i < j; ++i) {
+    buf[offset + i] = (value & 0xff << 8 * (littleEndian ? i : 1 - i)) >>> (littleEndian ? i : 1 - i) * 8;
+  }
+}
+
+Buffer.prototype.writeUInt16LE = function writeUInt16LE(value, offset, noAssert) {
+  value = +value;
+  offset = offset | 0;
+  if (!noAssert) checkInt(this, value, offset, 2, 0xffff, 0);
+
+  if (Buffer.TYPED_ARRAY_SUPPORT) {
+    this[offset] = value & 0xff;
+    this[offset + 1] = value >>> 8;
+  } else {
+    objectWriteUInt16(this, value, offset, true);
+  }
+
+  return offset + 2;
+};
+
+Buffer.prototype.writeUInt16BE = function writeUInt16BE(value, offset, noAssert) {
+  value = +value;
+  offset = offset | 0;
+  if (!noAssert) checkInt(this, value, offset, 2, 0xffff, 0);
+
+  if (Buffer.TYPED_ARRAY_SUPPORT) {
+    this[offset] = value >>> 8;
+    this[offset + 1] = value & 0xff;
+  } else {
+    objectWriteUInt16(this, value, offset, false);
+  }
+
+  return offset + 2;
+};
+
+function objectWriteUInt32(buf, value, offset, littleEndian) {
+  if (value < 0) value = 0xffffffff + value + 1;
+
+  for (var i = 0, j = Math.min(buf.length - offset, 4); i < j; ++i) {
+    buf[offset + i] = value >>> (littleEndian ? i : 3 - i) * 8 & 0xff;
+  }
+}
+
+Buffer.prototype.writeUInt32LE = function writeUInt32LE(value, offset, noAssert) {
+  value = +value;
+  offset = offset | 0;
+  if (!noAssert) checkInt(this, value, offset, 4, 0xffffffff, 0);
+
+  if (Buffer.TYPED_ARRAY_SUPPORT) {
+    this[offset + 3] = value >>> 24;
+    this[offset + 2] = value >>> 16;
+    this[offset + 1] = value >>> 8;
+    this[offset] = value & 0xff;
+  } else {
+    objectWriteUInt32(this, value, offset, true);
+  }
+
+  return offset + 4;
+};
+
+Buffer.prototype.writeUInt32BE = function writeUInt32BE(value, offset, noAssert) {
+  value = +value;
+  offset = offset | 0;
+  if (!noAssert) checkInt(this, value, offset, 4, 0xffffffff, 0);
+
+  if (Buffer.TYPED_ARRAY_SUPPORT) {
+    this[offset] = value >>> 24;
+    this[offset + 1] = value >>> 16;
+    this[offset + 2] = value >>> 8;
+    this[offset + 3] = value & 0xff;
+  } else {
+    objectWriteUInt32(this, value, offset, false);
+  }
+
+  return offset + 4;
+};
+
+Buffer.prototype.writeIntLE = function writeIntLE(value, offset, byteLength, noAssert) {
+  value = +value;
+  offset = offset | 0;
+
+  if (!noAssert) {
+    var limit = Math.pow(2, 8 * byteLength - 1);
+    checkInt(this, value, offset, byteLength, limit - 1, -limit);
+  }
+
+  var i = 0;
+  var mul = 1;
+  var sub = 0;
+  this[offset] = value & 0xFF;
+
+  while (++i < byteLength && (mul *= 0x100)) {
+    if (value < 0 && sub === 0 && this[offset + i - 1] !== 0) {
+      sub = 1;
+    }
+
+    this[offset + i] = (value / mul >> 0) - sub & 0xFF;
+  }
+
+  return offset + byteLength;
+};
+
+Buffer.prototype.writeIntBE = function writeIntBE(value, offset, byteLength, noAssert) {
+  value = +value;
+  offset = offset | 0;
+
+  if (!noAssert) {
+    var limit = Math.pow(2, 8 * byteLength - 1);
+    checkInt(this, value, offset, byteLength, limit - 1, -limit);
+  }
+
+  var i = byteLength - 1;
+  var mul = 1;
+  var sub = 0;
+  this[offset + i] = value & 0xFF;
+
+  while (--i >= 0 && (mul *= 0x100)) {
+    if (value < 0 && sub === 0 && this[offset + i + 1] !== 0) {
+      sub = 1;
+    }
+
+    this[offset + i] = (value / mul >> 0) - sub & 0xFF;
+  }
+
+  return offset + byteLength;
+};
+
+Buffer.prototype.writeInt8 = function writeInt8(value, offset, noAssert) {
+  value = +value;
+  offset = offset | 0;
+  if (!noAssert) checkInt(this, value, offset, 1, 0x7f, -0x80);
+  if (!Buffer.TYPED_ARRAY_SUPPORT) value = Math.floor(value);
+  if (value < 0) value = 0xff + value + 1;
+  this[offset] = value & 0xff;
+  return offset + 1;
+};
+
+Buffer.prototype.writeInt16LE = function writeInt16LE(value, offset, noAssert) {
+  value = +value;
+  offset = offset | 0;
+  if (!noAssert) checkInt(this, value, offset, 2, 0x7fff, -0x8000);
+
+  if (Buffer.TYPED_ARRAY_SUPPORT) {
+    this[offset] = value & 0xff;
+    this[offset + 1] = value >>> 8;
+  } else {
+    objectWriteUInt16(this, value, offset, true);
+  }
+
+  return offset + 2;
+};
+
+Buffer.prototype.writeInt16BE = function writeInt16BE(value, offset, noAssert) {
+  value = +value;
+  offset = offset | 0;
+  if (!noAssert) checkInt(this, value, offset, 2, 0x7fff, -0x8000);
+
+  if (Buffer.TYPED_ARRAY_SUPPORT) {
+    this[offset] = value >>> 8;
+    this[offset + 1] = value & 0xff;
+  } else {
+    objectWriteUInt16(this, value, offset, false);
+  }
+
+  return offset + 2;
+};
+
+Buffer.prototype.writeInt32LE = function writeInt32LE(value, offset, noAssert) {
+  value = +value;
+  offset = offset | 0;
+  if (!noAssert) checkInt(this, value, offset, 4, 0x7fffffff, -0x80000000);
+
+  if (Buffer.TYPED_ARRAY_SUPPORT) {
+    this[offset] = value & 0xff;
+    this[offset + 1] = value >>> 8;
+    this[offset + 2] = value >>> 16;
+    this[offset + 3] = value >>> 24;
+  } else {
+    objectWriteUInt32(this, value, offset, true);
+  }
+
+  return offset + 4;
+};
+
+Buffer.prototype.writeInt32BE = function writeInt32BE(value, offset, noAssert) {
+  value = +value;
+  offset = offset | 0;
+  if (!noAssert) checkInt(this, value, offset, 4, 0x7fffffff, -0x80000000);
+  if (value < 0) value = 0xffffffff + value + 1;
+
+  if (Buffer.TYPED_ARRAY_SUPPORT) {
+    this[offset] = value >>> 24;
+    this[offset + 1] = value >>> 16;
+    this[offset + 2] = value >>> 8;
+    this[offset + 3] = value & 0xff;
+  } else {
+    objectWriteUInt32(this, value, offset, false);
+  }
+
+  return offset + 4;
+};
+
+function checkIEEE754(buf, value, offset, ext, max, min) {
+  if (offset + ext > buf.length) throw new RangeError('Index out of range');
+  if (offset < 0) throw new RangeError('Index out of range');
+}
+
+function writeFloat(buf, value, offset, littleEndian, noAssert) {
+  if (!noAssert) {
+    checkIEEE754(buf, value, offset, 4, 3.4028234663852886e+38, -3.4028234663852886e+38);
+  }
+
+  ieee754.write(buf, value, offset, littleEndian, 23, 4);
+  return offset + 4;
+}
+
+Buffer.prototype.writeFloatLE = function writeFloatLE(value, offset, noAssert) {
+  return writeFloat(this, value, offset, true, noAssert);
+};
+
+Buffer.prototype.writeFloatBE = function writeFloatBE(value, offset, noAssert) {
+  return writeFloat(this, value, offset, false, noAssert);
+};
+
+function writeDouble(buf, value, offset, littleEndian, noAssert) {
+  if (!noAssert) {
+    checkIEEE754(buf, value, offset, 8, 1.7976931348623157E+308, -1.7976931348623157E+308);
+  }
+
+  ieee754.write(buf, value, offset, littleEndian, 52, 8);
+  return offset + 8;
+}
+
+Buffer.prototype.writeDoubleLE = function writeDoubleLE(value, offset, noAssert) {
+  return writeDouble(this, value, offset, true, noAssert);
+};
+
+Buffer.prototype.writeDoubleBE = function writeDoubleBE(value, offset, noAssert) {
+  return writeDouble(this, value, offset, false, noAssert);
+}; // copy(targetBuffer, targetStart=0, sourceStart=0, sourceEnd=buffer.length)
+
+
+Buffer.prototype.copy = function copy(target, targetStart, start, end) {
+  if (!start) start = 0;
+  if (!end && end !== 0) end = this.length;
+  if (targetStart >= target.length) targetStart = target.length;
+  if (!targetStart) targetStart = 0;
+  if (end > 0 && end < start) end = start; // Copy 0 bytes; we're done
+
+  if (end === start) return 0;
+  if (target.length === 0 || this.length === 0) return 0; // Fatal error conditions
+
+  if (targetStart < 0) {
+    throw new RangeError('targetStart out of bounds');
+  }
+
+  if (start < 0 || start >= this.length) throw new RangeError('sourceStart out of bounds');
+  if (end < 0) throw new RangeError('sourceEnd out of bounds'); // Are we oob?
+
+  if (end > this.length) end = this.length;
+
+  if (target.length - targetStart < end - start) {
+    end = target.length - targetStart + start;
+  }
+
+  var len = end - start;
+  var i;
+
+  if (this === target && start < targetStart && targetStart < end) {
+    // descending copy from end
+    for (i = len - 1; i >= 0; --i) {
+      target[i + targetStart] = this[i + start];
+    }
+  } else if (len < 1000 || !Buffer.TYPED_ARRAY_SUPPORT) {
+    // ascending copy from start
+    for (i = 0; i < len; ++i) {
+      target[i + targetStart] = this[i + start];
+    }
+  } else {
+    Uint8Array.prototype.set.call(target, this.subarray(start, start + len), targetStart);
+  }
+
+  return len;
+}; // Usage:
+//    buffer.fill(number[, offset[, end]])
+//    buffer.fill(buffer[, offset[, end]])
+//    buffer.fill(string[, offset[, end]][, encoding])
+
+
+Buffer.prototype.fill = function fill(val, start, end, encoding) {
+  // Handle string cases:
+  if (typeof val === 'string') {
+    if (typeof start === 'string') {
+      encoding = start;
+      start = 0;
+      end = this.length;
+    } else if (typeof end === 'string') {
+      encoding = end;
+      end = this.length;
+    }
+
+    if (val.length === 1) {
+      var code = val.charCodeAt(0);
+
+      if (code < 256) {
+        val = code;
+      }
+    }
+
+    if (encoding !== undefined && typeof encoding !== 'string') {
+      throw new TypeError('encoding must be a string');
+    }
+
+    if (typeof encoding === 'string' && !Buffer.isEncoding(encoding)) {
+      throw new TypeError('Unknown encoding: ' + encoding);
+    }
+  } else if (typeof val === 'number') {
+    val = val & 255;
+  } // Invalid ranges are not set to a default, so can range check early.
+
+
+  if (start < 0 || this.length < start || this.length < end) {
+    throw new RangeError('Out of range index');
+  }
+
+  if (end <= start) {
+    return this;
+  }
+
+  start = start >>> 0;
+  end = end === undefined ? this.length : end >>> 0;
+  if (!val) val = 0;
+  var i;
+
+  if (typeof val === 'number') {
+    for (i = start; i < end; ++i) {
+      this[i] = val;
+    }
+  } else {
+    var bytes = Buffer.isBuffer(val) ? val : utf8ToBytes(new Buffer(val, encoding).toString());
+    var len = bytes.length;
+
+    for (i = 0; i < end - start; ++i) {
+      this[i + start] = bytes[i % len];
+    }
+  }
+
+  return this;
+}; // HELPER FUNCTIONS
+// ================
+
+
+var INVALID_BASE64_RE = /[^+\/0-9A-Za-z-_]/g;
+
+function base64clean(str) {
+  // Node strips out invalid characters like \n and \t from the string, base64-js does not
+  str = stringtrim(str).replace(INVALID_BASE64_RE, ''); // Node converts strings with length < 2 to ''
+
+  if (str.length < 2) return ''; // Node allows for non-padded base64 strings (missing trailing ===), base64-js does not
+
+  while (str.length % 4 !== 0) {
+    str = str + '=';
+  }
+
+  return str;
+}
+
+function stringtrim(str) {
+  if (str.trim) return str.trim();
+  return str.replace(/^\s+|\s+$/g, '');
+}
+
+function toHex(n) {
+  if (n < 16) return '0' + n.toString(16);
+  return n.toString(16);
+}
+
+function utf8ToBytes(string, units) {
+  units = units || Infinity;
+  var codePoint;
+  var length = string.length;
+  var leadSurrogate = null;
+  var bytes = [];
+
+  for (var i = 0; i < length; ++i) {
+    codePoint = string.charCodeAt(i); // is surrogate component
+
+    if (codePoint > 0xD7FF && codePoint < 0xE000) {
+      // last char was a lead
+      if (!leadSurrogate) {
+        // no lead yet
+        if (codePoint > 0xDBFF) {
+          // unexpected trail
+          if ((units -= 3) > -1) bytes.push(0xEF, 0xBF, 0xBD);
+          continue;
+        } else if (i + 1 === length) {
+          // unpaired lead
+          if ((units -= 3) > -1) bytes.push(0xEF, 0xBF, 0xBD);
+          continue;
+        } // valid lead
+
+
+        leadSurrogate = codePoint;
+        continue;
+      } // 2 leads in a row
+
+
+      if (codePoint < 0xDC00) {
+        if ((units -= 3) > -1) bytes.push(0xEF, 0xBF, 0xBD);
+        leadSurrogate = codePoint;
+        continue;
+      } // valid surrogate pair
+
+
+      codePoint = (leadSurrogate - 0xD800 << 10 | codePoint - 0xDC00) + 0x10000;
+    } else if (leadSurrogate) {
+      // valid bmp char, but last char was a lead
+      if ((units -= 3) > -1) bytes.push(0xEF, 0xBF, 0xBD);
+    }
+
+    leadSurrogate = null; // encode utf8
+
+    if (codePoint < 0x80) {
+      if ((units -= 1) < 0) break;
+      bytes.push(codePoint);
+    } else if (codePoint < 0x800) {
+      if ((units -= 2) < 0) break;
+      bytes.push(codePoint >> 0x6 | 0xC0, codePoint & 0x3F | 0x80);
+    } else if (codePoint < 0x10000) {
+      if ((units -= 3) < 0) break;
+      bytes.push(codePoint >> 0xC | 0xE0, codePoint >> 0x6 & 0x3F | 0x80, codePoint & 0x3F | 0x80);
+    } else if (codePoint < 0x110000) {
+      if ((units -= 4) < 0) break;
+      bytes.push(codePoint >> 0x12 | 0xF0, codePoint >> 0xC & 0x3F | 0x80, codePoint >> 0x6 & 0x3F | 0x80, codePoint & 0x3F | 0x80);
+    } else {
+      throw new Error('Invalid code point');
+    }
+  }
+
+  return bytes;
+}
+
+function asciiToBytes(str) {
+  var byteArray = [];
+
+  for (var i = 0; i < str.length; ++i) {
+    // Node's code seems to be doing this and not & 0x7F..
+    byteArray.push(str.charCodeAt(i) & 0xFF);
+  }
+
+  return byteArray;
+}
+
+function utf16leToBytes(str, units) {
+  var c, hi, lo;
+  var byteArray = [];
+
+  for (var i = 0; i < str.length; ++i) {
+    if ((units -= 2) < 0) break;
+    c = str.charCodeAt(i);
+    hi = c >> 8;
+    lo = c % 256;
+    byteArray.push(lo);
+    byteArray.push(hi);
+  }
+
+  return byteArray;
+}
+
+function base64ToBytes(str) {
+  return base64.toByteArray(base64clean(str));
+}
+
+function blitBuffer(src, dst, offset, length) {
+  for (var i = 0; i < length; ++i) {
+    if (i + offset >= dst.length || i >= src.length) break;
+    dst[i + offset] = src[i];
+  }
+
+  return i;
+}
+
+function isnan(val) {
+  return val !== val; // eslint-disable-line no-self-compare
+}
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js")))
+
+/***/ }),
+
+/***/ "./node_modules/buffer/node_modules/isarray/index.js":
+/*!***********************************************************!*\
+  !*** ./node_modules/buffer/node_modules/isarray/index.js ***!
+  \***********************************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+var toString = {}.toString;
+
+module.exports = Array.isArray || function (arr) {
+  return toString.call(arr) == '[object Array]';
+};
 
 /***/ }),
 
@@ -202,18 +4445,94 @@ eval("/* WEBPACK VAR INJECTION */(function(global) {/*!\n * The buffer module fr
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-eval("exports.read = function (buffer, offset, isLE, mLen, nBytes) {\n  var e, m;\n  var eLen = nBytes * 8 - mLen - 1;\n  var eMax = (1 << eLen) - 1;\n  var eBias = eMax >> 1;\n  var nBits = -7;\n  var i = isLE ? nBytes - 1 : 0;\n  var d = isLE ? -1 : 1;\n  var s = buffer[offset + i];\n  i += d;\n  e = s & (1 << -nBits) - 1;\n  s >>= -nBits;\n  nBits += eLen;\n\n  for (; nBits > 0; e = e * 256 + buffer[offset + i], i += d, nBits -= 8) {}\n\n  m = e & (1 << -nBits) - 1;\n  e >>= -nBits;\n  nBits += mLen;\n\n  for (; nBits > 0; m = m * 256 + buffer[offset + i], i += d, nBits -= 8) {}\n\n  if (e === 0) {\n    e = 1 - eBias;\n  } else if (e === eMax) {\n    return m ? NaN : (s ? -1 : 1) * Infinity;\n  } else {\n    m = m + Math.pow(2, mLen);\n    e = e - eBias;\n  }\n\n  return (s ? -1 : 1) * m * Math.pow(2, e - mLen);\n};\n\nexports.write = function (buffer, value, offset, isLE, mLen, nBytes) {\n  var e, m, c;\n  var eLen = nBytes * 8 - mLen - 1;\n  var eMax = (1 << eLen) - 1;\n  var eBias = eMax >> 1;\n  var rt = mLen === 23 ? Math.pow(2, -24) - Math.pow(2, -77) : 0;\n  var i = isLE ? 0 : nBytes - 1;\n  var d = isLE ? 1 : -1;\n  var s = value < 0 || value === 0 && 1 / value < 0 ? 1 : 0;\n  value = Math.abs(value);\n\n  if (isNaN(value) || value === Infinity) {\n    m = isNaN(value) ? 1 : 0;\n    e = eMax;\n  } else {\n    e = Math.floor(Math.log(value) / Math.LN2);\n\n    if (value * (c = Math.pow(2, -e)) < 1) {\n      e--;\n      c *= 2;\n    }\n\n    if (e + eBias >= 1) {\n      value += rt / c;\n    } else {\n      value += rt * Math.pow(2, 1 - eBias);\n    }\n\n    if (value * c >= 2) {\n      e++;\n      c /= 2;\n    }\n\n    if (e + eBias >= eMax) {\n      m = 0;\n      e = eMax;\n    } else if (e + eBias >= 1) {\n      m = (value * c - 1) * Math.pow(2, mLen);\n      e = e + eBias;\n    } else {\n      m = value * Math.pow(2, eBias - 1) * Math.pow(2, mLen);\n      e = 0;\n    }\n  }\n\n  for (; mLen >= 8; buffer[offset + i] = m & 0xff, i += d, m /= 256, mLen -= 8) {}\n\n  e = e << mLen | m;\n  eLen += mLen;\n\n  for (; eLen > 0; buffer[offset + i] = e & 0xff, i += d, e /= 256, eLen -= 8) {}\n\n  buffer[offset + i - d] |= s * 128;\n};\n\n//# sourceURL=webpack://Jose/./node_modules/ieee754/index.js?");
+exports.read = function (buffer, offset, isLE, mLen, nBytes) {
+  var e, m;
+  var eLen = nBytes * 8 - mLen - 1;
+  var eMax = (1 << eLen) - 1;
+  var eBias = eMax >> 1;
+  var nBits = -7;
+  var i = isLE ? nBytes - 1 : 0;
+  var d = isLE ? -1 : 1;
+  var s = buffer[offset + i];
+  i += d;
+  e = s & (1 << -nBits) - 1;
+  s >>= -nBits;
+  nBits += eLen;
 
-/***/ }),
+  for (; nBits > 0; e = e * 256 + buffer[offset + i], i += d, nBits -= 8) {}
 
-/***/ "./node_modules/isarray/index.js":
-/*!***************************************!*\
-  !*** ./node_modules/isarray/index.js ***!
-  \***************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
+  m = e & (1 << -nBits) - 1;
+  e >>= -nBits;
+  nBits += mLen;
 
-eval("var toString = {}.toString;\n\nmodule.exports = Array.isArray || function (arr) {\n  return toString.call(arr) == '[object Array]';\n};\n\n//# sourceURL=webpack://Jose/./node_modules/isarray/index.js?");
+  for (; nBits > 0; m = m * 256 + buffer[offset + i], i += d, nBits -= 8) {}
+
+  if (e === 0) {
+    e = 1 - eBias;
+  } else if (e === eMax) {
+    return m ? NaN : (s ? -1 : 1) * Infinity;
+  } else {
+    m = m + Math.pow(2, mLen);
+    e = e - eBias;
+  }
+
+  return (s ? -1 : 1) * m * Math.pow(2, e - mLen);
+};
+
+exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
+  var e, m, c;
+  var eLen = nBytes * 8 - mLen - 1;
+  var eMax = (1 << eLen) - 1;
+  var eBias = eMax >> 1;
+  var rt = mLen === 23 ? Math.pow(2, -24) - Math.pow(2, -77) : 0;
+  var i = isLE ? 0 : nBytes - 1;
+  var d = isLE ? 1 : -1;
+  var s = value < 0 || value === 0 && 1 / value < 0 ? 1 : 0;
+  value = Math.abs(value);
+
+  if (isNaN(value) || value === Infinity) {
+    m = isNaN(value) ? 1 : 0;
+    e = eMax;
+  } else {
+    e = Math.floor(Math.log(value) / Math.LN2);
+
+    if (value * (c = Math.pow(2, -e)) < 1) {
+      e--;
+      c *= 2;
+    }
+
+    if (e + eBias >= 1) {
+      value += rt / c;
+    } else {
+      value += rt * Math.pow(2, 1 - eBias);
+    }
+
+    if (value * c >= 2) {
+      e++;
+      c /= 2;
+    }
+
+    if (e + eBias >= eMax) {
+      m = 0;
+      e = eMax;
+    } else if (e + eBias >= 1) {
+      m = (value * c - 1) * Math.pow(2, mLen);
+      e = e + eBias;
+    } else {
+      m = value * Math.pow(2, eBias - 1) * Math.pow(2, mLen);
+      e = 0;
+    }
+  }
+
+  for (; mLen >= 8; buffer[offset + i] = m & 0xff, i += d, m /= 256, mLen -= 8) {}
+
+  e = e << mLen | m;
+  eLen += mLen;
+
+  for (; eLen > 0; buffer[offset + i] = e & 0xff, i += d, e /= 256, eLen -= 8) {}
+
+  buffer[offset + i - d] |= s * 128;
+};
 
 /***/ }),
 
@@ -224,8 +4543,28 @@ eval("var toString = {}.toString;\n\nmodule.exports = Array.isArray || function 
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-eval("function _typeof(obj) { if (typeof Symbol === \"function\" && typeof Symbol.iterator === \"symbol\") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === \"function\" && obj.constructor === Symbol && obj !== Symbol.prototype ? \"symbol\" : typeof obj; }; } return _typeof(obj); }\n\nvar g; // This works in non-strict mode\n\ng = function () {\n  return this;\n}();\n\ntry {\n  // This works if eval is allowed (see CSP)\n  g = g || new Function(\"return this\")();\n} catch (e) {\n  // This works if the window reference is available\n  if ((typeof window === \"undefined\" ? \"undefined\" : _typeof(window)) === \"object\") g = window;\n} // g can still be undefined, but nothing to do about it...\n// We return undefined, instead of nothing here, so it's\n// easier to handle this case. if(!global) { ...}\n\n\nmodule.exports = g;\n\n//# sourceURL=webpack://Jose/(webpack)/buildin/global.js?");
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+var g; // This works in non-strict mode
+
+g = function () {
+  return this;
+}();
+
+try {
+  // This works if eval is allowed (see CSP)
+  g = g || Function("return this")() || (1, eval)("this");
+} catch (e) {
+  // This works if the window reference is available
+  if ((typeof window === "undefined" ? "undefined" : _typeof(window)) === "object") g = window;
+} // g can still be undefined, but nothing to do about it...
+// We return undefined, instead of nothing here, so it's
+// easier to handle this case. if(!global) { ...}
+
+
+module.exports = g;
 
 /***/ })
 
 /******/ });
+//# sourceMappingURL=jose.js.map
