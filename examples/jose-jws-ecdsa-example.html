@@ -1,0 +1,69 @@
+<html>
+<body>
+<p>payload: <span id="plaintext">hello world, &#x26C4;</span></p>
+
+<p>signature:
+<pre style="word-wrap: break-word" id="signtext"></pre>
+</p>
+<p>error: <span id="error" style="color: red"></span></p>
+<script src="../dist/jose.js"></script>
+
+<script>
+// To create the key pair
+// var key = await crypto.subtle.generateKey({'name':'ECDSA','namedCurve':'P-256'}, true, ['sign', 'verify']);
+// console.log(JSON.stringify(await crypto.subtle.exportKey('jwk', key.privateKey), null, 4));
+// console.log(JSON.stringify(await crypto.subtle.exportKey('jwk', key.publicKey), null, 4));
+
+var ecc_key = {
+  "crv": "P-256",
+  "ext": true,
+  "key_ops": [
+      "verify"
+  ],
+  "kty": "EC",
+  "x": "fsCXKkz1zQiV8TB1YQGxKaFAk8M9jPEuQ2Bna_mqM6U",
+  "y": "jpuyJDSgQOOdGjlAXJaY6aCnaA1ZzxDjJy3p8TbeBKg"
+};
+var ecc_private_key = {
+  "crv": "P-256",
+  "d": "e8cx7lNG2wqzhdwWuDIzhG9tF5T6dG3elsz8iQOMR34",
+  "ext": true,
+  "key_ops": [
+      "sign"
+  ],
+  "kty": "EC",
+  "x": "fsCXKkz1zQiV8TB1YQGxKaFAk8M9jPEuQ2Bna_mqM6U",
+  "y": "jpuyJDSgQOOdGjlAXJaY6aCnaA1ZzxDjJy3p8TbeBKg"
+};
+
+async function example() {
+  var cryptographer = new Jose.WebCryptographer();
+  cryptographer.setContentSignAlgorithm("ES256");
+
+  var signer = new Jose.JoseJWS.Signer(cryptographer);
+
+  var signers = [];
+  signers.push(signer.addSigner(ecc_private_key, "123", {alg: 'ES256'}));
+  Promise.all(signers).then(function () {
+    signer.sign(plaintext.textContent, null, {}).then(function (message) {
+      console.log(message.CompactSerialize());
+
+      signtext.textContent = JSON.stringify(message, null, 4);
+      var verifier = new Jose.JoseJWS.Verifier(cryptographer, message);
+      verifier.addRecipient(ecc_key, "123", "ES256").then(function () {
+        verifier.verify().then(function (verified) {
+          signtext.textContent += '\n\nverified: ' + JSON.stringify(verified, null, 4);
+        }).catch(function (err) {
+          error.textContent = "verification failed: " + err;
+          throw err;
+        });
+      });
+    }).catch(function (err) {
+      error.textContent = "sign failed: " + err;
+    });
+  });
+}
+example();
+</script>
+</body>
+</html>
