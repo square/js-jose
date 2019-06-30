@@ -91,13 +91,14 @@ var Jose =
 /*!**************************!*\
   !*** ./lib/jose-core.js ***!
   \**************************/
-/*! exports provided: crypto, Utils, WebCryptographer, JoseJWE, JoseJWS, setCrypto, caniuse */
+/*! exports provided: crypto, Utils, WebCryptographer, default, Jose, JoseJWE, JoseJWS, setCrypto, caniuse */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* WEBPACK VAR INJECTION */(function(Buffer, global) {/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "crypto", function() { return crypto; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Utils", function() { return Utils; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Jose", function() { return Jose; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "JoseJWE", function() { return JoseJWE; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "JoseJWS", function() { return JoseJWS; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "setCrypto", function() { return setCrypto; });
@@ -157,6 +158,14 @@ var JoseJWS = {
   Signer: _jose_jws_sign__WEBPACK_IMPORTED_MODULE_3__["Signer"],
   Verifier: _jose_jws_verify__WEBPACK_IMPORTED_MODULE_4__["Verifier"]
 };
+var Jose = {
+  JoseJWS: JoseJWS,
+  JoseJWE: JoseJWE
+};
+/* harmony default export */ __webpack_exports__["default"] = ({
+  Jose: Jose
+});
+
 /**
  * Set crypto provider to use (window.crypto, node-webcrypto-ossl, node-webcrypto-pkcs11 etc.).
  */
