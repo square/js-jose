@@ -29,7 +29,11 @@ type JoseAlgorithm = EncryptAlgorithm | SignAlgorithm;
 
 interface IWebCryptographer {
     new(): IWebCryptographer;
+    getContentEncryptionAlgorithm(): EncryptAlgorithm;
+    setContentEncryptionAlgorithm(algorithm: EncryptAlgorithm): void;
+    getKeyEncryptionAlgorithm(): EncryptAlgorithm;
     setKeyEncryptionAlgorithm(algorithm: EncryptAlgorithm): void;
+    getContentSignAlgorithm(): SignAlgorithm;
     setContentSignAlgorithm(algorithm: SignAlgorithm): void;
     createIV(): ArrayBufferView;
     createCek(): PromiseLike<CryptoKey>;
