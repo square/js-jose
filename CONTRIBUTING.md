@@ -5,7 +5,7 @@ forking the repository and sending a pull request.
 
 When submitting code, please make every effort to follow existing conventions
 and style in order to keep the code as readable as possible. Please also make
-sure all tests pass by running `make test`.
+sure all tests pass by running `npm run build`.
 
 Before your code can be accepted into the project you must also sign the
 Individual Contributor License Agreement.  We use [cla-assistant.io][1] and you

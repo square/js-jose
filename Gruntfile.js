@@ -6,11 +6,11 @@ module.exports = function(grunt) {
   var config = {
     pkg: grunt.file.readJSON('package.json'),
 
-    jshint: {
-      all: ['Gruntfile.js', 'lib/*.js'],
+    eslint: {
       options: {
-        "esversion": 6
-      }
+        fix: true
+      },
+      target: 'lib'
     },
 
     webpack: {
@@ -26,13 +26,13 @@ module.exports = function(grunt) {
           },
           reporters: ['coverage', 'progress'],
           coverageReporter: {
-            type : 'lcovonly',
-            dir : 'coverage/'
+            type: 'lcovonly',
+            dir: 'coverage/'
           },
           frameworks: ['qunit'],
           files: [
-            {pattern: 'dist/jose.js', watching: false, included: false},
-            {pattern: 'test/qunit-promises.js', watching: false, included: false},
+            { pattern: 'dist/jose.js', watching: false, included: false },
+            { pattern: 'test/qunit-promises.js', watching: false, included: false },
             'test/jose-jwe-test.html',
             'test/jose-jws-ecdsa-test.html',
             'test/jose-jws-rsa-test.html'
@@ -46,15 +46,15 @@ module.exports = function(grunt) {
             }
           },
           singleRun: true,
-          plugins:['karma-coverage', 'karma-qunit', 'karma-chrome-launcher']
+          plugins: ['karma-coverage', 'karma-qunit', 'karma-chrome-launcher']
         }
       },
       without_coverage: {
         options: {
           frameworks: ['qunit'],
           files: [
-            {pattern: 'dist/jose.js', watching: false, included: false},
-            {pattern: 'test/qunit-promises.js', watching: false, included: false},
+            { pattern: 'dist/jose.js', watching: false, included: false },
+            { pattern: 'test/qunit-promises.js', watching: false, included: false },
             'test/jose-jwe-test.html',
             'test/jose-jws-ecdsa-test.html',
             'test/jose-jws-rsa-test.html'
@@ -90,12 +90,12 @@ module.exports = function(grunt) {
   grunt.initConfig(config);
 
   grunt.loadNpmTasks('grunt-contrib-concat');
-  grunt.loadNpmTasks('grunt-contrib-jshint');
+  grunt.loadNpmTasks('grunt-eslint');
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-karma');
   grunt.loadNpmTasks('grunt-karma-coveralls');
   grunt.loadNpmTasks('grunt-webpack');
 
-  grunt.registerTask('default', ['jshint', 'webpack', 'karma:without_coverage']);
-  grunt.registerTask('with_coverage', ['jshint', 'webpack', 'karma:with_coverage']);
+  grunt.registerTask('default', ['eslint', 'webpack', 'karma:without_coverage']);
+  grunt.registerTask('with_coverage', ['eslint', 'webpack', 'karma:with_coverage']);
 };

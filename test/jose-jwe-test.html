@@ -184,7 +184,7 @@
       var cryptographer = new Jose.WebCryptographer();
       cryptographer.setKeyEncryptionAlgorithm("A128KW");
       var shared_key = {"kty":"oct", "k":"GawgguFyGrWKav7AX4VKUg"};
-      shared_key = crypto.subtle.importKey("jwk", shared_key, cryptographer.key_encryption.id, true, ["wrapKey", "unwrapKey"]);
+      shared_key = crypto.subtle.importKey("jwk", shared_key, cryptographer.keyEncryption.id, true, ["wrapKey", "unwrapKey"]);
       var plain_text = "I only went out for a walk and finally concluded to stay out till sundown, for going out, I found, was really going in. --John Muir";
 
       var encrypter = new Jose.JoseJWE.Encrypter(cryptographer, shared_key);
@@ -225,7 +225,7 @@
       cryptographer.setContentEncryptionAlgorithm("A128GCM");
 
       var shared_key = {"kty":"oct", "k":"GawgguFyGrWKav7AX4VKUg"};
-      shared_key = crypto.subtle.importKey("jwk", shared_key, cryptographer.key_encryption.id, true, ["wrapKey", "unwrapKey"]);
+      shared_key = crypto.subtle.importKey("jwk", shared_key, cryptographer.keyEncryption.id, true, ["wrapKey", "unwrapKey"]);
 
       var plain_text = "All generalizations are false, including this one.  --Mark Twain";
       var encrypter = new Jose.JoseJWE.Encrypter(cryptographer, shared_key);
