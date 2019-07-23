@@ -6,6 +6,12 @@ module.exports = function(grunt) {
   var config = {
     pkg: grunt.file.readJSON('package.json'),
 
+    run: {
+      jest: {
+        cmd: 'jest',
+      }
+    },
+
     eslint: {
       options: {
         fix: true
@@ -89,6 +95,7 @@ module.exports = function(grunt) {
 
   grunt.initConfig(config);
 
+  grunt.loadNpmTasks('grunt-run');
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-eslint');
   grunt.loadNpmTasks('grunt-contrib-uglify');
@@ -96,6 +103,6 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-karma-coveralls');
   grunt.loadNpmTasks('grunt-webpack');
 
-  grunt.registerTask('default', ['eslint', 'webpack', 'karma:without_coverage']);
-  grunt.registerTask('with_coverage', ['eslint', 'webpack', 'karma:with_coverage']);
+  grunt.registerTask('default', ['eslint', 'run:jest', 'webpack', 'karma:without_coverage']);
+  grunt.registerTask('with_coverage', ['eslint', 'run:jest', 'webpack', 'karma:with_coverage']);
 };
