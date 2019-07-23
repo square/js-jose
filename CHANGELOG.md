@@ -6,9 +6,10 @@ and this project should eventually adhere to [Semantic Versioning](https://semve
 however it has not stabilized, yet.
 
 ## [Unreleased]
+
+## [0.2.0] - 2019-07-23
 ### Added
 - Support for signing and verifying using EC keys (#95).
-
 
 ### Fixed
 - Fix babel-loader config (#91).
@@ -20,7 +21,6 @@ however it has not stabilized, yet.
 - Use ESLint instead of JSHint and adopt [JavaScript Standard Style](https://standardjs.com/)
   for the project -- with the exception of [semi rule](https://eslint.org/docs/rules/semi)
   (we still require semicolons everywhere) (#99).
-
 
 ## [0.1.7] - 2019-02-21
 ### Changed
@@ -92,7 +92,8 @@ however it has not stabilized, yet.
 - Support for content encryption: A128CBC-HS256, A256CBC-HS512, A128GCM,
   A256GCM (default).
 
-[Unreleased]: https://github.com/square/js-jose/compare/v0.1.7...HEAD
+[Unreleased]: https://github.com/square/js-jose/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/square/js-jose/compare/v0.1.7...v0.2.0
 [0.1.7]: https://github.com/square/js-jose/compare/v0.1.6...v0.1.7
 [0.1.6]: https://github.com/square/js-jose/compare/v0.1.5...v0.1.6
 [0.1.5]: https://github.com/square/js-jose/compare/v0.1.4...v0.1.5
