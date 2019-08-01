@@ -44,10 +44,10 @@ module.exports = function(grunt) {
             'test/jose-jws-rsa-test.html'
           ],
           autoWatch: true,
-          browsers: ['Chrome'],
+          browsers: ['Chrome', 'ChromeHeadless', 'ChromeHeadlessNoSandbox'],
           customLaunchers: {
-            Chrome_travis_ci: {
-              base: 'Chrome',
+            ChromeHeadlessNoSandbox: {
+              base: 'ChromeHeadless',
               flags: ['--no-sandbox']
             }
           },
@@ -66,10 +66,10 @@ module.exports = function(grunt) {
             'test/jose-jws-rsa-test.html'
           ],
           autoWatch: true,
-          browsers: ['Chrome'],
+          browsers: ['Chrome', 'ChromeHeadless', 'ChromeHeadlessNoSandbox'],
           customLaunchers: {
-            Chrome_travis_ci: {
-              base: 'Chrome',
+            ChromeHeadlessNoSandbox: {
+              base: 'ChromeHeadless',
               flags: ['--no-sandbox']
             }
           },
@@ -89,8 +89,8 @@ module.exports = function(grunt) {
   };
 
   if (process.env.TRAVIS) {
-    config.karma.with_coverage.browsers = ['Chrome_travis_ci'];
-    config.karma.without_coverage.browsers = ['Chrome_travis_ci'];
+    config.karma.with_coverage.browsers = ['ChromeHeadlessNoSandbox'];
+    config.karma.without_coverage.browsers = ['ChromeHeadlessNoSandbox'];
   }
 
   grunt.initConfig(config);
