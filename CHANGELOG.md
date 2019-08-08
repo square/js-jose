@@ -7,6 +7,17 @@ however it has not stabilized, yet.
 
 ## [Unreleased]
 
+## [0.2.1] - 2019-08-08
+### Fixed
+- Fix WebCryptographer export (#116).
+
+### Changed
+- Update of many dev dependencies (#103, #104, #105, #107, #108, #111, #112)
+
+### Deprecated
+- Node.js 9 is unsupported. CI is configured to run latest Node.js version and latest
+  LTS release (#113).
+
 ## [0.2.0] - 2019-07-23
 ### Added
 - Support for signing and verifying using EC keys (#95).
@@ -92,7 +103,8 @@ however it has not stabilized, yet.
 - Support for content encryption: A128CBC-HS256, A256CBC-HS512, A128GCM,
   A256GCM (default).
 
-[Unreleased]: https://github.com/square/js-jose/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/square/js-jose/compare/v0.2.1...HEAD
+[0.2.1]: https://github.com/square/js-jose/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/square/js-jose/compare/v0.1.7...v0.2.0
 [0.1.7]: https://github.com/square/js-jose/compare/v0.1.6...v0.1.7
 [0.1.6]: https://github.com/square/js-jose/compare/v0.1.5...v0.1.6
