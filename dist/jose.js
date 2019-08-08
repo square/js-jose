@@ -91,7 +91,7 @@ var Jose =
 /*!**************************!*\
   !*** ./lib/jose-core.js ***!
   \**************************/
-/*! exports provided: crypto, Utils, WebCryptographer, default, Jose, JoseJWE, JoseJWS, setCrypto, caniuse */
+/*! exports provided: crypto, Utils, default, Jose, JoseJWE, JoseJWS, WebCryptographer, setCrypto, caniuse */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -133,6 +133,7 @@ function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterat
 
 
 
+
 var crypto;
 /**
  * Javascript Object Signing and Encryption library.
@@ -141,7 +142,6 @@ var crypto;
  */
 
 var Utils = _jose_utils__WEBPACK_IMPORTED_MODULE_0__;
-
 /**
  * Initializes a JoseJWE object.
  */
@@ -160,10 +160,12 @@ var JoseJWS = {
 };
 var Jose = {
   JoseJWS: JoseJWS,
-  JoseJWE: JoseJWE
+  JoseJWE: JoseJWE,
+  WebCryptographer: _jose_jwe_webcryptographer__WEBPACK_IMPORTED_MODULE_5__["WebCryptographer"]
 };
 /* harmony default export */ __webpack_exports__["default"] = ({
-  Jose: Jose
+  Jose: Jose,
+  WebCryptographer: _jose_jwe_webcryptographer__WEBPACK_IMPORTED_MODULE_5__["WebCryptographer"]
 });
 
 /**
