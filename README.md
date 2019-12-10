@@ -118,7 +118,7 @@ signer.addSigner(rsa_key).then(function() {
     .sign("hello world", null, {})
     .then(function(message) {
       console.log(message);
-      var verifier = new JoseJWS.Verifier(cryptographer, message);
+      var verifier = new Jose.JoseJWS.Verifier(cryptographer, message);
       verifier.addRecipient(rsa_key).then(function() {
         verifier
           .verify()
@@ -155,7 +155,7 @@ signer.addSigner(ec_key).then(function() {
     .sign("hello world", null, {})
     .then(function(message) {
       console.log(message);
-      var verifier = new JoseJWS.Verifier(cryptographer, message);
+      var verifier = new Jose.JoseJWS.Verifier(cryptographer, message);
       delete ec_key.d;
       verifier.addRecipient(ec_key).then(function() {
         verifier
