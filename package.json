@@ -49,7 +49,7 @@
     "jest": "^24.8.0",
     "karma": "^1.7.1",
     "karma-chrome-launcher": "^3.0.0",
-    "karma-coverage": "^1.1.1",
+    "karma-coverage": "^2.0.1",
     "karma-qunit": "^1.2.1",
     "qunit": "^2.9.2",
     "qunitjs": "^1.23.1",
