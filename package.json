@@ -50,7 +50,7 @@
     "karma": "^1.7.1",
     "karma-chrome-launcher": "^3.0.0",
     "karma-coverage": "^2.0.1",
-    "karma-qunit": "^1.2.1",
+    "karma-qunit": "^3.0.0",
     "qunit": "^2.9.2",
     "qunitjs": "^1.23.1",
     "terser": "^4.1.2",
