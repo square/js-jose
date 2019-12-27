@@ -94,6 +94,7 @@ interface IHeaders {
 interface IUtils {
     importRsaPublicKey(rsa_key: JWKRSA, alg: JoseAlgorithm): PromiseLike<CryptoKey>;
     importRsaPrivateKey(rsa_key: JWKRSA, alg: JoseAlgorithm): PromiseLike<CryptoKey>;
+    importPublicKey(key: IJsonWebKey, alg: JoseAlgorithm): PromiseLike<CryptoKey>;
 }
 
 interface IJose {
@@ -145,6 +146,10 @@ interface IDecrypter {
 interface IJoseJWE {
     Encrypter: IEncrypter;
     Decrypter: IDecrypter;
+}
+
+interface Window {
+    Jose: IJose;
 }
 
 declare function setCrypto(cryptoProvider: Crypto): void;
