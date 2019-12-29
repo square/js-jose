@@ -91,17 +91,17 @@ var Jose =
 /*!**************************!*\
   !*** ./lib/jose-core.js ***!
   \**************************/
-/*! exports provided: crypto, Utils, default, Jose, JoseJWE, JoseJWS, WebCryptographer, setCrypto, caniuse */
+/*! exports provided: crypto, Utils, setCrypto, default, Jose, JoseJWE, JoseJWS, WebCryptographer, caniuse */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* WEBPACK VAR INJECTION */(function(Buffer, global) {/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "crypto", function() { return crypto; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Utils", function() { return Utils; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "setCrypto", function() { return setCrypto; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Jose", function() { return Jose; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "JoseJWE", function() { return JoseJWE; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "JoseJWS", function() { return JoseJWS; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "setCrypto", function() { return setCrypto; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "caniuse", function() { return caniuse; });
 /* harmony import */ var _jose_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./jose-utils */ "./lib/jose-utils.js");
 /* harmony import */ var _jose_jwe_encrypt__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./jose-jwe-encrypt */ "./lib/jose-jwe-encrypt.js");
@@ -158,16 +158,6 @@ var JoseJWS = {
   Signer: _jose_jws_sign__WEBPACK_IMPORTED_MODULE_3__["Signer"],
   Verifier: _jose_jws_verify__WEBPACK_IMPORTED_MODULE_4__["Verifier"]
 };
-var Jose = {
-  JoseJWS: JoseJWS,
-  JoseJWE: JoseJWE,
-  WebCryptographer: _jose_jwe_webcryptographer__WEBPACK_IMPORTED_MODULE_5__["WebCryptographer"]
-};
-/* harmony default export */ __webpack_exports__["default"] = ({
-  Jose: Jose,
-  WebCryptographer: _jose_jwe_webcryptographer__WEBPACK_IMPORTED_MODULE_5__["WebCryptographer"]
-});
-
 /**
  * Set crypto provider to use (window.crypto, node-webcrypto-ossl, node-webcrypto-pkcs11 etc.).
  */
@@ -188,10 +178,22 @@ if (typeof window !== 'undefined') {
     }
   }
 }
+
+var Jose = {
+  JoseJWS: JoseJWS,
+  JoseJWE: JoseJWE,
+  WebCryptographer: _jose_jwe_webcryptographer__WEBPACK_IMPORTED_MODULE_5__["WebCryptographer"],
+  crypto: crypto,
+  Utils: Utils
+};
+/* harmony default export */ __webpack_exports__["default"] = ({
+  Jose: Jose,
+  WebCryptographer: _jose_jwe_webcryptographer__WEBPACK_IMPORTED_MODULE_5__["WebCryptographer"]
+});
+
 /**
  * Use Node versions of atob, btoa functions outside the browser
  */
-
 
 if (typeof atob !== 'function') {
   // eslint-disable-next-line no-global-assign
@@ -560,6 +562,7 @@ function () {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "WebCryptographer", function() { return WebCryptographer; });
 /* harmony import */ var _jose_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./jose-utils */ "./lib/jose-utils.js");
+/* harmony import */ var _jose_core__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./jose-core */ "./lib/jose-core.js");
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
@@ -583,7 +586,6 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
  */
 // TODO(eslint): figure out how to properly include Jose or expose crypto object
 
-/* global Jose */
 
 /**
  * The WebCryptographer uses http://www.w3.org/TR/WebCryptoAPI/ to perform
@@ -659,7 +661,7 @@ function () {
     key: "createIV",
     value: function createIV() {
       var iv = new Uint8Array(new Array(this.content_encryption.iv_bytes));
-      return Jose.crypto.getRandomValues(iv);
+      return _jose_core__WEBPACK_IMPORTED_MODULE_1__["Jose"].crypto.getRandomValues(iv);
     }
     /**
      * Creates a random content encryption key.
@@ -672,12 +674,12 @@ function () {
     key: "createCek",
     value: function createCek() {
       var hack = this.getCekWorkaround(this.content_encryption);
-      return Jose.crypto.subtle.generateKey(hack.id, true, hack.enc_op);
+      return _jose_core__WEBPACK_IMPORTED_MODULE_1__["Jose"].crypto.subtle.generateKey(hack.id, true, hack.enc_op);
     }
   }, {
     key: "wrapCek",
     value: function wrapCek(cek, key) {
-      return Jose.crypto.subtle.wrapKey('raw', cek, key, this.keyEncryption.id);
+      return _jose_core__WEBPACK_IMPORTED_MODULE_1__["Jose"].crypto.subtle.wrapKey('raw', cek, key, this.keyEncryption.id);
     }
   }, {
     key: "unwrapCek",
@@ -685,7 +687,7 @@ function () {
       var hack = this.getCekWorkaround(this.content_encryption);
       var extractable = this.content_encryption.specific_cekBytes > 0;
       var keyEncryption = this.keyEncryption.id;
-      return Jose.crypto.subtle.unwrapKey('raw', cek, key, keyEncryption, hack.id, extractable, hack.dec_op);
+      return _jose_core__WEBPACK_IMPORTED_MODULE_1__["Jose"].crypto.subtle.unwrapKey('raw', cek, key, keyEncryption, hack.id, extractable, hack.dec_op);
     }
     /**
      * Returns algorithm and operation needed to create a CEK.
@@ -784,7 +786,7 @@ function () {
           tagLength: tagBytes * 8
         };
         return cekPromise.then(function (cek) {
-          return Jose.crypto.subtle.encrypt(enc, cek, plainText).then(function (cipherText) {
+          return _jose_core__WEBPACK_IMPORTED_MODULE_1__["Jose"].crypto.subtle.encrypt(enc, cek, plainText).then(function (cipherText) {
             var offset = cipherText.byteLength - tagBytes;
             return {
               cipher: cipherText.slice(0, offset),
@@ -802,7 +804,7 @@ function () {
             name: config.id.name,
             iv: iv
           };
-          return Jose.crypto.subtle.encrypt(enc, encKey, plainText);
+          return _jose_core__WEBPACK_IMPORTED_MODULE_1__["Jose"].crypto.subtle.encrypt(enc, encKey, plainText);
         }); // compute MAC
 
         var macPromise = cipherTextPromise.then(function (cipherText) {
@@ -830,8 +832,8 @@ function () {
       this.assert(arr1 instanceof Uint8Array, 'compare: invalid input');
       this.assert(arr2 instanceof Uint8Array, 'compare: invalid input');
       return macKeyPromise.then(function (macKey) {
-        var hash1 = Jose.crypto.subtle.sign(config.auth.id, macKey, arr1);
-        var hash2 = Jose.crypto.subtle.sign(config.auth.id, macKey, arr2);
+        var hash1 = _jose_core__WEBPACK_IMPORTED_MODULE_1__["Jose"].crypto.subtle.sign(config.auth.id, macKey, arr1);
+        var hash2 = _jose_core__WEBPACK_IMPORTED_MODULE_1__["Jose"].crypto.subtle.sign(config.auth.id, macKey, arr2);
         return Promise.all([hash1, hash2]).then(function (all) {
           var hash1 = new Uint8Array(all[0]);
           var hash2 = new Uint8Array(all[1]);
@@ -881,7 +883,7 @@ function () {
         };
         return cekPromise.then(function (cek) {
           var buf = _jose_utils__WEBPACK_IMPORTED_MODULE_0__["arrayBufferConcat"](cipherText, tag);
-          return Jose.crypto.subtle.decrypt(dec, cek, buf);
+          return _jose_core__WEBPACK_IMPORTED_MODULE_1__["Jose"].crypto.subtle.decrypt(dec, cek, buf);
         });
       } else {
         var keys = this.splitKey(config, cekPromise, ['decrypt']);
@@ -897,7 +899,7 @@ function () {
               name: config.id.name,
               iv: iv
             };
-            return Jose.crypto.subtle.decrypt(dec, encKey, cipherText);
+            return _jose_core__WEBPACK_IMPORTED_MODULE_1__["Jose"].crypto.subtle.decrypt(dec, encKey, cipherText);
           })["catch"](function () {
             return Promise.reject(Error('decryptCiphertext: MAC failed.'));
           });
@@ -925,7 +927,7 @@ function () {
 
       return keyPromise.then(function (key) {
         var base64UrlEncoder = new _jose_utils__WEBPACK_IMPORTED_MODULE_0__["Base64Url"]();
-        return Jose.crypto.subtle.sign(config.id, key, _jose_utils__WEBPACK_IMPORTED_MODULE_0__["arrayFromString"](base64UrlEncoder.encode(JSON.stringify(aad)) + '.' + base64UrlEncoder.encodeArray(payload)));
+        return _jose_core__WEBPACK_IMPORTED_MODULE_1__["Jose"].crypto.subtle.sign(config.id, key, _jose_utils__WEBPACK_IMPORTED_MODULE_0__["arrayFromString"](base64UrlEncoder.encode(JSON.stringify(aad)) + '.' + base64UrlEncoder.encodeArray(payload)));
       });
     }
     /**
@@ -944,7 +946,7 @@ function () {
     value: function verify(aad, payload, signature, keyPromise, keyId) {
       var config = this.content_sign;
       return keyPromise.then(function (key) {
-        return Jose.crypto.subtle.verify(config.id, key, signature, _jose_utils__WEBPACK_IMPORTED_MODULE_0__["arrayFromString"](aad + '.' + payload)).then(function (res) {
+        return _jose_core__WEBPACK_IMPORTED_MODULE_1__["Jose"].crypto.subtle.verify(config.id, key, signature, _jose_utils__WEBPACK_IMPORTED_MODULE_0__["arrayFromString"](aad + '.' + payload)).then(function (res) {
           return {
             kid: keyId,
             verified: res
@@ -975,7 +977,7 @@ function () {
     value: function splitKey(config, cekPromise, purpose) {
       // We need to split the CEK key into a MAC and ENC keys
       var cekBytesPromise = cekPromise.then(function (cek) {
-        return Jose.crypto.subtle.exportKey('raw', cek);
+        return _jose_core__WEBPACK_IMPORTED_MODULE_1__["Jose"].crypto.subtle.exportKey('raw', cek);
       });
       var macKeyPromise = cekBytesPromise.then(function (cekBytes) {
         if (cekBytes.byteLength * 8 !== config.id.length + config.auth.key_bytes * 8) {
@@ -983,7 +985,7 @@ function () {
         }
 
         var bytes = cekBytes.slice(0, config.auth.key_bytes);
-        return Jose.crypto.subtle.importKey('raw', bytes, config.auth.id, false, ['sign']);
+        return _jose_core__WEBPACK_IMPORTED_MODULE_1__["Jose"].crypto.subtle.importKey('raw', bytes, config.auth.id, false, ['sign']);
       });
       var encKeyPromise = cekBytesPromise.then(function (cekBytes) {
         if (cekBytes.byteLength * 8 !== config.id.length + config.auth.key_bytes * 8) {
@@ -991,7 +993,7 @@ function () {
         }
 
         var bytes = cekBytes.slice(config.auth.key_bytes);
-        return Jose.crypto.subtle.importKey('raw', bytes, config.id, false, purpose);
+        return _jose_core__WEBPACK_IMPORTED_MODULE_1__["Jose"].crypto.subtle.importKey('raw', bytes, config.id, false, purpose);
       });
       return [macKeyPromise, encKeyPromise];
     }
@@ -1147,7 +1149,7 @@ function () {
         var alFull = new Uint8Array(8);
         alFull.set(al, 4);
         var buf = _jose_utils__WEBPACK_IMPORTED_MODULE_0__["arrayBufferConcat"](aad, iv, cipherText, alFull);
-        return Jose.crypto.subtle.sign(config.auth.id, macKey, buf).then(function (bytes) {
+        return _jose_core__WEBPACK_IMPORTED_MODULE_1__["Jose"].crypto.subtle.sign(config.auth.id, macKey, buf).then(function (bytes) {
           return bytes.slice(0, config.auth.truncated_bytes);
         });
       });
@@ -1930,6 +1932,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isCryptoKey", function() { return isCryptoKey; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Base64Url", function() { return Base64Url; });
 /* harmony import */ var _jose_jwe_webcryptographer__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./jose-jwe-webcryptographer */ "./lib/jose-jwe-webcryptographer.js");
+/* harmony import */ var _jose_core__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./jose-core */ "./lib/jose-core.js");
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
@@ -1953,7 +1956,6 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
  */
 // TODO(eslint): figure out how to properly include Jose or expose crypto object
 
-/* global Jose */
 
 var webCryptographer = new _jose_jwe_webcryptographer__WEBPACK_IMPORTED_MODULE_0__["WebCryptographer"]();
 /**
@@ -2021,7 +2023,7 @@ var importPrivateKey = function importPrivateKey(key, alg) {
 var importEcPublicKey = function importEcPublicKey(ecKey, alg) {
   var config = webCryptographer.getSignConfig(alg);
   var usage = webCryptographer.getKeyUsageByAlg(alg);
-  return Jose.crypto.subtle.importKey('jwk', ecKey, config.id, false, [usage.publicKey]);
+  return _jose_core__WEBPACK_IMPORTED_MODULE_1__["Jose"].crypto.subtle.importKey('jwk', ecKey, config.id, false, [usage.publicKey]);
 };
 /**
  * Import a private EC key in JWK format.
@@ -2034,7 +2036,7 @@ var importEcPublicKey = function importEcPublicKey(ecKey, alg) {
 var importEcPrivateKey = function importEcPrivateKey(ecKey, alg) {
   var config = webCryptographer.getSignConfig(alg);
   var usage = webCryptographer.getKeyUsageByAlg(alg);
-  return Jose.crypto.subtle.importKey('jwk', ecKey, config.id, false, [usage.privateKey]);
+  return _jose_core__WEBPACK_IMPORTED_MODULE_1__["Jose"].crypto.subtle.importKey('jwk', ecKey, config.id, false, [usage.privateKey]);
 };
 /**
  * Converts the output from `openssl x509 -text` or `openssl rsa -text` into a
@@ -2079,7 +2081,7 @@ var importRsaPublicKey = function importRsaPublicKey(rsaKey, alg) {
     jwk.ext = true;
   }
 
-  return Jose.crypto.subtle.importKey('jwk', jwk, config.id, false, [usage.publicKey]);
+  return _jose_core__WEBPACK_IMPORTED_MODULE_1__["Jose"].crypto.subtle.importKey('jwk', jwk, config.id, false, [usage.publicKey]);
 };
 /**
  * Converts the output from `openssl x509 -text` or `openssl rsa -text` into a
@@ -2125,7 +2127,7 @@ var importRsaPrivateKey = function importRsaPrivateKey(rsaKey, alg) {
     jwk.ext = true;
   }
 
-  return Jose.crypto.subtle.importKey('jwk', jwk, config.id, false, [usage.privateKey]);
+  return _jose_core__WEBPACK_IMPORTED_MODULE_1__["Jose"].crypto.subtle.importKey('jwk', jwk, config.id, false, [usage.privateKey]);
 }; // Private functions
 
 var isString = function isString(str) {
@@ -2369,7 +2371,7 @@ var sha256 = function sha256(str) {
   // Browser docs indicate the first parameter to crypto.subtle.digest to be a
   // DOMString. This was initially implemented as an object and continues to be
   // supported, so we favor the older form for backwards compatibility.
-  return Jose.crypto.subtle.digest({
+  return _jose_core__WEBPACK_IMPORTED_MODULE_1__["Jose"].crypto.subtle.digest({
     name: 'SHA-256'
   }, arrayFromString(str)).then(function (hash) {
     return new Base64Url().encodeArray(hash);
