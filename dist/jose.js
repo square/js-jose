@@ -1595,7 +1595,7 @@ function () {
       }
 
       for (var kid in that.keyPromises) {
-        if (that.keyPromises.hasOwnProperty(kid)) {
+        if (Object.prototype.hasOwnProperty.call(that.keyPromises, kid)) {
           kids.push(kid);
         }
       }
@@ -2067,7 +2067,7 @@ var importRsaPublicKey = function importRsaPublicKey(rsaKey, alg) {
     var rk = {};
 
     for (var name in rsaKey) {
-      if (rsaKey.hasOwnProperty(name)) {
+      if (Object.prototype.hasOwnProperty.call(rsaKey, name)) {
         rk[name] = rsaKey[name];
       }
     }
@@ -2112,7 +2112,7 @@ var importRsaPrivateKey = function importRsaPrivateKey(rsaKey, alg) {
     var rk = {};
 
     for (var name in rsaKey) {
-      if (rsaKey.hasOwnProperty(name)) {
+      if (Object.prototype.hasOwnProperty.call(rsaKey, name)) {
         rk[name] = rsaKey[name];
       }
     }
@@ -2386,7 +2386,7 @@ var isCryptoKey = function isCryptoKey(rsaKey) {
   // so let's also allow objects that have an 'algorithm' property.
 
 
-  if (rsaKey.hasOwnProperty('algorithm')) {
+  if (Object.prototype.hasOwnProperty.call(rsaKey, 'algorithm')) {
     return true;
   }
 
