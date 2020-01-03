@@ -1,14 +1,13 @@
 const webpackDevConfig = require('./webpack.dev');
 const webpackProdConfig = require('./webpack.prod');
 
-module.exports = function(grunt) {
-
+module.exports = function (grunt) {
   var config = {
     pkg: grunt.file.readJSON('package.json'),
 
     run: {
       jest: {
-        cmd: 'jest',
+        cmd: 'jest'
       }
     },
 
@@ -37,12 +36,17 @@ module.exports = function(grunt) {
           },
           frameworks: ['qunit'],
           files: [
-            { pattern: 'dist/jose.js', watching: false, included: false },
-            { pattern: 'test/qunit-promises.js', watching: false, included: false },
-            'test/jose-jwe-test.html',
-            'test/jose-jws-ecdsa-test.html',
-            'test/jose-jws-rsa-test.html'
+            { pattern: 'dist/jose.js', watching: false, included: true },
+            { pattern: 'test/qunit-promises.js', watching: false, included: true },
+            'test/jose-*.js'
           ],
+          client: {
+            clearContext: false,
+            qunit: {
+              showUI: true,
+              testTimeout: 5000
+            }
+          },
           autoWatch: true,
           browsers: ['Chrome', 'ChromeHeadless', 'ChromeHeadlessNoSandbox'],
           customLaunchers: {
@@ -59,21 +63,27 @@ module.exports = function(grunt) {
         options: {
           frameworks: ['qunit'],
           files: [
-            { pattern: 'dist/jose.js', watching: false, included: false },
-            { pattern: 'test/qunit-promises.js', watching: false, included: false },
-            'test/jose-jwe-test.html',
-            'test/jose-jws-ecdsa-test.html',
-            'test/jose-jws-rsa-test.html'
+            { pattern: 'dist/jose.js', watching: false, included: true },
+            { pattern: 'test/qunit-promises.js', watching: false, included: true },
+            'test/jose-*.js'
           ],
-          autoWatch: true,
-          browsers: ['Chrome', 'ChromeHeadless', 'ChromeHeadlessNoSandbox'],
-          customLaunchers: {
-            ChromeHeadlessNoSandbox: {
-              base: 'ChromeHeadless',
-              flags: ['--no-sandbox']
+          client: {
+            clearContext: false,
+            qunit: {
+              showUI: true,
+              testTimeout: 5000
             }
           },
-          singleRun: true
+          autoWatch: true,
+          browsers: ['Chrome'],
+          browserConsoleLogOptions: {
+            level: 'info',
+            format: '%b %T: %m',
+            path: 'output.log',
+            terminal: true
+          },
+          singleRun: true,
+          logLevel: 'info'
         }
       }
     },
