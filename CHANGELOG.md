@@ -7,6 +7,13 @@ however it has not stabilized, yet.
 
 ## [Unreleased]
 
+## [0.2.2] - 2020-01-13
+### Fixed
+- Fix library export for TypeScript (#125)
+
+### Changed
+- Update of many dev dependencies (#120, #123, #134, #137, #139, #140)
+
 ## [0.2.1] - 2019-08-08
 ### Fixed
 - Fix WebCryptographer export (#116).
@@ -103,7 +110,8 @@ however it has not stabilized, yet.
 - Support for content encryption: A128CBC-HS256, A256CBC-HS512, A128GCM,
   A256GCM (default).
 
-[Unreleased]: https://github.com/square/js-jose/compare/v0.2.1...HEAD
+[Unreleased]: https://github.com/square/js-jose/compare/v0.2.2...HEAD
+[0.2.2]: https://github.com/square/js-jose/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/square/js-jose/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/square/js-jose/compare/v0.1.7...v0.2.0
 [0.1.7]: https://github.com/square/js-jose/compare/v0.1.6...v0.1.7
