@@ -42,7 +42,7 @@
     "grunt-contrib-concat": "^1.0.1",
     "grunt-contrib-uglify": "^4.0.1",
     "grunt-eslint": "^22.0.0",
-    "grunt-karma": "^3.0.2",
+    "grunt-karma": "^4.0.0",
     "grunt-karma-coveralls": "^2.5.4",
     "grunt-run": "^0.8.1",
     "grunt-webpack": "^3.1.3",
