@@ -52,7 +52,7 @@
     "karma-coverage": "^2.0.1",
     "karma-qunit": "^4.0.0",
     "qunit": "^2.9.2",
-    "terser": "^4.1.2",
+    "terser": "^5.3.7",
     "uglifyjs-webpack-plugin": "^2.0.1",
     "webpack": "^4.20.2",
     "webpack-cli": "^3.1.1"
