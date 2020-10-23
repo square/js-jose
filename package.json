@@ -27,7 +27,7 @@
     "@webpack-cli/init": "^0.3.0",
     "babel": "^6.23.0",
     "babel-core": "^6.26.3",
-    "babel-jest": "^25.1.0",
+    "babel-jest": "^26.6.1",
     "babel-loader": "^8.0.4",
     "babel-plugin-syntax-dynamic-import": "^6.18.0",
     "coveralls": "^3.0.5",
