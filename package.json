@@ -55,7 +55,7 @@
     "terser": "^4.1.2",
     "uglifyjs-webpack-plugin": "^2.0.1",
     "webpack": "^4.20.2",
-    "webpack-cli": "^3.1.1"
+    "webpack-cli": "^4.2.0"
   },
   "typings": "jose-jwe-jws.d.ts",
   "main": "dist/jose.min.js"
