@@ -40,7 +40,7 @@
     "eslint-plugin-standard": "^4.0.0",
     "grunt": "^1.0.4",
     "grunt-contrib-concat": "^1.0.1",
-    "grunt-contrib-uglify": "^4.0.1",
+    "grunt-contrib-uglify": "^5.0.1",
     "grunt-eslint": "^22.0.0",
     "grunt-karma": "^3.0.2",
     "grunt-karma-coveralls": "^2.5.4",
